@@ -1,0 +1,53 @@
+# post size in MiB
+maxuploadsize: 25
+
+idlength: 20
+
+# directory to store uploaded files
+storepath: 'files'
+
+# listen address/port
+listenaddr: ':8080'
+
+tls:
+    use:  false
+    key:  '/etc/ssl/private/ssl-cert-snakeoil.key'
+    cert: '/etc/ssl/certs/ssl-cert-snakeoil.pem'
+
+database:
+    # see https://godoc.org/github.com/jinzhu/gorm#Open
+    driver: 'sqlite3'
+    args:   'gdprshare.db'
+
+mail:
+    smtphost: 'localhost'
+    smtpport: 25
+    smtpuser: ''
+    smtppass: ''
+    from:     'root@localhost'
+    subject:  'File was downloaded: %s'
+
+    # available variables:
+    #   .FileID
+    #   .Addr
+    #   .UserAgent
+    #   .SrcTLSVersion
+    #   .SrcTLSCipherSuite
+    #   .DstTLSVersion
+    #   .DstTLSCipherSuite
+    body:     'File with id {{.FileID}} was downloaded.'
+
+
+# headers in case app is behind a reverse proxy
+header:
+    tlsversion:     'X-TLS-Version'
+    tlsciphersuite: 'X-TLS-CipherSuite'
+
+# saves receiver IP addr and user agent in database
+saveclientinfo: false
+
+# length of password pregenerated on the frontend
+passwordlength: 12
+
+
+# for config via env vars see https://github.com/jinzhu/configor#advanced-usage

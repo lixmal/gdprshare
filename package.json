@@ -1,0 +1,48 @@
+{
+    "name": "gdprshare",
+    "version": "0.1.0",
+    "description": "share files according to gdpr rules",
+    "main": "src/scripts/app.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "dev": "node_modules/.bin/browserify -t browserify-css -t [ babelify --presets [ @babel/preset-env @babel/preset-react ] ] src/scripts/app.js -o public/scripts/bundle.js; sed -i 's/node_modules\\/bootstrap\\/dist\\///g' public/scripts/bundle.js",
+        "build": "NODE_ENV=production node_modules/.bin/browserify -p [ minifyify --no-map ] -t browserify-css -t [ babelify --presets [ @babel/preset-env @babel/preset-react ] ] src/scripts/app.js -o public/scripts/bundle.js; sed -i 's/node_modules\\/bootstrap\\/dist\\///g' public/scripts/bundle.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/lixmal/gdprshare"
+    },
+    "keywords": [
+        "gdpr",
+        "fileshare"
+    ],
+    "author": "Viktor Liu",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/lixmal/gdprshare/issues"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.7.2",
+        "@babel/preset-env": "^7.7.1",
+        "@babel/preset-react": "^7.7.0",
+        "babelify": "^10.0.0",
+        "browserify": "^16.5.0",
+        "browserify-css": "^0.15.0",
+        "minifyify": "^7.3.5"
+    },
+    "dependencies": {
+        "@primer/octicons-react": "^9.3.0",
+        "bootstrap": "^4.3.1",
+        "bs-custom-file-input": "^1.3.2",
+        "classnames": "^2.2.6",
+        "clipboard-polyfill": "^2.8.6",
+        "react": "^16.12.0",
+        "react-dom": "^16.12.0",
+        "react-router-dom": "^5.1.2"
+    },
+    "browserify-css": {
+        "autoInject": true,
+        "minify": true,
+        "rootDir": "."
+    }
+}

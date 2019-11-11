@@ -1,0 +1,92 @@
+.is-dragover {
+    background-color: gray;
+}
+
+.app-outer {
+    margin-top: 5px !important;
+    padding: 10px;
+    width: auto;
+    height: auto;
+    min-height: 200px;
+    min-width: 320px;
+    background-color: #f3f3f3;
+    margin:0 auto;
+    border-radius: 9px;
+    border: 1px solid ##c5c5c5;
+}
+
+.app-inner {
+    margin:0 auto;
+    max-width: 380px;
+    width: auto;
+}
+
+.app-outer>h4 {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.input-group-text:active:focus {
+    outline: none;
+}
+
+.file-error {
+    margin-top: 15px;
+    animation: blinker 1s linear;
+    margin-bottom: 0px;
+    padding-bottom: 0px;
+}
+
+.file-error>svg {
+    margin-right: 5px;
+}
+
+@keyframes blinker {
+    50% { opacity: 0.0; }
+}
+
+.panel-body {
+    background-color: #EEEEEE;
+}
+
+.loading-mask {
+    position: relative;
+}
+
+.loading-mask::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.25);
+    z-index: 100;
+    border-radius: 9px;
+}
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(359deg);
+    }
+}
+
+.loading-mask::after {
+    content: '';
+    z-index: 100;
+    position: absolute;
+    border-width: 3px;
+    border-style: solid;
+    border-color: transparent rgb(255, 255, 255) rgb(255, 255, 255);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    top: calc(50% - 12px);
+    left: calc(50% - 12px);
+    animation: 2s linear 0s normal none infinite running spin;
+    filter: drop-shadow(0 0 2 rgba(0, 0, 0, 0.33));
+}
+
+@import url('node_modules/bootstrap/dist/css/bootstrap.min.css');

@@ -1,0 +1,27 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+gdprshare
+
+# Test binary, build with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+*.db
+
+# npm
+node_modules/
+public/scripts/bundle.js
+npm-debug.log
+disc.html
+
+# vim
+*.sw[a-z]
+
+config_test.yml
+test/
