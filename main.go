@@ -1,7 +1,7 @@
 package main
 
 import (
-	"net/http"
+    "net/http"
     "crypto/rand"
     "encoding/base64"
     "log"
@@ -20,12 +20,12 @@ import (
     "strings"
 
     "github.com/nu7hatch/gouuid"
-	"github.com/gin-gonic/gin"
+    "github.com/gin-gonic/gin"
     "github.com/gin-gonic/gin/binding"
     "github.com/gin-contrib/size"
     "github.com/jinzhu/configor"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
+    "github.com/jinzhu/gorm"
+    _ "github.com/jinzhu/gorm/dialects/sqlite"
     "github.com/go-gomail/gomail"
 )
 
@@ -79,9 +79,9 @@ var flagCleanup *bool
 var flagVersion *bool
 
 var Config = struct {
-	MaxUploadSize int64  `default:"25"` // MiB
+    MaxUploadSize int64  `default:"25"` // MiB
     IDLength      int    `default:"20"`
-	StorePath     string `default:"files"`
+    StorePath     string `default:"files"`
     ListenAddr    string `default:":8080"`
     TLS struct {
         Use  bool   `default:"false"`
@@ -125,11 +125,11 @@ func init() {
     // try parsing the mail body template
     template.Must(template.New("mailbody").Parse(Config.Mail.Body))
 
-	var err error
+    var err error
     db, err = gorm.Open(Config.Database.Driver, Config.Database.Args)
-	if err != nil {
+    if err != nil {
         log.Fatalf("Failed to connect to database: %s\n", err)
-	}
+    }
 
     if err = db.AutoMigrate(&Client{}).Error; err != nil {
         log.Fatalf("Failed to migrate schema: %s\n", err)
@@ -164,8 +164,8 @@ func main() {
     }
 
     // override v8 validator with v10
-	binding.Validator = new(defaultValidator)
-	router := gin.Default()
+    binding.Validator = new(defaultValidator)
+    router := gin.Default()
 
     // TODO: add json response
     router.Use(limits.RequestSizeLimiter(Config.MaxUploadSize * 1024  * 1024))
@@ -178,17 +178,17 @@ func main() {
     router.GET("/d/:fileId", index)
     router.POST("/stats", stats)
 
-	v1 := router.Group("/api/v1")
+    v1 := router.Group("/api/v1")
     v1.GET("/config", download)
     v1.POST("/upload", upload)
     v1.GET("/download/:fileId", download)
 
     srv := &http.Server{
-		Addr:    Config.ListenAddr,
-		Handler: router,
-	}
+        Addr:    Config.ListenAddr,
+        Handler: router,
+    }
 
-	go func() {
+    go func() {
         var err error
 
         if (Config.TLS.Use) {
@@ -197,43 +197,43 @@ func main() {
             err = srv.ListenAndServe()
         }
 
-		if err != nil && err != http.ErrServerClosed {
+        if err != nil && err != http.ErrServerClosed {
             log.Fatalf("Failed to start server: %s\n", err)
-		}
-	}()
+        }
+    }()
 
-	sig := make(chan os.Signal)
+    sig := make(chan os.Signal)
 
-	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+    signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
 
-	<-sig
+    <-sig
 
-	log.Println("Server shutdown ...")
+    log.Println("Server shutdown ...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), GRACEFUL_TIMEOUT)
-	defer cancel()
-	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatalln(err)
-	}
+    ctx, cancel := context.WithTimeout(context.Background(), GRACEFUL_TIMEOUT)
+    defer cancel()
+    if err := srv.Shutdown(ctx); err != nil {
+        log.Fatalln(err)
+    }
 
-	select {
-	case <-ctx.Done():
-	}
-	log.Println("Finished")
+    select {
+    case <-ctx.Done():
+    }
+    log.Println("Finished")
 
 }
 
 func getId() (string, error) {
     buf := make([]byte, Config.IDLength)
 
-	_, err := rand.Read(buf)
-	if err != nil {
-		return "", err
-	}
+    _, err := rand.Read(buf)
+    if err != nil {
+        return "", err
+    }
 
     fileId := base64.RawURLEncoding.EncodeToString(buf)
 
-	return fileId, nil
+    return fileId, nil
 }
 
 func index(c *gin.Context) {
@@ -356,7 +356,7 @@ func upload(c *gin.Context) {
     }
 
     c.Header("Location", "/d/" + fileId)
-	c.JSON(
+    c.JSON(
         http.StatusCreated,
         gin.H{
             "message": "file uploaded successfully",
