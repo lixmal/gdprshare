@@ -227,7 +227,7 @@ export default class Upload extends React.Component {
                             </label>
                             <div className="col-sm-9">
                                 <div className="custom-file">
-                                    <input className="custom-file-input form-control form-control-sm" id="file" type="file" ref="file" onChange={this.handleFile} required="required"  autoFocus="autoFocus" />
+                                    <input className="custom-file-input form-control form-control-sm" id="file" type="file" ref="file" onChange={this.handleFile} required autoFocus />
                                     <label className="custom-file-label col-form-label col-form-label-sm" htmlFor="file">
                                         Select or drop file
                                     </label>
@@ -253,7 +253,7 @@ export default class Upload extends React.Component {
                                     Count
                                 </label>
                                 <div className="col-sm-9">
-                                    <input className="form-control form-control-sm" className="form-control form-control-sm" id="count" type="number" ref="count" min="1" max="15" defaultValue="1" required="required" aria-describedby="countHelp" />
+                                    <input className="form-control form-control-sm" className="form-control form-control-sm" id="count" type="number" ref="count" min="1" max="15" defaultValue="1" required aria-describedby="countHelp" />
                                     <small id="countHelp" className="form-text text-muted">Maximum number of downloads before file is deleted</small>
                                 </div>
                             </div>
@@ -263,7 +263,7 @@ export default class Upload extends React.Component {
                                     Expiry
                                 </label>
                                 <div className="col-sm-9">
-                                    <input className="form-control form-control-sm" id="expiry" type="number" ref="expiry" min="1" max="14" defaultValue="7" required="required" aria-describedby="expiryHelp" />
+                                    <input className="form-control form-control-sm" id="expiry" type="number" ref="expiry" min="1" max="14" defaultValue="7" required aria-describedby="expiryHelp" />
                                     <small id="expiryHelp" className="form-text text-muted">Maximum days before file is deleted</small>
                                 </div>
                             </div>
@@ -281,7 +281,7 @@ export default class Upload extends React.Component {
                                         </button>
                                     </div>
                                     <input className="form-control form-control-sm" id="password" type="text" ref="password" placeholder="Password" maxLength="255"
-                                        defaultValue={this.genPassword(gdprshare.config.passwordLength)} required="required"
+                                        defaultValue={this.genPassword(gdprshare.config.passwordLength)} required
                                     />
                                 </div>
                             </div>

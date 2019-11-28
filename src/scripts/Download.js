@@ -169,7 +169,7 @@ export default class Download extends React.Component {
                 <div className="form-group row">
                     <label htmlFor="password" className="col-sm-3 col-form-label">Password</label>
                     <div className="col-sm-9">
-                        <input className="form-control" id="password" type="password" ref="password" placeholder="Password" maxLength="255" autoFocus="autoFocus" required="required"/>
+                        <input className="form-control" id="password" type="password" ref="password" placeholder="Password" maxLength="255" autoFocus required/>
                     </div>
                 </div>
                 <div className="text-center col-sm-12">

@@ -94,7 +94,7 @@ export default class Uploaded extends React.Component {
                                 Filename
                             </label>
                             <div className="col-sm-9">
-                                <input className="form-control form-control-sm" id="filename" type="text" ref="filename" readOnly="readOnly" defaultValue={this.props.history.location.state.filename} />
+                                <input className="form-control form-control-sm" id="filename" type="text" ref="filename" readOnly defaultValue={this.props.history.location.state.filename} />
                             </div>
                         </div>
 
@@ -105,11 +105,11 @@ export default class Uploaded extends React.Component {
                             <div className="col-sm-9">
                                 <div className="input-group">
                                     <div className="input-group-prepend">
-                                        <button id="pw-copy" onClick={this.copyHandler} type="button" className="input-group-text">
+                                        <button id="pw-copy" onClick={this.copyHandler} type="button" className="input-group-text" data-for="copy-tip" data-tip>
                                             <Octicon icon={Clippy} />
                                         </button>
                                     </div>
-                                    <input className="form-control form-control-sm" id="password" type="text" ref="password" readOnly="readOnly" defaultValue={this.props.history.location.state.password} />
+                                    <input className="form-control form-control-sm" id="password" type="text" ref="password" readOnly defaultValue={this.props.history.location.state.password} />
                                 </div>
                             </div>
                         </div>
@@ -123,11 +123,11 @@ export default class Uploaded extends React.Component {
                             <div className="col-sm-9">
                                 <div className="input-group">
                                     <div className="input-group-prepend">
-                                        <button id="link-copy" onClick={this.copyHandler} type="button" className="input-group-text">
+                                        <button id="link-copy" onClick={this.copyHandler} type="button" className="input-group-text" data-for="copy-tip" data-tip>
                                             <Octicon icon={Clippy} />
                                         </button>
                                     </div>
-                                    <input className="form-control form-control-sm" id="link" type="text" ref="link" placeholder="Link" readOnly="readOnly" aria-describedby="linkHelp"
+                                    <input className="form-control form-control-sm" id="link" type="text" ref="link" placeholder="Link" readOnly aria-describedby="linkHelp"
                                         value={this.props.history.location.state.location}
                                     />
                                 </div>
@@ -143,11 +143,11 @@ export default class Uploaded extends React.Component {
                             <div className="col-sm-9">
                                 <div className="input-group">
                                     <div className="input-group-prepend">
-                                        <button id="linkpw-copy" onClick={this.copyHandler} type="button" className="input-group-text">
+                                        <button id="linkpw-copy" onClick={this.copyHandler} type="button" className="input-group-text" data-for="copy-tip" data-tip>
                                             <Octicon icon={Clippy} />
                                         </button>
                                     </div>
-                                    <input className="form-control form-control-sm" id="linkpassword" type="text" ref="linkpassword" placeholder="Link and passwod" readOnly="readOnly" aria-describedby="linkpasswordHelp"
+                                    <input className="form-control form-control-sm" id="linkpassword" type="text" ref="linkpassword" placeholder="Link and passwod" readOnly aria-describedby="linkpasswordHelp"
                                         value={ this.props.history.location.state.location + '?p=' + this.props.history.location.state.password }
                                     />
                                 </div>
