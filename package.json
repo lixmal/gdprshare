@@ -6,7 +6,7 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "dev": "node_modules/.bin/browserify -t browserify-css -t [ babelify --presets [ @babel/preset-env @babel/preset-react ] ] src/scripts/app.js -o public/scripts/bundle.js; sed -i 's/node_modules\\/bootstrap\\/dist\\///g' public/scripts/bundle.js",
-        "build": "NODE_ENV=production node_modules/.bin/browserify -p [ minifyify --no-map ] -t browserify-css -t [ babelify --presets [ @babel/preset-env @babel/preset-react ] ] src/scripts/app.js -o public/scripts/bundle.js; sed -i 's/node_modules\\/bootstrap\\/dist\\///g' public/scripts/bundle.js"
+        "build": "NODE_ENV=production node_modules/.bin/browserify -p [ uglifyify --no-sourcemap ] -t browserify-css -t [ babelify --presets [ @babel/preset-env @babel/preset-react ] ] src/scripts/app.js -o public/scripts/bundle.js; sed -i 's/node_modules\\/bootstrap\\/dist\\///g' public/scripts/bundle.js"
     },
     "repository": {
         "type": "git",
@@ -28,7 +28,7 @@
         "babelify": "^10.0.0",
         "browserify": "^16.5.0",
         "browserify-css": "^0.15.0",
-        "minifyify": "^7.3.5"
+        "uglifyify": "^5.0.2",
     },
     "dependencies": {
         "@primer/octicons-react": "^9.3.0",
