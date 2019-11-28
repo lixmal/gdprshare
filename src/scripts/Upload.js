@@ -96,6 +96,7 @@ export default class Upload extends React.Component {
                         // unencrypted filename
                         filename: this.refs.file.files[0].name,
                         password: this.refs.password.value,
+                        count: this.refs.count.value,
                     }
                 )
             else {

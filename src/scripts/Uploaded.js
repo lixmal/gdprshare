@@ -1,13 +1,18 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import * as Clipboard from "clipboard-polyfill/dist/clipboard-polyfill.promise"
-import Octicon, { Clippy } from '@primer/octicons-react'
+import Octicon, { LinkExternal, Clippy } from '@primer/octicons-react'
+import Alert from './Alert'
 
 export default class Uploaded extends React.Component {
     constructor() {
         super()
 
         this.copyHandler = this.copyHandler.bind(this)
+        this.shareHandler = this.shareHandler.bind(this)
+        this.state = {
+            error: null,
+        }
     }
 
     showTooltip(btn, message) {
@@ -15,6 +20,9 @@ export default class Uploaded extends React.Component {
     }
 
     copyHandler(event) {
+        this.setState({
+            error: null
+        })
         var btn = event.currentTarget
         btn.blur()
         var input = btn.parentNode.nextSibling
@@ -26,6 +34,35 @@ export default class Uploaded extends React.Component {
                 this.showTooltip(btn, 'Failed to copy')
             }.bind(this),
         )
+    }
+
+    shareHandler(event) {
+        this.setState({
+            error: null
+        })
+
+        var btn = event.currentTarget
+        btn.blur()
+        var state = this.props.history.location.state
+        var downloadLink = state.location + '?p=' + state.password
+
+        if (window.navigator.share) {
+            var shr = {
+                title: state.filename,
+                text: 'Sharing ' + state.filename,
+                url: downloadLink,
+            }
+            navigator.share(shr) // .catch(gdprshare.rejecterr.bind(this))
+        }
+        else {
+            var subject = '?subject=Sharing%20' + window.encodeURIComponent(state.filename)
+            var body = '&body=Download link' + window.encodeURIComponent(': ' + downloadLink) +
+                '%0aMax downloads' + window.encodeURIComponent(': ' + state.count)
+
+            var mailto = 'mailto:' + subject + body
+
+            window.location.href = mailto
+        }
     }
 
     render() {
@@ -104,7 +141,14 @@ export default class Uploaded extends React.Component {
                         </div>
                     </form>
 
+                    <div className="text-center">
+                        <button id="share" onClick={this.shareHandler} type="button">
+                            <Octicon icon={LinkExternal} /> Share
+                        </button>
+                    </div>
+
                     <br />
+                    <Alert error={this.state.error} />
 
                     <div className="text-center col-sm-12">
                         <Link to="/">Upload another file</Link>
