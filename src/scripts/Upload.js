@@ -23,7 +23,7 @@ export default class Upload extends React.Component {
         }
     }
 
-    UNSAFE_componentDidMount() {
+    componentDidMount() {
         BsCustomFileInput.init()
     }
 
