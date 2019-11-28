@@ -19,7 +19,7 @@ RUN apk add --update --no-cache --virtual .build-deps \
     && rm -rf node_modules \
     # remove build tools
     && apk del --purge .build-deps \
-    && rm -rf src *.go go.* *.json \
+    && rm -rf src *.go go.* *.json misc \
     # create dir
     && mkdir /conf \
     # move config to volume

@@ -1,0 +1,17 @@
+[Unit]
+Description=gdprshare web service
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+Type=simple
+Restart=always
+Environment="GIN_MODE=release"
+WorkingDirectory=/opt/gdprshare
+ExecStart=/opt/gdprshare/gdprshare
+StandardOutput=file:/var/log/gdprshare/gdprshare.log
+StandardError=inherit
+
+[Install]
+WantedBy=multi-user.target
