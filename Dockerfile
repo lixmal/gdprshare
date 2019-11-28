@@ -6,6 +6,9 @@ RUN apk add --update --no-cache --virtual .build-deps \
         npm \
         go \
         git \
+        # cgo: sqlite3
+        gcc \
+        musl-dev \
     # get source
     && cd .. \
     && git clone https://github.com/lixmal/gdprshare \
@@ -19,15 +22,18 @@ RUN apk add --update --no-cache --virtual .build-deps \
     && rm -rf node_modules \
     # remove build tools
     && apk del --purge .build-deps \
-    && rm -rf src *.go go.* *.json misc \
-    # create dir
-    && mkdir /conf \
+    && rm -rf src .git* *.go go.* *.json misc files \
+    # create dirs
+    && mkdir -p /conf /data/files \
+    # adjust config
+    && sed -i 's/gdprshare.db/\/data\/gdprshare.db/' config.yml \
+    && sed -i 's/files'\''/\/data\/files'\'/ config.yml \
     # move config to volume
     && mv config.yml /conf/
 
 EXPOSE 8080
 
-VOLUME ["/conf"]
+VOLUME /conf /data
 
 STOPSIGNAL SIGTERM
 
