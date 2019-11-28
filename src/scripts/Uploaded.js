@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import * as Clipboard from "clipboard-polyfill/dist/clipboard-polyfill.promise"
 import Octicon, { LinkExternal, Clippy } from '@primer/octicons-react'
 import Alert from './Alert'
+import ReactTooltip from 'react-tooltip'
 
 export default class Uploaded extends React.Component {
     constructor() {
@@ -10,19 +11,30 @@ export default class Uploaded extends React.Component {
 
         this.copyHandler = this.copyHandler.bind(this)
         this.shareHandler = this.shareHandler.bind(this)
+        this.handleTipContent = this.handleTipContent.bind(this)
         this.state = {
             error: null,
+            copy: null,
         }
     }
 
     showTooltip(btn, message) {
-        // TODO
+        this.setState({
+            copy: message,
+        })
+        ReactTooltip.show(btn)
+        ReactTooltip.hide(btn)
+    }
+
+    handleTipContent() {
+        return this.state.copy
     }
 
     copyHandler(event) {
         this.setState({
             error: null
         })
+
         var btn = event.currentTarget
         btn.blur()
         var input = btn.parentNode.nextSibling
@@ -30,8 +42,11 @@ export default class Uploaded extends React.Component {
             function () {
                 this.showTooltip(btn, 'Copied')
             }.bind(this),
-            function () {
+            function (err) {
                 this.showTooltip(btn, 'Failed to copy')
+                this.setState({
+                    error: err,
+                })
             }.bind(this),
         )
     }
@@ -52,7 +67,7 @@ export default class Uploaded extends React.Component {
                 text: 'Sharing ' + state.filename,
                 url: downloadLink,
             }
-            navigator.share(shr) // .catch(gdprshare.rejecterr.bind(this))
+            navigator.share(shr)
         }
         else {
             var subject = '?subject=Sharing%20' + window.encodeURIComponent(state.filename)
@@ -153,6 +168,7 @@ export default class Uploaded extends React.Component {
                     <div className="text-center col-sm-12">
                         <Link to="/">Upload another file</Link>
                     </div>
+                    <ReactTooltip id="copy-tip" event="none" getContent={this.handleTipContent} delayHide={1000} />
                 </div>
             </div>
         )
