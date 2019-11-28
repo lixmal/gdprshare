@@ -81,8 +81,10 @@ export default class Uploaded extends React.Component {
     }
 
     render() {
-        if (!this.props.history.location.state)
+        if (!this.props.history.location.state) {
+            this.props.history.replace('/')
             return null
+        }
 
         return (
             <div className="container-fluid col-sm-4">
