@@ -44,14 +44,27 @@ gdprshare.fetcherr = function (response, error) {
 
 var rootEl = document.getElementById('app-content')
 
-// IE
-if (!window.crypto || !window.TextEncoder || !window.Promise || !window.File) {
+
+var errPage = function () {
     ReactDOM.render(
         <ErrPage />,
         rootEl
     )
     throw 'browser does not support required functions'
 }
+
+// IE
+if (!window.crypto || !window.TextEncoder || !window.Promise || !window.File) {
+    errPage()
+}
+// Edge, doesn't support PBKDF2
+window.crypto.subtle.importKey(
+    'raw',
+    new ArrayBuffer(),
+    { name: 'PBKDF2' },
+    false,
+    [ 'deriveBits', 'deriveKey' ]
+).catch(errPage)
 
 gdprshare.deriveKey = function (keyMaterial, salt, callback) {
     window.crypto.subtle.deriveKey(
