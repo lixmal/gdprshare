@@ -28,7 +28,7 @@
         "babelify": "^10.0.0",
         "browserify": "^16.5.0",
         "browserify-css": "^0.15.0",
-        "uglifyify": "^5.0.2",
+        "uglifyify": "^5.0.2"
     },
     "dependencies": {
         "@primer/octicons-react": "^9.3.0",
