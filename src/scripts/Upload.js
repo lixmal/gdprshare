@@ -118,9 +118,8 @@ export default class Upload extends React.Component {
             false,
             [ 'deriveBits', 'deriveKey' ]
         ).then(function (keyMaterial) {
-            var iv = window.crypto.getRandomValues(new Uint8Array(12))
-
             gdprshare.deriveKey(keyMaterial, salt, function (key) {
+                var iv = window.crypto.getRandomValues(new Uint8Array(12))
                 var gcmParams = {
                     name: 'aes-gcm',
                     iv: iv,
