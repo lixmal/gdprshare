@@ -3,6 +3,7 @@ package main
 import (
     "net/http"
     "crypto/rand"
+    "crypto/subtle"
     "encoding/base64"
     "log"
     "os"
@@ -38,6 +39,7 @@ const (
     MULTIPART_MEM     = 8 << 20 // 8M
     GRACEFUL_TIMEOUT  = 1 * time.Second
     CONFIG_FILE       = "config.yml"
+    OWNER_TOKEN_LEN   = 20
 )
 
 type Client struct {
@@ -55,6 +57,7 @@ type DstClient struct {
 type StoredFile struct {
     gorm.Model
     FileId     string                `form:"-"        gorm:"not null"`
+    OwnerToken string                `form:"-"`
     File       *multipart.FileHeader `form:"file"     gorm:"-"                  binding:"required"`
     Filename   string                `form:"filename" gorm:"type:varchar(1024)" binding:"omitempty,max=1024"`
     Name       string                `form:"-"        gorm:"not null"`
@@ -67,6 +70,11 @@ type StoredFile struct {
 
 type FileId struct {
     FileId     string                `uri:"fileId"                              binding:"required,printascii,min=3,max=64"`
+}
+
+type OwnedFile struct {
+    FileId
+    OwnerToken string                `form:"ownerToken"                         binding:"required,printascii,min=3,max=64"`
 }
 
 type Stats struct {
@@ -153,7 +161,7 @@ func main() {
         if errors := cleanup(); len(errors) > 0 {
             log.Println("File cleanup errors:")
             for _, err := range errors {
-                log.Println(err)
+                log.Printf("%s\n", err)
             }
             os.Exit(len(errors))
         }
@@ -182,6 +190,7 @@ func main() {
     v1.GET("/config", getConfig)
     v1.POST("/files", uploadFile)
     v1.GET("/files/:fileId", downloadFile)
+    v1.DELETE("/files/:fileId", deleteFile)
 
     srv := &http.Server{
         Addr:    Config.ListenAddr,
@@ -223,17 +232,17 @@ func main() {
 
 }
 
-func getId() (string, error) {
-    buf := make([]byte, Config.IDLength)
+func genToken(length int) (string, error) {
+    buf := make([]byte, length)
 
     _, err := rand.Read(buf)
     if err != nil {
         return "", err
     }
 
-    fileId := base64.RawURLEncoding.EncodeToString(buf)
+    token := base64.RawURLEncoding.EncodeToString(buf)
 
-    return fileId, nil
+    return token, nil
 }
 
 func index(c *gin.Context) {
@@ -242,7 +251,7 @@ func index(c *gin.Context) {
 
 func getConfig(c *gin.Context) {
     c.JSON(
-        http.StatusBadRequest,
+        http.StatusOK,
         gin.H{
             "maxFileSize": Config.MaxUploadSize,
             "passwordLength": Config.PasswordLength,
@@ -279,13 +288,25 @@ func uploadFile(c *gin.Context) {
     }
     namestr := name.String()
 
-    fileId, err := getId()
+    fileId, err := genToken(Config.IDLength)
     if err != nil {
         log.Printf("Failed to generate file ID: %s", err)
         c.JSON(
             http.StatusInternalServerError,
             gin.H{
                 "message": "failed to generate file ID",
+            },
+        )
+        return
+    }
+
+    ownerToken, err := genToken(OWNER_TOKEN_LEN)
+    if err != nil {
+        log.Printf("Failed to generate file ID: %s", err)
+        c.JSON(
+            http.StatusInternalServerError,
+            gin.H{
+                "message": "failed to generate owner token",
             },
         )
         return
@@ -305,6 +326,7 @@ func uploadFile(c *gin.Context) {
     }
 
     storedFile.FileId = fileId
+    storedFile.OwnerToken = ownerToken
     storedFile.Name = namestr
 
     storedFile.SrcClient = getClientInfo(c)
@@ -361,6 +383,7 @@ func uploadFile(c *gin.Context) {
         gin.H{
             "message": "file uploaded successfully",
             "fileId": fileId,
+            "ownerToken": ownerToken,
         },
     )
 }
@@ -420,11 +443,10 @@ func downloadFile(c *gin.Context) {
     path := filepath.Join(Config.StorePath, storedFile.Name)
 
     if storedFile.Count < 1 {
-        if err := db.Delete(&storedFile).Error; err != nil {
-            log.Printf("Failed to delete file with id %s from database: %s\n", fileId, err)
-        }
-        if err := os.Remove(path); err != nil {
-            log.Printf("Failed to delete file with id %s from storage: %s\n", fileId, err)
+        if errs := deleteStoredFile(&storedFile); len(errs) > 0 {
+            for _, err := range errs {
+                log.Printf("%s\n", err)
+            }
         }
         c.JSON(
             http.StatusNotFound,
@@ -526,6 +548,64 @@ func downloadFile(c *gin.Context) {
     }
 }
 
+func deleteFile(c *gin.Context) {
+    var o OwnedFile
+    if err := c.ShouldBindUri(&o); err != nil {
+        // TODO: get FieldError and return relevant part only
+        c.JSON(
+            http.StatusBadRequest,
+            gin.H{
+                "message": err.Error(),
+            },
+        )
+        return
+    }
+    fileId := o.FileId.FileId
+
+    var storedFile StoredFile
+    if err := db.Where(&StoredFile{FileId: fileId}).Find(&storedFile).Error; err != nil {
+        log.Printf("Failed to find file with id %s in database: %s\n", fileId, err)
+        c.JSON(
+            http.StatusNotFound,
+            gin.H{
+                "message": "file not found",
+            },
+        )
+        return
+    }
+
+    // check if owner token matches the stored one
+    if subtle.ConstantTimeCompare([]byte(o.OwnerToken), []byte(storedFile.OwnerToken)) != 1 {
+        c.JSON(
+            http.StatusUnauthorized,
+            gin.H{
+                "message": "owner token doesn't match",
+            },
+        )
+        return
+    }
+
+    if errs := deleteStoredFile(&storedFile); len(errs) > 0 {
+        for _, err := range errs {
+            log.Printf("%s\n", err)
+        }
+        c.JSON(
+            http.StatusInternalServerError,
+            gin.H{
+                "message": "file deletion failed",
+            },
+        )
+        return
+    }
+
+    c.JSON(
+        http.StatusOK,
+        gin.H{
+            "message": "file deleted",
+        },
+    )
+}
+
 func setStats(c *gin.Context) {
     var stats Stats
     if err := c.ShouldBind(&stats); err != nil {
@@ -561,6 +641,20 @@ func setStats(c *gin.Context) {
     )
 }
 
+func deleteStoredFile(f *StoredFile) []error {
+    var errors []error
+
+    path := filepath.Join(Config.StorePath, f.Name)
+    if err := os.Remove(path); err != nil {
+        errors = append(errors, fmt.Errorf("Failed to delete file with id %s from storage: %s", f.FileId, err))
+    }
+    if err := db.Delete(&f).Error; err != nil {
+        errors = append(errors, fmt.Errorf("Failed to delete file with id %s from database: %s", f.FileId, err))
+    }
+
+    return errors
+}
+
 func cleanup() []error {
     var expired []StoredFile
     var errors []error
@@ -574,12 +668,8 @@ func cleanup() []error {
     }
 
     for _, v := range expired {
-        path := filepath.Join(Config.StorePath, v.Name)
-        if err := os.Remove(path); err != nil {
-            errors = append(errors, err)
-        }
-        if err := db.Delete(&v).Error; err != nil {
-            errors = append(errors, err)
+        if errs := deleteStoredFile(&v); len(errs) > 0 {
+            errors = append(errors, errs...)
         }
     }
 
