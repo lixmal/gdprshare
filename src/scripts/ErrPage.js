@@ -8,13 +8,12 @@ export default class ErrPage extends React.Component {
         this.url = gdprshare.config.apiPrefix + '/stats'
     }
 
-    UNSAFE_componentWillMount() {
-        window.fetch(this.url, {
-            method: 'POST',
-            body: {
-                url: window.document.location.toString(),
-            },
-        })
+    componentDidMount() {
+        var XHR = new XMLHttpRequest()
+        XHR.open("POST", this.url)
+        XHR.send(JSON.stringify({
+            url: window.document.location.toString(),
+        }))
     }
 
     render() {

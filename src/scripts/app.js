@@ -56,17 +56,22 @@ var errPage = function () {
 }
 
 // IE
-if (!window.crypto || !window.TextEncoder || !window.Promise || !window.File) {
+if (!window.crypto || !window.TextEncoder || !window.Promise || !window.File || !window.fetch) {
     errPage()
 }
-// Edge, doesn't support PBKDF2
-window.crypto.subtle.importKey(
-    'raw',
-    new ArrayBuffer(),
-    { name: 'PBKDF2' },
-    false,
-    [ 'deriveBits', 'deriveKey' ]
-).catch(errPage)
+// Edge/IE, doesn't support PBKDF2
+try {
+    window.crypto.subtle.importKey(
+        'raw',
+        new ArrayBuffer(),
+        { name: 'PBKDF2' },
+        false,
+        [ 'deriveBits', 'deriveKey' ]
+    ).catch(errPage)
+}
+catch (e) {
+    errPage()
+}
 
 gdprshare.deriveKey = function (keyMaterial, salt, callback) {
     window.crypto.subtle.deriveKey(
