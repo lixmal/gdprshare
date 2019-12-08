@@ -1,6 +1,6 @@
 import React from 'react'
 import Classnames from 'classnames'
-import Octicon, { Key } from '@primer/octicons-react'
+import Octicon, { CloudUpload, Key } from '@primer/octicons-react'
 import BsCustomFileInput from 'bs-custom-file-input'
 import Alert from './Alert'
 
@@ -27,18 +27,26 @@ export default class Upload extends React.Component {
         BsCustomFileInput.init()
     }
 
-    classes() {
+    outerClasses() {
         return Classnames({
             'app-outer': true,
+            'drag-outer': this.state.isDragOver,
             'loading-mask': this.state.mask,
         })
     }
 
+    innerClasses() {
+        return Classnames({
+            'app-inner': true,
+            'drag-inner': this.state.isDragOver,
+        })
+    }
+
+
     dndClasses() {
         return Classnames({
-            'col-sm-4': true,
-            'container-fluid': true,
-            'is-dragover': this.state.isDragOver,
+            'drag-text-visible': this.state.isDragOver,
+            'drag-text': true,
         })
     }
 
@@ -216,10 +224,16 @@ export default class Upload extends React.Component {
 
     render() {
         return (
-            <div className={this.dndClasses()} onDrop={this.handleDrop} onDragEnter={this.handleDragOn} onDragOver={this.handleDragOn} onDragLeave={this.handleDragOff} onDragEnd={this.handleDragOff}>
-                <div className={this.classes()}>
+            <div className="container-fluid col-sm-4">
+                <div className={this.dndClasses()}>
+                    <Octicon size="large" icon={CloudUpload} />
+                    <h3>
+                        drop file here
+                    </h3>
+                </div>
+                <div className={this.outerClasses()} onDrop={this.handleDrop} onDragEnter={this.handleDragOn} onDragOver={this.handleDragOn} onDragLeave={this.handleDragOff} onDragEnd={this.handleDragOff}>
                     <h4 className="text-center">GDPRShare Upload</h4>
-                    <form ref="form" className="app-inner" onSubmit={this.handleUpload}>
+                    <form ref="form" className={this.innerClasses()} onSubmit={this.handleUpload}>
                         <div className="form-group row">
                             <label htmlFor="file" className="col-sm-3 col-form-label col-form-label-sm">
                                 File

@@ -1,5 +1,22 @@
-.is-dragover {
-    background-color: gray;
+.drag-text {
+    opacity: 0;
+    height: 0;
+    width: 100%;
+    position: absolute;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 0;
+    left: 0;
+    top: 0;
+    overflow: hidden;
+    width: 100%;
+    z-index: 999;
+}
+.drag-text-visible {
+    opacity: 1;
+    height: 100%;
 }
 
 .app-outer {
@@ -10,20 +27,31 @@
     min-height: 200px;
     min-width: 320px;
     background-color: #f3f3f3;
-    margin:0 auto;
+    margin: 0 auto;
     border-radius: 9px;
-    border: 1px solid ##c5c5c5;
+    border: 1px solid #c5c5c5;
 }
 
-.app-inner {
-    margin:0 auto;
-    max-width: 380px;
-    width: auto;
+.drag-outer {
+    border-top-style: dashed;
+    border-right-style: dashed;
+    border-bottom-style: dashed;
+    border-left-style: dashed;
 }
 
 .app-outer>h4 {
     font-size: 20px;
     font-weight: 600;
+}
+
+.app-inner {
+    margin: 0 auto;
+    max-width: 380px;
+    width: auto;
+}
+
+.drag-inner {
+    opacity: 0;
 }
 
 .input-group-text:active:focus {
