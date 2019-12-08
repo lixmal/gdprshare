@@ -22,6 +22,8 @@ window.gdprshare = {}
 gdprshare.config = {
     maxFileSize: 25,
     passwordLength: 12,
+    apiPrefix: '/api/v1',
+    apiUrl: '/api/v1/files',
 }
 
 gdprshare.rejecterr = function (error) {

@@ -176,12 +176,12 @@ func main() {
     router.GET("/", index)
     router.GET("/uploaded", index)
     router.GET("/d/:fileId", index)
-    router.POST("/stats", stats)
 
     v1 := router.Group("/api/v1")
-    v1.GET("/config", download)
-    v1.POST("/upload", upload)
-    v1.GET("/download/:fileId", download)
+    v1.POST("/stats", setStats)
+    v1.GET("/config", getConfig)
+    v1.POST("/files", uploadFile)
+    v1.GET("/files/:fileId", downloadFile)
 
     srv := &http.Server{
         Addr:    Config.ListenAddr,
@@ -240,7 +240,7 @@ func index(c *gin.Context) {
     c.File("public/index.html")
 }
 
-func config(c *gin.Context) {
+func getConfig(c *gin.Context) {
     c.JSON(
         http.StatusBadRequest,
         gin.H{
@@ -250,7 +250,7 @@ func config(c *gin.Context) {
     )
 }
 
-func upload(c *gin.Context) {
+func uploadFile(c *gin.Context) {
     var storedFile StoredFile
     if err := c.ShouldBind(&storedFile); err != nil {
         // file to large: middleware has already written to response body
@@ -365,7 +365,7 @@ func upload(c *gin.Context) {
     )
 }
 
-func download(c *gin.Context) {
+func downloadFile(c *gin.Context) {
     var f FileId
     if err := c.ShouldBindUri(&f); err != nil {
         // TODO: get FieldError and return relevant part only
@@ -526,7 +526,7 @@ func download(c *gin.Context) {
     }
 }
 
-func stats(c *gin.Context) {
+func setStats(c *gin.Context) {
     var stats Stats
     if err := c.ShouldBind(&stats); err != nil {
         // TODO: get FieldError and return relevant part only

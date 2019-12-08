@@ -5,7 +5,7 @@ import Alert from './Alert'
 export default class ErrPage extends React.Component {
     constructor() {
         super()
-        this.url = '/stats'
+        this.url = gdprshare.config.apiPrefix + '/stats'
     }
 
     UNSAFE_componentWillMount() {

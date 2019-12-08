@@ -6,8 +6,6 @@ import Alert from './Alert'
 export default class Download extends React.Component {
     constructor() {
         super()
-        this.url = '/api/v1/download'
-
         this.handleDownload = this.handleDownload.bind(this)
         this.downloadFile = this.downloadFile.bind(this)
 
@@ -129,7 +127,7 @@ export default class Download extends React.Component {
 
         let fileId = window.location.pathname.split('/').pop()
 
-        window.fetch(this.url + '/' + fileId, {
+        window.fetch(gdprshare.config.apiUrl + '/' + fileId, {
             method: 'GET',
         }).then(function (response) {
             if (response.ok) {

@@ -7,8 +7,6 @@ import Alert from './Alert'
 export default class Upload extends React.Component {
     constructor() {
         super()
-        this.url = '/api/v1/upload'
-
         this.handleFile = this.handleFile.bind(this)
         this.handleUpload = this.handleUpload.bind(this)
         this.handleDrop = this.handleDrop.bind(this)
@@ -92,7 +90,7 @@ export default class Upload extends React.Component {
 
         window.localStorage.setItem('email', email)
 
-        window.fetch(this.url, {
+        window.fetch(gdprshare.config.apiUrl, {
             method: 'POST',
             body: formData,
         }).then(function (response) {
