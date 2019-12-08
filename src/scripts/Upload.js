@@ -225,13 +225,13 @@ export default class Upload extends React.Component {
     render() {
         return (
             <div className="container-fluid col-sm-4">
-                <div className={this.dndClasses()}>
+                <div className={this.dndClasses()} onDrop={this.handleDrop} onDragEnter={this.handleDragOn} onDragOver={this.handleDragOn} onDragLeave={this.handleDragOff} onDragEnd={this.handleDragOff}>
                     <Octicon size="large" icon={CloudUpload} />
                     <h3>
                         drop file here
                     </h3>
                 </div>
-                <div className={this.outerClasses()} onDrop={this.handleDrop} onDragEnter={this.handleDragOn} onDragOver={this.handleDragOn} onDragLeave={this.handleDragOff} onDragEnd={this.handleDragOff}>
+                <div className={this.outerClasses()} onDragEnter={this.handleDragOn}>
                     <h4 className="text-center">GDPRShare Upload</h4>
                     <form ref="form" className={this.innerClasses()} onSubmit={this.handleUpload}>
                         <div className="form-group row">
