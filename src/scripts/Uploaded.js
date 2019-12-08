@@ -59,7 +59,7 @@ export default class Uploaded extends React.Component {
         var btn = event.currentTarget
         btn.blur()
         var state = this.props.history.location.state
-        var downloadLink = state.location + '?p=' + state.password
+        var downloadLink = state.location + '#' + state.password
 
         if (window.navigator.share) {
             var shr = {
@@ -150,7 +150,7 @@ export default class Uploaded extends React.Component {
                                         </button>
                                     </div>
                                     <input className="form-control form-control-sm" id="linkpassword" type="text" ref="linkpassword" placeholder="Link and passwod" readOnly aria-describedby="linkpasswordHelp"
-                                        value={ this.props.history.location.state.location + '?p=' + this.props.history.location.state.password }
+                                        value={ this.props.history.location.state.location + '#' + this.props.history.location.state.password }
                                     />
                                 </div>
                                 <small id="linkpasswordHelp" className="form-text text-muted">Send link and password at once (less secure)</small>

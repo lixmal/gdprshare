@@ -20,8 +20,7 @@ export default class Download extends React.Component {
     }
 
     componentDidMount() {
-        var url = new URL(window.location.href)
-        var password = url.searchParams.get('p')
+        var password = window.location.hash.substring(1)
 
         // don't render password field
         if (password) {
