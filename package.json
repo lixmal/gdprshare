@@ -5,8 +5,8 @@
     "main": "src/scripts/app.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "dev": "node_modules/.bin/browserify -t browserify-css -t [ babelify --presets [ @babel/preset-env @babel/preset-react ] ] src/scripts/app.js -o public/scripts/bundle.js; sed -i 's/node_modules\\/bootstrap\\/dist\\///g' public/scripts/bundle.js",
-        "build": "NODE_ENV=production node_modules/.bin/browserify -t browserify-css -t [ babelify --presets [ @babel/preset-env @babel/preset-react ] ] -p [ uglifyify --no-sourcemap ] src/scripts/app.js | terser --compress --mangle > public/scripts/bundle.js; sed -i 's/node_modules\\/bootstrap\\/dist\\///g' public/scripts/bundle.js"
+        "dev": "browserify -t browserify-css -t [ babelify --presets [ @babel/preset-env @babel/preset-react ] ] src/scripts/app.js -o public/scripts/bundle.js; sed -i 's/node_modules\\/bootstrap\\/dist\\///g' public/scripts/bundle.js",
+        "build": "NODE_ENV=production browserify -t browserify-css -t [ babelify --presets [ @babel/preset-env @babel/preset-react ] ] -p [ uglifyify --no-sourcemap ] src/scripts/app.js | terser --compress --mangle > public/scripts/bundle.js; sed -i 's/node_modules\\/bootstrap\\/dist\\///g' public/scripts/bundle.js"
     },
     "repository": {
         "type": "git",
