@@ -33,11 +33,11 @@ RUN apk add --update --no-cache --virtual .build-deps \
 
 EXPOSE 8080
 
+USER nobody:nogroup
+
 VOLUME /conf /data
 
 STOPSIGNAL SIGTERM
-
-USER nobody:nogroup
 
 ENV GIN_MODE release
 
