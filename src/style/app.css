@@ -59,7 +59,7 @@
     outline: none;
 }
 
-.file-error {
+.file-alert {
     margin-top: 15px;
     animation: blinker 1s linear;
     margin-bottom: 0px;

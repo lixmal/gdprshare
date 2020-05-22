@@ -8,7 +8,7 @@ export default class Alert extends React.Component {
 
     render() {
         return this.props.error ? (
-            <div className="alert alert-danger alert-dismissible col-sm-12 file-error text-center">
+            <div className="alert alert-danger alert-dismissible col-sm-12 file-alert text-center">
                 <Octicon icon={AlertI} />
                 <span className="sr-only">
                     Error:

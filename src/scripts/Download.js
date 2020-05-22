@@ -2,6 +2,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import Classnames from 'classnames'
 import Alert from './Alert'
+import Success from './Success'
 
 export default class Download extends React.Component {
     constructor() {
@@ -174,12 +175,15 @@ export default class Download extends React.Component {
                 </div>
             </form>
         )
+
         return (
             <div className="container-fluid col-sm-4">
                 <div className={this.classes()}>
                     <h4 className="text-center">GDPRShare Download</h4>
                     { this.state.direct || this.state.finished ? null : form }
+
                     <br />
+                    { this.state.finished && <Success message="Successfully downloaded, check your download folder" /> }
                     <Alert error={this.state.error} />
 
                     <div className="text-center col-sm-12">
