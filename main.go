@@ -408,7 +408,7 @@ func downloadFile(c *gin.Context) {
         c.JSON(
             http.StatusNotFound,
             gin.H{
-                "message": "file not found",
+                "message": "file not found or download limit exceeded",
             },
         )
         return
@@ -420,7 +420,7 @@ func downloadFile(c *gin.Context) {
         c.JSON(
             http.StatusNotFound,
             gin.H{
-                "message": "file not found",
+                "message": "file retrieval error",
             },
         )
         return
@@ -433,7 +433,7 @@ func downloadFile(c *gin.Context) {
         c.JSON(
             http.StatusNotFound,
             gin.H{
-                "message": "file not found",
+                "message": "file retrieval error",
             },
         )
         return
