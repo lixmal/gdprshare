@@ -107,7 +107,7 @@ export default class Uploaded extends React.Component {
                             <div className="col-sm-9">
                                 <div className="input-group">
                                     <div className="input-group-prepend">
-                                        <button id="pw-copy" onClick={this.copyHandler} type="button" className="input-group-text" data-for="copy-tip" data-tip>
+                                        <button id="pw-copy" onClick={this.copyHandler} type="button" className="btn input-group-text" data-for="copy-tip" data-tip>
                                             <Octicon icon={Clippy} />
                                         </button>
                                     </div>
@@ -125,7 +125,7 @@ export default class Uploaded extends React.Component {
                             <div className="col-sm-9">
                                 <div className="input-group">
                                     <div className="input-group-prepend">
-                                        <button id="link-copy" onClick={this.copyHandler} type="button" className="input-group-text" data-for="copy-tip" data-tip>
+                                        <button id="link-copy" onClick={this.copyHandler} type="button" className="btn input-group-text" data-for="copy-tip" data-tip>
                                             <Octicon icon={Clippy} />
                                         </button>
                                     </div>
@@ -145,7 +145,7 @@ export default class Uploaded extends React.Component {
                             <div className="col-sm-9">
                                 <div className="input-group">
                                     <div className="input-group-prepend">
-                                        <button id="linkpw-copy" onClick={this.copyHandler} type="button" className="input-group-text" data-for="copy-tip" data-tip>
+                                        <button id="linkpw-copy" onClick={this.copyHandler} type="button" className="btn input-group-text" data-for="copy-tip" data-tip>
                                             <Octicon icon={Clippy} />
                                         </button>
                                     </div>
@@ -159,7 +159,7 @@ export default class Uploaded extends React.Component {
                     </form>
 
                     <div className="text-center">
-                        <button id="share" onClick={this.shareHandler} type="button">
+                        <button id="share" onClick={this.shareHandler} type="button" className="btn btn-primary">
                             <Octicon icon={LinkExternal} /> Share
                         </button>
                     </div>
