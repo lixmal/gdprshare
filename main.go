@@ -262,7 +262,7 @@ func getConfig(c *gin.Context) {
 func uploadFile(c *gin.Context) {
     var storedFile StoredFile
     if err := c.ShouldBind(&storedFile); err != nil {
-        // file to large: middleware has already written to response body
+        // file too large: middleware has already written to response body
         if c.Writer.Status() == http.StatusRequestEntityTooLarge {
             return
         }
