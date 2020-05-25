@@ -1,44 +1,41 @@
-FROM alpine:edge
+FROM golang:alpine AS build
 
-WORKDIR /opt/gdprshare/
-RUN apk add --update --no-cache --virtual .build-deps \
-    # install build tools
+WORKDIR /workspace
+
+COPY . .
+
+RUN apk add --no-cache \
         npm \
-        go \
-        git \
         # cgo: sqlite3
         gcc \
         musl-dev \
-    # get source
-    && cd .. \
-    && git clone https://github.com/lixmal/gdprshare \
-    && cd gdprshare \
     # build go binary
-    && go build \
+    && go build -ldflags '-w -extldflags "-static"' \
     # install js dependencies
     && npm install \
     # build bundle.js
     && npm run build \
-    && rm -rf node_modules \
-    # remove build tools
-    && apk del --purge .build-deps \
-    && rm -rf src .git* *.go go.* *.json misc files \
-    # create dirs
-    && mkdir -p /conf /data/files \
     # adjust config
     && sed -i 's/gdprshare.db/\/data\/gdprshare.db/' config.yml \
-    && sed -i 's/files'\''/\/data\/files'\'/ config.yml \
-    # move config to volume
-    && mv config.yml /conf/
+    && sed -i 's/files'\''/\/data\/files'\'/ config.yml
 
-EXPOSE 8080
+
+FROM alpine
+
+COPY --from=build /workspace/gdprshare /gdprshare/
+COPY --from=build /workspace/public /gdprshare/public
+COPY --from=build /workspace/config.yml /conf/
 
 USER nobody:nogroup
 
 VOLUME /conf /data
 
+EXPOSE 8080
+
 STOPSIGNAL SIGTERM
 
 ENV GIN_MODE release
+
+WORKDIR /gdprshare
 
 CMD ["./gdprshare", "--config", "/conf/config.yml"]
