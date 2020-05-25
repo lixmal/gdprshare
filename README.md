@@ -58,4 +58,4 @@ Alternatively run the [docker image](https://hub.docker.com/r/lixmal/gdprshare):
 
 `sudo docker run  -p 8080:8080 -v conf/path:/conf -v data/path:/data lixmal/gdprshare`
 
-The `/data` volume needs to be writable by the `nobody` user, and it requires a `files` directory inside.
+The `/data` volume needs to be writable by the `nobody` user, and it requires a `files` directory inside (automatically created).

@@ -134,6 +134,13 @@ func init() {
     template.Must(template.New("mailbody").Parse(Config.Mail.Body))
 
     var err error
+    if _, err = os.Stat(Config.StorePath); os.IsNotExist(err) {
+        // create files directory
+        if err = os.Mkdir(Config.StorePath, 0700); err != nil {
+            log.Fatalf("Failed to create file store path: %s\n", err)
+        }
+    }
+
     db, err = gorm.Open(Config.Database.Driver, Config.Database.Args)
     if err != nil {
         log.Fatalf("Failed to connect to database: %s\n", err)
@@ -154,6 +161,7 @@ func init() {
     if err = db.AutoMigrate(&Stats{}).Error; err != nil {
         log.Fatalf("Failed to migrate schema: %s\n", err)
     }
+
 }
 
 func main() {
