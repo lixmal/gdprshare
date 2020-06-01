@@ -187,10 +187,10 @@ export default class Upload extends React.Component {
         if (!file)
             return
         var allowedSize = gdprshare.config.maxFileSize
-        
+
         if (file.size > allowedSize * 1024 * 1024) {
             this.setState({
-                error: 'File to big, maximum allowed size: ' + allowedSize + ' MiB.',
+                error: 'File too big, maximum allowed size: ' + allowedSize + ' MiB.',
             })
             this.refs.file.value = null
             return false
