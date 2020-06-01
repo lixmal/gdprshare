@@ -129,6 +129,11 @@ func init() {
     config := flag.String("config", CONFIG_FILE, "configuration file path")
     flag.Parse()
 
+    var err error
+    if _, err = os.Stat(*config); err != nil {
+        log.Fatalf("Cannot open config file: %s", err)
+    }
+
     if err := configor.Load(&Config, *config); err != nil {
         log.Fatalf("Error parsing config file %s: %s", CONFIG_FILE, err)
     }
@@ -136,7 +141,6 @@ func init() {
     // try parsing the mail body template
     template.Must(template.New("mailbody").Parse(Config.Mail.Body))
 
-    var err error
     if _, err = os.Stat(Config.StorePath); os.IsNotExist(err) {
         // create files directory
         if err = os.Mkdir(Config.StorePath, 0700); err != nil {

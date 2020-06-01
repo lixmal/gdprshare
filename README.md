@@ -58,6 +58,8 @@ Afterwards build the js bundle:
 Run locally:
 `GIN_MODE=release ./gdprshare`
 
+gdprshare will look for a `config.yml` in it's working directory, but you can specify `gdprshare -config <config file>` to change this.
+
 Take a look at `misc/gdprshare.service` for an example systemd unit and `misc/crontab` for the cronjob to delete expired files.
 
 Alternatively run the [docker image](https://hub.docker.com/r/lixmal/gdprshare):
