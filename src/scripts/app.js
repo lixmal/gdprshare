@@ -12,6 +12,8 @@ import Uploaded from './Uploaded'
 import Download from './Download'
 
 import './Polyfills'
+import ReactTooltip from 'react-tooltip'
+import * as Clipboard from "clipboard-polyfill/dist/clipboard-polyfill.promise"
 
 const history = createBrowserHistory()
 
@@ -22,6 +24,7 @@ window.gdprshare = {}
 gdprshare.config = {
     maxFileSize: 25,
     passwordLength: 12,
+    saveFiles: true,
     apiPrefix: '/api/v1',
     apiUrl: '/api/v1/files',
 }
@@ -88,6 +91,55 @@ gdprshare.deriveKey = function (keyMaterial, salt, callback) {
     ).then(callback, gdprshare.rejecterr.bind(this))
 }
 
+gdprshare.copyHandler = function (event) {
+    this.setState({
+        error: null
+    })
+
+    var btn = event.currentTarget
+    btn.blur()
+    var element = btn.parentNode.nextSibling
+    var value
+    if (element.tagName === 'INPUT') {
+        value = element.value
+    }
+    else {
+        try {
+            var files = JSON.parse(window.localStorage.getItem('savedFiles'))
+            value = files[element.textContent].location
+        }
+        catch (e) {
+            console.log(e)
+            gdprshare.showTooltip.bind(this)(btn, 'Failed to get file URL')
+            return
+        }
+    }
+
+
+    var me = this
+    Clipboard.writeText(value).then(
+        function () {
+            gdprshare.showTooltip.bind(me)(btn, 'Copied')
+        },
+        function (err) {
+            console.log(err)
+            gdprshare.showTooltip.bind(me)(btn, 'Failed to copy')
+        },
+    )
+}
+
+
+gdprshare.showTooltip = function (btn, message) {
+    this.setState({
+        copy: message,
+    })
+    ReactTooltip.show(btn)
+    ReactTooltip.hide(btn)
+}
+
+gdprshare.handleTipContent = function () {
+    return this.state.copy
+}
 
 
 ReactDOM.render(

@@ -1,6 +1,5 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import * as Clipboard from "clipboard-polyfill/dist/clipboard-polyfill.promise"
 import Octicon, { LinkExternal, Clippy } from '@primer/octicons-react'
 import Alert from './Alert'
 import ReactTooltip from 'react-tooltip'
@@ -9,46 +8,13 @@ export default class Uploaded extends React.Component {
     constructor() {
         super()
 
-        this.copyHandler = this.copyHandler.bind(this)
+        this.copyHandler = gdprshare.copyHandler.bind(this)
         this.shareHandler = this.shareHandler.bind(this)
-        this.handleTipContent = this.handleTipContent.bind(this)
+        this.handleTipContent = gdprshare.handleTipContent.bind(this)
         this.state = {
             error: null,
             copy: null,
         }
-    }
-
-    showTooltip(btn, message) {
-        this.setState({
-            copy: message,
-        })
-        ReactTooltip.show(btn)
-        ReactTooltip.hide(btn)
-    }
-
-    handleTipContent() {
-        return this.state.copy
-    }
-
-    copyHandler(event) {
-        this.setState({
-            error: null
-        })
-
-        var btn = event.currentTarget
-        btn.blur()
-        var input = btn.parentNode.nextSibling
-        Clipboard.writeText(input.value).then(
-            function () {
-                this.showTooltip(btn, 'Copied')
-            }.bind(this),
-            function (err) {
-                this.showTooltip(btn, 'Failed to copy')
-                this.setState({
-                    error: err,
-                })
-            }.bind(this),
-        )
     }
 
     shareHandler(event) {
