@@ -76,7 +76,6 @@ type FileId struct {
 }
 
 type OwnedFile struct {
-    FileId
     OwnerToken string                `form:"ownerToken"                         binding:"required,printascii,min=3,max=64"`
 }
 
@@ -564,8 +563,8 @@ func downloadFile(c *gin.Context) {
 }
 
 func deleteFile(c *gin.Context) {
-    var o OwnedFile
-    if err := c.ShouldBindUri(&o); err != nil {
+    var f FileId
+    if err := c.ShouldBindUri(&f); err != nil {
         // TODO: get FieldError and return relevant part only
         c.JSON(
             http.StatusBadRequest,
@@ -575,7 +574,19 @@ func deleteFile(c *gin.Context) {
         )
         return
     }
-    fileId := o.FileId.FileId
+    var o OwnedFile
+    if err := c.ShouldBind(&o); err != nil {
+        // TODO: get FieldError and return relevant part only
+        c.JSON(
+            http.StatusBadRequest,
+            gin.H{
+                "message": err.Error(),
+            },
+        )
+        return
+    }
+
+    fileId := f.FileId
 
     var storedFile StoredFile
     if err := db.Where(&StoredFile{FileId: fileId}).Find(&storedFile).Error; err != nil {
