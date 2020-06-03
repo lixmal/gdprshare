@@ -365,7 +365,10 @@ export default class Upload extends React.Component {
             colWidth = 8
             filesCol = (
                 <div className="col-sm">
-                    {savedFiles}
+                    <h6 className="text-center">Uploaded Files</h6>
+                    <div className="saved-files overflow-auto">
+                        {savedFiles}
+                    </div>
                 </div>
             )
         }

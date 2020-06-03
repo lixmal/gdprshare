@@ -1,3 +1,7 @@
+.saved-files {
+    max-height: 350px;
+}
+
 .card {
     margin-bottom: 5px;
 }
@@ -9,6 +13,7 @@
 .card-header {
     padding: 8px !important;
 }
+
 .card-header-text {
     margin: 5px 0px 0px 5px;
 }
