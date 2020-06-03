@@ -347,12 +347,12 @@ export default class Upload extends React.Component {
                                     <Octicon icon={Trashcan} />
                                 </button>
                             </div>
-                            <span className="card-header-text">
+                            <span className="card-header-text long-text">
                                 {files[i].fileId}
                             </span>
                         </div>
                     </div>
-                    <div className="card-body">
+                    <div className="card-body long-text">
                         {files[i].filename}
                     </div>
                 </div>

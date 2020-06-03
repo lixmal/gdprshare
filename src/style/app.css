@@ -13,6 +13,24 @@
     margin: 5px 0px 0px 5px;
 }
 
+.long-text {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.long-text:hover {
+    text-overflow: clip;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.long-text:active {
+    text-overflow: clip;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
 .drag-text {
     opacity: 0;
     height: 0;
