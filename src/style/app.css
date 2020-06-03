@@ -1,11 +1,16 @@
 .card {
     margin-bottom: 5px;
 }
+
 .card-body {
     padding: 8px !important;
 }
+
 .card-header {
     padding: 8px !important;
+}
+.card-header-text {
+    margin: 5px 0px 0px 5px;
 }
 
 .drag-text {
