@@ -2,6 +2,20 @@
     max-height: 350px;
 }
 
+.expiry {
+    margin-left: 5px;
+    float: right;
+    color: green;
+}
+
+.expiry-expired {
+    color: orange;
+}
+
+.expiry-error {
+    color: red;
+}
+
 .card {
     margin-bottom: 5px;
 }

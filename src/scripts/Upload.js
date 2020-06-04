@@ -19,16 +19,64 @@ export default class Upload extends React.Component {
         this.handleDragOff = this.handleDragOff.bind(this)
         this.uploadFile = this.uploadFile.bind(this)
         this.reGenPassword = this.reGenPassword.bind(this)
+        this.updateValidity = this.updateValidity.bind(this)
 
         this.state = {
             error: null,
             mask: false,
             copy: null,
+            fileInfo: null,
         }
     }
 
     componentDidMount() {
         BsCustomFileInput.init()
+
+        this.updateValidity()
+    }
+
+    updateValidity() {
+        try {
+            var files = JSON.parse(window.localStorage.getItem('savedFiles'))
+        }
+        catch (e) {
+            console.log(e)
+            return
+        }
+
+        var fileIds = []
+        for (var i in files) {
+            fileIds.push(
+                {
+                    fileId: files[i].fileId,
+                    ownerToken: files[i].ownerToken,
+                }
+            )
+        }
+
+        this.setState({
+            error: null,
+        })
+
+        var fileInfo
+        window.fetch(gdprshare.config.apiUrl + '/' + 'validate', {
+            method: 'POST',
+            body: JSON.stringify(fileIds),
+        }).then(function (response) {
+            response.clone().json().then(function(data) {
+                if (response.ok) {
+                    this.setState({
+                        fileInfo: data.fileInfo
+                    })
+                }
+                else {
+                    console.log(data.message)
+                    this.setState({
+                        error: 'fetching file validity failed: ' + data.message,
+                    })
+                }
+            }.bind(this), gdprshare.fetcherr.bind(this, response))
+        }.bind(this), gdprshare.rejecterr.bind(this))
     }
 
     outerClasses() {
@@ -263,7 +311,6 @@ export default class Upload extends React.Component {
 
         var formData = new FormData()
         formData.append('ownerToken', ownerToken)
-        formData.append('fileId', fileId)
 
         window.fetch(gdprshare.config.apiUrl + '/' + fileId, {
             method: 'DELETE',
@@ -335,6 +382,43 @@ export default class Upload extends React.Component {
         }
 
         for (var i in files) {
+            let expiry
+            let file = this.state.fileInfo && this.state.fileInfo[files[i].fileId]
+            if (file) {
+                if (file.error) {
+                    console.log(file.error)
+                    expiry = (
+                        <span className="expiry expiry-error">
+                            &lt;error&gt;
+                        </span>
+                    )
+                }
+                else {
+                    let expiryDate = new Date(file.expiryDate)
+                    // go's time.Time zero value
+                    let isInitDate = expiryDate.getTime() == new Date('0001-01-01T00:00:00Z').getTime()
+                    let isExpired = isInitDate || file.count < 1  || Date.now() > expiryDate
+
+                    let text
+                    let classes
+                    if (isExpired) {
+                        classes = 'expiry expiry-expired'
+                        text = '<expired>'
+                    }
+                    else {
+                        classes = 'expiry'
+                        let expires = isInitDate ? '<no data>' : expiryDate.toLocaleString()
+                        let s = file.count > 1 ? 's' : ''
+                        text = `${file.count} DL${s} or ${expires}`
+                    }
+                    expiry = (
+                        <span className={classes}>
+                            {text}
+                        </span>
+                    )
+                }
+            }
+
             savedFiles.push(
                 <div className="card" key={files[i].fileId}>
                     <div className="card-header">
@@ -354,6 +438,7 @@ export default class Upload extends React.Component {
                     </div>
                     <div className="card-body long-text">
                         {files[i].filename}
+                        {expiry}
                     </div>
                 </div>
             )

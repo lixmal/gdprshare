@@ -71,12 +71,23 @@ type StoredFile struct {
     DstClients []DstClient           `form:"-"`
 }
 
+type StoredFileInfo struct {
+    ExpiryDate time.Time `json:"expiryDate"`
+    Count uint  `json:"count"`
+    Error string `json:"error"`
+}
+
 type FileId struct {
-    FileId     string                `uri:"fileId"                              binding:"required,printascii,min=3,max=64"`
+    FileId     string                `json:"fileId" uri:"fileId"                binding:"required,printascii,min=3,max=64"`
+}
+
+type OwnerToken struct {
+    OwnerToken string                `form:"ownerToken"                         binding:"required,printascii,min=3,max=64"`
 }
 
 type OwnedFile struct {
-    OwnerToken string                `form:"ownerToken"                         binding:"required,printascii,min=3,max=64"`
+    FileId
+    OwnerToken
 }
 
 type Stats struct {
@@ -205,6 +216,7 @@ func main() {
     v1.POST("/files", uploadFile)
     v1.GET("/files/:fileId", downloadFile)
     v1.DELETE("/files/:fileId", deleteFile)
+    v1.POST("/files/validate", validateFiles)
 
     srv := &http.Server{
         Addr:    Config.ListenAddr,
@@ -402,6 +414,50 @@ func uploadFile(c *gin.Context) {
     )
 }
 
+func validateFiles(c *gin.Context) {
+    var files []OwnedFile
+    if err := c.ShouldBindJSON(&files); err != nil {
+        // TODO: get FieldError and return relevant part only
+        c.JSON(
+            http.StatusBadRequest,
+            gin.H{
+                "message": err.Error(),
+            },
+        )
+        return
+    }
+
+
+    log.Println("%+#v", files)
+    fileInfo := map[string]StoredFileInfo{}
+    for _, f := range(files) {
+        var storedFile StoredFile
+
+        fileId := f.FileId.FileId
+        err := db.Where(&StoredFile{FileId: fileId}).Find(&storedFile).Error;
+        if err != nil {
+            log.Printf("Failed to find file with id %s in database: %s\n", fileId, err)
+            fileInfo[fileId] = StoredFileInfo{}
+        } else if subtle.ConstantTimeCompare([]byte(f.OwnerToken.OwnerToken), []byte(storedFile.OwnerToken)) != 1 {
+            fileInfo[fileId] = StoredFileInfo{
+                Error: "Owner token mismatch",
+            }
+        } else {
+            fileInfo[fileId] = StoredFileInfo{
+                ExpiryDate: storedFile.CreatedAt.AddDate(0, 0, int(storedFile.Expiry)),
+                Count: storedFile.Count,
+            }
+        }
+    }
+
+    c.JSON(
+        http.StatusOK,
+        gin.H{
+            "fileInfo": fileInfo,
+        },
+    )
+}
+
 func downloadFile(c *gin.Context) {
     var f FileId
     if err := c.ShouldBindUri(&f); err != nil {
@@ -574,7 +630,7 @@ func deleteFile(c *gin.Context) {
         )
         return
     }
-    var o OwnedFile
+    var o OwnerToken
     if err := c.ShouldBind(&o); err != nil {
         // TODO: get FieldError and return relevant part only
         c.JSON(
