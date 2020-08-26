@@ -35,7 +35,7 @@ import (
 
 const (
     AUTHOR   = "Viktor Liu"
-    VERSION  = "0.4.0"
+    VERSION  = "0.4.1"
 )
 
 const (
