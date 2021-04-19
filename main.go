@@ -40,7 +40,7 @@ const (
 
 const (
     MULTIPART_MEM     = 8 << 20 // 8M
-    GRACEFUL_TIMEOUT  = 1 * time.Second
+    GRACEFUL_TIMEOUT  = 20 * time.Second
     CONFIG_FILE       = "config.yml"
     OWNER_TOKEN_LEN   = 20
 )
@@ -246,16 +246,13 @@ func main() {
     log.Println("Server shutdown ...")
 
     ctx, cancel := context.WithTimeout(context.Background(), GRACEFUL_TIMEOUT)
-    defer cancel()
     if err := srv.Shutdown(ctx); err != nil {
         log.Fatalln(err)
     }
+    cancel()
 
-    select {
-    case <-ctx.Done():
-    }
+    <-ctx.Done()
     log.Println("Finished")
-
 }
 
 func genToken(length int) (string, error) {
