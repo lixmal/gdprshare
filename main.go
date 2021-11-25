@@ -735,7 +735,7 @@ func cleanup() []error {
     var expired []StoredFile
     var errors []error
 
-    if errs := db.Where("datetime(created_at, expiry || ' days') > datetime('now')").Find(&expired).GetErrors(); errs != nil {
+    if errs := db.Where("datetime(created_at, expiry || ' days') < datetime('now')").Find(&expired).GetErrors(); errs != nil {
         for _, err := range errs {
             if !gorm.IsRecordNotFoundError(err) {
                 errors = append(errors, err)
