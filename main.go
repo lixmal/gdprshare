@@ -19,7 +19,6 @@ import (
 )
 
 const (
-	Author  = "Viktor Liu"
 	Version = "0.4.2"
 )
 
