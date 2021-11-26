@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"reflect"
@@ -53,4 +53,3 @@ func kindOfData(data interface{}) reflect.Kind {
 	}
 	return valueType
 }
-
