@@ -9,8 +9,10 @@ RUN apk add --no-cache \
         # cgo: sqlite3
         gcc \
         musl-dev \
+        ca-certificates \
     # build go binary
     && go build -ldflags '-w -extldflags "-static"' \
+        -o gdprshare github.com/lixmal/gdprshare/cmd/gdprshare \
     # install js dependencies
     && npm install \
     # build bundle.js
@@ -20,15 +22,14 @@ RUN apk add --no-cache \
     && sed -i 's/files'\''/\/data\/files'\'/ config.yml
 
 
-FROM alpine
+FROM scratch
 
 COPY --from=build /workspace/gdprshare /gdprshare/
 COPY --from=build /workspace/public /gdprshare/public
 COPY --from=build /workspace/config.yml /conf/
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
-USER nobody:nogroup
-
-VOLUME /conf /data
+WORKDIR /gdprshare
 
 EXPOSE 8080
 
@@ -36,6 +37,11 @@ STOPSIGNAL SIGTERM
 
 ENV GIN_MODE release
 
-WORKDIR /gdprshare
+VOLUME /conf
+
+USER 1000:1000
+
+VOLUME /data
+
 
 CMD ["./gdprshare", "--config", "/conf/config.yml"]
