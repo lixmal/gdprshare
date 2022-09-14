@@ -6,7 +6,6 @@ import (
 
 	limits "github.com/gin-contrib/size"
 	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
 
 	"github.com/lixmal/gdprshare/pkg/config"
 	"github.com/lixmal/gdprshare/pkg/database"
@@ -64,8 +63,6 @@ func setupRoutes(router *gin.Engine, srv *Server) {
 }
 
 func New(db *database.Database, conf *config.Config) *Server {
-	// override v8 validator with v10
-	binding.Validator = new(defaultValidator)
 	router := gin.Default()
 
 	srv := &Server{
