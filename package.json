@@ -1,6 +1,6 @@
 {
     "name": "gdprshare",
-    "version": "0.4.3",
+    "version": "0.4.4",
     "description": "share files according to gdpr rules",
     "main": "src/scripts/app.js",
     "scripts": {
