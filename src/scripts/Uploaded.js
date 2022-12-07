@@ -1,8 +1,9 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import Octicon, { LinkExternal, Clippy } from '@primer/octicons-react'
+import Octicon, { LinkExternal, Clippy, ScreenFull } from '@primer/octicons-react'
 import Alert from './Alert'
 import ReactTooltip from 'react-tooltip'
+import { QRCodeSVG } from 'qrcode.react'
 
 export default class Uploaded extends React.Component {
     constructor() {
@@ -10,10 +11,12 @@ export default class Uploaded extends React.Component {
 
         this.copyHandler = gdprshare.copyHandler.bind(this)
         this.shareHandler = this.shareHandler.bind(this)
+        this.qrHandler = this.qrHandler.bind(this)
         this.handleTipContent = gdprshare.handleTipContent.bind(this)
         this.state = {
             error: null,
             copy: null,
+            dialogOpen: false,
         }
     }
 
@@ -46,10 +49,29 @@ export default class Uploaded extends React.Component {
         }
     }
 
+    qrHandler(event) {
+        var btn = event.currentTarget
+        btn.blur()
+        this.setState({
+            error: null,
+            dialogOpen: !this.state.dialogOpen,
+        })
+    }
+
     render() {
         if (!this.props.history.location.state) {
             this.props.history.replace('/')
             return null
+        }
+
+        let dialog
+
+        if (this.state.dialogOpen) {
+            dialog = (
+                <dialog className="dialog" open onClick={this.handleShowDialog}>
+                    <QRCodeSVG value={ this.props.history.location.state.location + '#' + this.props.history.location.state.password } onClick={this.qrHandler} />
+                </dialog>
+            )
         }
 
         return (
@@ -103,7 +125,7 @@ export default class Uploaded extends React.Component {
                             </div>
                         </div>
 
-
+                        {dialog}
                         <div className="form-group row">
                             <label htmlFor="linkpw" className="col-sm-3 col-form-label col-form-label-sm">
                                 Link and Password
@@ -114,6 +136,12 @@ export default class Uploaded extends React.Component {
                                         <button id="linkpw-copy" onClick={this.copyHandler} type="button" className="btn input-group-text" data-for="copy-tip" data-tip>
                                             <Octicon icon={Clippy} />
                                         </button>
+                                        <button id="linkpw-qr" onClick={this.qrHandler} type="button" className="btn input-group-text">
+                                            <Octicon icon={ScreenFull} />
+                                        </button>
+                                        <button id="linkpw-share" onClick={this.shareHandler} type="button" className="btn input-group-text">
+                                            <Octicon icon={LinkExternal} />
+                                        </button>
                                     </div>
                                     <input className="form-control form-control-sm" id="linkpassword" type="text" ref="linkpassword" placeholder="Link and passwod" readOnly aria-describedby="linkpasswordHelp"
                                         value={ this.props.history.location.state.location + '#' + this.props.history.location.state.password }
@@ -123,12 +151,6 @@ export default class Uploaded extends React.Component {
                             </div>
                         </div>
                     </form>
-
-                    <div className="text-center">
-                        <button id="share" onClick={this.shareHandler} type="button" className="btn btn-primary">
-                            <Octicon icon={LinkExternal} /> Share
-                        </button>
-                    </div>
 
                     <br />
                     <Alert error={this.state.error} />

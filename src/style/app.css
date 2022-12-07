@@ -170,4 +170,9 @@
     filter: drop-shadow(0 0 2 rgba(0, 0, 0, 0.33));
 }
 
+.dialog {
+    position: absolute;
+    z-index: 999;
+}
+
 @import url('node_modules/bootstrap/dist/css/bootstrap.min.css');
