@@ -16,6 +16,7 @@ import (
 	"gopkg.in/gomail.v2"
 
 	"github.com/lixmal/gdprshare/pkg/database"
+	"github.com/lixmal/gdprshare/pkg/geoip"
 	"github.com/lixmal/gdprshare/pkg/misc"
 )
 
@@ -325,15 +326,26 @@ func (s *Server) downloadFile(c *gin.Context) {
 			return
 		}
 
-		fields := map[string]string{
-			"FileID":            storedFile.FileId,
-			"Addr":              client.Addr,
-			"UserAgent":         client.UserAgent,
-			"SrcTLSVersion":     storedFile.SrcClient.TLSVersion,
-			"SrcTLSCipherSuite": storedFile.SrcClient.TLSCipherSuite,
-			"DstTLSVersion":     client.TLSVersion,
-			"DstTLSCipherSuite": client.TLSCipherSuite,
+		fields := struct {
+			FileID            string
+			Addr              string
+			UserAgent         string
+			SrcTLSVersion     string
+			SrcTLSCipherSuite string
+			DstTLSVersion     string
+			DstTLSCipherSuite string
+			Location          *geoip.Location
+		}{
+			storedFile.FileId,
+			client.Addr,
+			client.UserAgent,
+			storedFile.SrcClient.TLSVersion,
+			storedFile.SrcClient.TLSCipherSuite,
+			client.TLSVersion,
+			client.TLSCipherSuite,
+			client.Location,
 		}
+
 		var body strings.Builder
 		if err := templ.Execute(&body, fields); err != nil {
 			log.Printf("Failed to execute mail body template: %s", err)
@@ -467,9 +479,19 @@ func (s *Server) setStats(c *gin.Context) {
 
 func (s *Server) getClientInfo(c *gin.Context) *database.Client {
 	var addr, ua, tlsversion, tlscipher string
+	var location *geoip.Location
+	var err error
+
 	if s.config.SaveClientInfo {
 		addr = c.ClientIP()
 		ua = c.Request.Header.Get("User-Agent")
+
+		if s.config.GeoIPPath != "" {
+			location, err = geoip.LookupIP(s.config.GeoIPPath, addr)
+			if err != nil {
+				log.Printf("Failed to lookup geo ip: %s", err)
+			}
+		}
 	} else {
 		ua = "none"
 	}
@@ -487,5 +509,6 @@ func (s *Server) getClientInfo(c *gin.Context) *database.Client {
 		UserAgent:      ua,
 		TLSVersion:     tlsversion,
 		TLSCipherSuite: tlscipher,
+		Location:       location,
 	}
 }

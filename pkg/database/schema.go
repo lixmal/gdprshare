@@ -4,6 +4,8 @@ import (
 	"mime/multipart"
 
 	"github.com/jinzhu/gorm"
+
+	"github.com/lixmal/gdprshare/pkg/geoip"
 )
 
 type Client struct {
@@ -13,6 +15,7 @@ type Client struct {
 	UserAgent      string
 	TLSVersion     string
 	TLSCipherSuite string
+	Location       *geoip.Location
 }
 
 type DstClient struct {

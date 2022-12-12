@@ -2,9 +2,10 @@ package config
 
 import (
 	"fmt"
-	"github.com/jinzhu/configor"
 	"os"
 	"text/template"
+
+	"github.com/jinzhu/configor"
 )
 
 type Config struct {
@@ -36,6 +37,7 @@ type Config struct {
 	}
 	SaveClientInfo bool `default:"false"`
 	PasswordLength int  `default:"12"`
+	GeoIPPath      string
 }
 
 func Default() *Config {
