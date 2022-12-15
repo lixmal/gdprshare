@@ -24,6 +24,7 @@ window.gdprshare = {}
 gdprshare.config = {
     maxFileSize: 25,
     passwordLength: 12,
+    contentMaxLength: 1024,
     saveFiles: true,
     apiPrefix: '/api/v1',
     apiUrl: '/api/v1/files',

@@ -17,6 +17,7 @@ export default class Upload extends React.Component {
         this.handleDrop = this.handleDrop.bind(this)
         this.handleDragOn = this.handleDragOn.bind(this)
         this.handleDragOff = this.handleDragOff.bind(this)
+        this.handleTypeToggle = this.handleTypeToggle.bind(this)
         this.uploadFile = this.uploadFile.bind(this)
         this.reGenPassword = this.reGenPassword.bind(this)
         this.updateValidity = this.updateValidity.bind(this)
@@ -26,6 +27,7 @@ export default class Upload extends React.Component {
             mask: false,
             copy: null,
             fileInfo: null,
+            type: 'file',
         }
     }
 
@@ -126,7 +128,7 @@ export default class Upload extends React.Component {
         var val = btn.parentNode.nextSibling.value = this.genPassword(gdprshare.config.passwordLength)
     }
 
-    uploadFile(data, filename) {
+    uploadFile(data, encFilename, plainFilename) {
         var formData = new FormData()
         var file = new File(
             [data],
@@ -136,8 +138,9 @@ export default class Upload extends React.Component {
         )
 
         var email = this.refs.email.value
-        formData.append('file', file, filename)
-        formData.append('filename', filename)
+        formData.append('type', this.state.type)
+        formData.append('file', file, encFilename)
+        formData.append('filename', encFilename)
         formData.append('count', this.refs.count.value)
         formData.append('expiry', this.refs.expiry.value)
         formData.append('email', email)
@@ -161,13 +164,12 @@ export default class Upload extends React.Component {
 
                     if (!files) files = {}
 
-                    var filename = this.refs.file.files[0].name
                     var password = this.refs.password.value
                     var loc = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + response.headers.get('Location')
 
                     if (gdprshare.config.saveFiles) {
                         files[data.fileId] = {
-                            filename: filename,
+                            filename: plainFilename,
                             fileId: data.fileId,
                             ownerToken: data.ownerToken,
                             location: loc + '#' + password,
@@ -186,7 +188,7 @@ export default class Upload extends React.Component {
                         {
                             location: loc,
                             // unencrypted filename
-                            filename: this.refs.file.files[0].name,
+                            filename: plainFilename,
                             password: password,
                             count: this.refs.count.value,
                         }
@@ -236,7 +238,6 @@ export default class Upload extends React.Component {
             return
 
         this.refs.file.files = files
-        //this.handleUpload(event)
         this.refs.submit.click()
     }
 
@@ -252,7 +253,17 @@ export default class Upload extends React.Component {
 
         var password = this.refs.password.value
         var salt = window.crypto.getRandomValues(new Uint8Array(32))
-        var file = this.refs.file.files[0]
+
+        let file
+        if (this.state.type === 'text') {
+            let text = this.refs.text.value
+            // using first few chars as filename for recognizability
+            // TODO: sanitize for usage in file names
+            file = new File([text], text.slice(0, 21) + '.txt',  { type: 'text/plain' })
+        }
+        else {
+            file = this.refs.file.files[0]
+        }
 
         // encryption of filename
         this.encrypt(new TextEncoder().encode(file.name), salt, password, function (cipherText) {
@@ -261,8 +272,8 @@ export default class Upload extends React.Component {
             var reader = new FileReader()
             reader.onload = function () {
                 // encryption of file
-                this.encrypt(reader.result, salt, password, function (clearText) {
-                    this.uploadFile(clearText, filename)
+                this.encrypt(reader.result, salt, password, function (cipherText) {
+                    this.uploadFile(cipherText, filename, file.name)
                 }.bind(this))
             }.bind(this)
             reader.readAsArrayBuffer(file)
@@ -370,6 +381,13 @@ export default class Upload extends React.Component {
         })
     }
 
+    handleTypeToggle(event) {
+        var cb = event.currentTarget
+        this.setState({
+            type: cb.checked ? 'text' : 'file'
+        })
+    }
+
     render() {
         var savedFiles = []
         var files = {}
@@ -458,6 +476,27 @@ export default class Upload extends React.Component {
             )
         }
 
+        let contentInput
+        if (this.state.type === 'file') {
+            contentInput = (
+                <div className="col-sm-9">
+                    <div className="custom-file">
+                        <input className="custom-file-input form-control form-control-sm" id="content" type="file" ref="file" onChange={this.handleFile} required autoFocus />
+                        <label className="custom-file-label col-form-label col-form-label-sm" htmlFor="file">
+                            Select or drop file
+                        </label>
+                    </div>
+                </div>
+            )
+        }
+        else {
+            contentInput = (
+                <div className="col-sm-9">
+                    <textarea className="form-control" id="text" ref="text" rows="2" maxLength={gdprshare.config.contentMaxLength}/>
+                </div>
+            )
+        }
+
         return (
             <div className={'container-fluid col-sm-' + colWidth}>
                 <div className={this.outerClasses()}>
@@ -472,17 +511,12 @@ export default class Upload extends React.Component {
                             </div>
                             <form ref="form" className={this.innerClasses()} onSubmit={this.handleUpload}>
                                 <div className="form-group row">
-                                    <label htmlFor="file" className="col-sm-3 col-form-label col-form-label-sm">
-                                        File
+                                    <label className="col-sm-3 col-form-label col-form-label-sm toggle">
+                                        <input type="checkbox" id="type" ref="type" onChange={this.handleTypeToggle}/>
+                                        <span className="slider"></span>
+                                        <span className="labels" data-on="File" data-off="Text"></span>
                                     </label>
-                                    <div className="col-sm-9">
-                                        <div className="custom-file">
-                                            <input className="custom-file-input form-control form-control-sm" id="file" type="file" ref="file" onChange={this.handleFile} required autoFocus />
-                                            <label className="custom-file-label col-form-label col-form-label-sm" htmlFor="file">
-                                                Select or drop file
-                                            </label>
-                                        </div>
-                                    </div>
+                                    {contentInput}
                                 </div>
 
                                 <div>
@@ -504,7 +538,7 @@ export default class Upload extends React.Component {
                                         </label>
                                         <div className="col-sm-9">
                                             <input className="form-control form-control-sm" className="form-control form-control-sm" id="count" type="number" ref="count" min="1" max="15" defaultValue="1" required aria-describedby="countHelp" />
-                                            <small id="countHelp" className="form-text text-muted">Maximum number of downloads before file is deleted</small>
+                                            <small id="countHelp" className="form-text text-muted">Maximum number of downloads before file expires</small>
                                         </div>
                                     </div>
 
@@ -514,7 +548,7 @@ export default class Upload extends React.Component {
                                         </label>
                                         <div className="col-sm-9">
                                             <input className="form-control form-control-sm" id="expiry" type="number" ref="expiry" min="1" max="14" defaultValue="7" required aria-describedby="expiryHelp" />
-                                            <small id="expiryHelp" className="form-text text-muted">Maximum days before file is deleted</small>
+                                            <small id="expiryHelp" className="form-text text-muted">Maximum days before file expires</small>
                                         </div>
                                     </div>
                                 </div>

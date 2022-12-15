@@ -3,18 +3,22 @@ import { Link } from 'react-router-dom'
 import Classnames from 'classnames'
 import Alert from './Alert'
 import Success from './Success'
+import Modal from 'react-modal'
 
 export default class Download extends React.Component {
     constructor() {
         super()
         this.handleDownload = this.handleDownload.bind(this)
         this.downloadFile = this.downloadFile.bind(this)
+        this.closeModal = this.closeModal.bind(this)
 
         this.state = {
             error: null,
             mask: false,
             direct: false,
             finished: false,
+            modalContent: null,
+            modalOpen: false,
         }
     }
 
@@ -35,6 +39,13 @@ export default class Download extends React.Component {
         return Classnames({
             'app-outer': true,
             'loading-mask': this.state.mask,
+        })
+    }
+
+    closeModal() {
+        this.setState({
+            modalOpen: false,
+            modalContent: null,
         })
     }
 
@@ -87,17 +98,17 @@ export default class Download extends React.Component {
             new TextEncoder().encode(password),
             { name: 'PBKDF2' },
             false,
-            [ 'deriveBits', 'deriveKey' ]
+            ['deriveBits', 'deriveKey']
         ).then(function (keyMaterial) {
             gdprshare.deriveKey(keyMaterial, salt, function (key) {
-                var iv = cipherText.slice(0,12)
-                var cipherT  = cipherText.slice(12)
+                var iv = cipherText.slice(0, 12)
+                var cipherT = cipherText.slice(12)
                 var gcmParams = {
                     name: 'aes-gcm',
                     iv: iv,
                 }
 
-                window.crypto.subtle.decrypt(gcmParams, key, cipherT).then(callback, function(error) {
+                window.crypto.subtle.decrypt(gcmParams, key, cipherT).then(callback, function (error) {
                     console.log(error)
                     var err = error.toString()
                     if (err === 'OperationError')
@@ -132,23 +143,33 @@ export default class Download extends React.Component {
             method: 'GET',
         }).then(function (response) {
             if (response.ok) {
+                let type = response.headers.get('X-Type')
+
                 var buf = Buffer.from(response.headers.get('X-Filename'), 'base64')
-                var salt = buf.slice(0,32)
-                var filename  = buf.slice(32)
+                var salt = buf.slice(0, 32)
+                var filename = buf.slice(32)
 
-                // decryption of filename
-                this.decrypt(filename, salt, password, function (clearText) {
-                    var filename = new TextDecoder().decode(clearText)
-
-                    response.arrayBuffer().then(function (file) {
-                        this.decrypt(file, salt, password, function(clearText) {
-                            this.downloadFile(clearText, filename)
-                        }.bind(this), gdprshare.rejecterr.bind(this))
+                response.arrayBuffer().then(function (file) {
+                    // decryption of file
+                    this.decrypt(file, salt, password, function (fileClearText) {
+                        if (type === 'text') {
+                            this.setState({
+                                modalContent: new TextDecoder().decode(fileClearText),
+                                modalOpen: true,
+                            })
+                        }
+                        else {
+                            // decryption of filename and download
+                            this.decrypt(filename, salt, password, function (clearText) {
+                                var filename = new TextDecoder().decode(clearText)
+                                this.downloadFile(fileClearText, filename)
+                            }.bind(this), gdprshare.rejecterr.bind(this))
+                        }
                     }.bind(this), gdprshare.rejecterr.bind(this))
                 }.bind(this), gdprshare.rejecterr.bind(this))
             }
             else {
-                response.clone().json().then(function(data) {
+                response.clone().json().then(function (data) {
                     this.setState({
                         error: data.message,
                     })
@@ -167,11 +188,11 @@ export default class Download extends React.Component {
                 <div className="form-group row">
                     <label htmlFor="password" className="col-sm-3 col-form-label">Password</label>
                     <div className="col-sm-9">
-                        <input className="form-control" id="password" type="password" ref="password" placeholder="Password" maxLength="255" autoFocus required/>
+                        <input className="form-control" id="password" type="password" ref="password" placeholder="Password" maxLength="255" autoFocus required />
                     </div>
                 </div>
                 <div className="text-center col-sm-12">
-                    <input type="submit" className="btn btn-primary" value="Download"/>
+                    <input type="submit" className="btn btn-primary" value="Download" />
                 </div>
             </form>
         )
@@ -180,17 +201,29 @@ export default class Download extends React.Component {
             <div className="container-fluid col-sm-4">
                 <div className={this.classes()}>
                     <h4 className="text-center">GDPRShare Download</h4>
-                    { this.state.direct || this.state.finished ? null : form }
+                    {this.state.direct || this.state.finished ? null : form}
 
                     <br />
-                    { this.state.finished && <Success message="Successfully downloaded, check your download folder" /> }
+                    {this.state.finished && <Success message="Successfully downloaded, check your download folder" />}
                     <Alert error={this.state.error} />
 
                     <div className="text-center col-sm-12">
                         <Link to="/">Upload new file</Link>
                     </div>
                 </div>
-            </div>
+                <Modal isOpen={this.state.modalOpen}>
+                    <div className="card">
+                        <div className="card-body">
+                            <p className="r-modal">
+                                {this.state.modalContent}
+                            </p>
+                        </div>
+                    </div>
+                    <button className="col-sm-1 btn btn-primary" onClick={this.closeModal}>
+                        Close
+                    </button>
+                </Modal>
+            </div >
         )
     }
 }

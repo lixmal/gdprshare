@@ -24,6 +24,7 @@ type DstClient struct {
 
 type StoredFile struct {
 	gorm.Model
+	Type       string                `form:"type"                               binding:"omitempty,printascii,min=1,max=255"`
 	FileId     string                `form:"-"        gorm:"not null"`
 	OwnerToken string                `form:"-"`
 	File       *multipart.FileHeader `form:"file"     gorm:"-"                  binding:"required"`

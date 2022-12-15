@@ -308,6 +308,7 @@ func (s *Server) downloadFile(c *gin.Context) {
 		filename = storedFile.Name
 	}
 	c.Header("X-Filename", filename)
+	c.Header("X-Type", storedFile.Type)
 	c.FileAttachment(path, filename)
 
 	if storedFile.Count < 1 {
