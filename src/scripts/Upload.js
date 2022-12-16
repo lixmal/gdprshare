@@ -492,7 +492,7 @@ export default class Upload extends React.Component {
         else {
             contentInput = (
                 <div className="col-sm-9">
-                    <textarea className="form-control" id="text" ref="text" rows="2" maxLength={gdprshare.config.contentMaxLength}/>
+                    <textarea className="form-control" id="text" ref="text" rows="2" minLength="3" maxLength={gdprshare.config.contentMaxLength} required />
                 </div>
             )
         }
@@ -526,7 +526,7 @@ export default class Upload extends React.Component {
                                         </label>
                                         <div className="col-sm-9">
                                             <input className="form-control form-control-sm" id="email" type="email" ref="email" placeholder="Enter email (optional)" maxLength="255" aria-describedby="emailHelp"
-                                                defaultValue={window.localStorage.getItem('email')}
+                                                defaultValue={window.localStorage.getItem('email')} minLength="6"
                                             />
                                             <small id="emailHelp" className="form-text text-muted">Email to receive download notifications</small>
                                         </div>
@@ -565,7 +565,7 @@ export default class Upload extends React.Component {
                                                 </button>
                                             </div>
                                             <input className="form-control form-control-sm" id="password" type="text" ref="password" placeholder="Password" maxLength="255"
-                                                defaultValue={this.genPassword(gdprshare.config.passwordLength)} required
+                                                defaultValue={this.genPassword(gdprshare.config.passwordLength)} required minLength="10"
                                             />
                                         </div>
                                     </div>
