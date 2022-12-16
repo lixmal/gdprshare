@@ -528,7 +528,7 @@ export default class Upload extends React.Component {
                                             <input className="form-control form-control-sm" id="email" type="email" ref="email" placeholder="Enter email (optional)" maxLength="255" aria-describedby="emailHelp"
                                                 defaultValue={window.localStorage.getItem('email')}
                                             />
-                                            <small id="emailHelp" className="form-text text-muted">Email address to receive download notifications</small>
+                                            <small id="emailHelp" className="form-text text-muted">Email to receive download notifications</small>
                                         </div>
                                     </div>
 
@@ -537,8 +537,8 @@ export default class Upload extends React.Component {
                                             Count
                                         </label>
                                         <div className="col-sm-9">
-                                            <input className="form-control form-control-sm" className="form-control form-control-sm" id="count" type="number" ref="count" min="1" max="15" defaultValue="1" required aria-describedby="countHelp" />
-                                            <small id="countHelp" className="form-text text-muted">Maximum number of downloads before file expires</small>
+                                            <input className="form-control form-control-sm" id="count" type="number" ref="count" min="1" max="15" defaultValue="1" required aria-describedby="countHelp" />
+                                            <small id="countHelp" className="form-text text-muted">Maximum downloads before link expires</small>
                                         </div>
                                     </div>
 
@@ -548,7 +548,7 @@ export default class Upload extends React.Component {
                                         </label>
                                         <div className="col-sm-9">
                                             <input className="form-control form-control-sm" id="expiry" type="number" ref="expiry" min="1" max="14" defaultValue="7" required aria-describedby="expiryHelp" />
-                                            <small id="expiryHelp" className="form-text text-muted">Maximum days before file expires</small>
+                                            <small id="expiryHelp" className="form-text text-muted">Maximum days before link expires</small>
                                         </div>
                                     </div>
                                 </div>
