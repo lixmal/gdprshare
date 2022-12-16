@@ -65,7 +65,7 @@ export default class Upload extends React.Component {
             method: 'POST',
             body: JSON.stringify(fileIds),
         }).then(function (response) {
-            response.clone().json().then(function(data) {
+            response.clone().json().then(function (data) {
                 if (response.ok) {
                     this.setState({
                         fileInfo: data.fileInfo
@@ -109,9 +109,9 @@ export default class Upload extends React.Component {
             var array = new Uint16Array(length)
             window.crypto.getRandomValues(array)
             var array = Array.apply([], array)
-            array = array.filter(function(x) {
+            array = array.filter(function (x) {
                 // -.0-9A-Za-z
-                return x >= 45 && x <=46 || x >= 48 && x<=57 || x >= 65 && x<= 90 || x >= 97 && x <= 122
+                return x >= 45 && x <= 46 || x >= 48 && x <= 57 || x >= 65 && x <= 90 || x >= 97 && x <= 122
             })
             return String.fromCharCode.apply(String, array)
         }
@@ -151,7 +151,7 @@ export default class Upload extends React.Component {
             method: 'POST',
             body: formData,
         }).then(function (response) {
-            response.clone().json().then(function(data) {
+            response.clone().json().then(function (data) {
                 if (response.ok) {
                     var files = {}
 
@@ -210,7 +210,7 @@ export default class Upload extends React.Component {
             new TextEncoder().encode(password),
             { name: 'PBKDF2' },
             false,
-            [ 'deriveBits', 'deriveKey' ]
+            ['deriveBits', 'deriveKey']
         ).then(function (keyMaterial) {
             gdprshare.deriveKey(keyMaterial, salt, function (key) {
                 var iv = window.crypto.getRandomValues(new Uint8Array(12))
@@ -218,7 +218,7 @@ export default class Upload extends React.Component {
                     name: 'aes-gcm',
                     iv: iv,
                 }
-                window.crypto.subtle.encrypt(gcmParams, key, clearText).then(function(cipherText) {
+                window.crypto.subtle.encrypt(gcmParams, key, clearText).then(function (cipherText) {
                     callback(Buffer.concat([iv, Buffer.from(cipherText)]))
                 }.bind(this), gdprshare.rejecterr.bind(this))
             }.bind(this))
@@ -259,7 +259,7 @@ export default class Upload extends React.Component {
             let text = this.refs.text.value
             // using first few chars as filename for recognizability
             // TODO: sanitize for usage in file names
-            file = new File([text], text.slice(0, 21) + '.txt',  { type: 'text/plain' })
+            file = new File([text], text.slice(0, 21) + '.txt', { type: 'text/plain' })
         }
         else {
             file = this.refs.file.files[0]
@@ -331,7 +331,7 @@ export default class Upload extends React.Component {
                 this.deleteFileId(fileId)
             }
             else {
-                response.clone().json().then(function(data) {
+                response.clone().json().then(function (data) {
                     console.log(data.message)
                     this.setState({
                         error: data.message,
@@ -415,7 +415,7 @@ export default class Upload extends React.Component {
                     let expiryDate = new Date(file.expiryDate)
                     // go's time.Time zero value
                     let isInitDate = expiryDate.getTime() == new Date('0001-01-01T00:00:00Z').getTime()
-                    let isExpired = isInitDate || file.count < 1  || Date.now() > expiryDate
+                    let isExpired = isInitDate || file.count < 1 || Date.now() > expiryDate
 
                     let text
                     let classes
@@ -512,7 +512,7 @@ export default class Upload extends React.Component {
                             <form ref="form" className={this.innerClasses()} onSubmit={this.handleUpload}>
                                 <div className="form-group row">
                                     <label className="col-sm-3 col-form-label col-form-label-sm toggle">
-                                        <input type="checkbox" id="type" ref="type" onChange={this.handleTypeToggle}/>
+                                        <input type="checkbox" id="type" ref="type" onChange={this.handleTypeToggle} />
                                         <span className="slider"></span>
                                         <span className="labels" data-on="File" data-off="Text"></span>
                                     </label>
@@ -571,7 +571,7 @@ export default class Upload extends React.Component {
                                     </div>
                                 </div>
                                 <div className="text-center col-sm-12">
-                                    <input type="submit" ref="submit" className="btn btn-primary" value="Upload"/>
+                                    <input type="submit" ref="submit" className="btn btn-primary" value="Upload" />
                                 </div>
                             </form>
 
