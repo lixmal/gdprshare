@@ -58,6 +58,7 @@ func setupRoutes(router *gin.Engine, srv *Server) {
 	v1.GET("/config", srv.getConfig)
 	v1.POST("/files", srv.uploadFile)
 	v1.GET("/files/:fileId", srv.downloadFile)
+	v1.POST("/files/:fileId", srv.confirmReceipt)
 	v1.DELETE("/files/:fileId", srv.deleteFile)
 	v1.POST("/files/validate", srv.validateFiles)
 }

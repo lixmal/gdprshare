@@ -15,7 +15,7 @@ type Client struct {
 	UserAgent      string
 	TLSVersion     string
 	TLSCipherSuite string
-	Location       *geoip.Location
+	Location       *geoip.Location `gorm:"-"`
 }
 
 type DstClient struct {
@@ -34,7 +34,7 @@ type StoredFile struct {
 	Expiry     uint                  `form:"expiry"   gorm:"default:14"         binding:"omitempty,min=1,max=14"`
 	Count      uint                  `form:"count"    gorm:"default:1"          binding:"omitempty,min=1,max=15"`
 	SrcClient  *Client               `form:"-"`
-	DstClients []DstClient           `form:"-"`
+	DstClients []*DstClient          `form:"-"`
 }
 
 type Stats struct {

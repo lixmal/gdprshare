@@ -142,6 +142,13 @@ gdprshare.handleTipContent = function () {
     return this.state.copy
 }
 
+gdprshare.confirmReceipt = function (fileId) {
+    window.fetch(gdprshare.config.apiUrl + '/' + fileId, {
+        method: 'POST',
+    }, function (error) {
+        console.log(error)
+    })
+}
 
 ReactDOM.render(
     <Router history={history}>

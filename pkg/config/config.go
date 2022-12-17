@@ -23,13 +23,14 @@ type Config struct {
 		Args   string `default:"gdprshare.db"`
 	}
 	Mail struct {
-		SmtpHost string `default:"localhost"`
-		SmtpPort uint16 `default:"25"`
-		SmtpUser string
-		SmtpPass string
-		From     string `default:"root@localhost"`
-		Subject  string `default:"File was downloaded: %s"`
-		Body     string `default:"File with id {{.FileID}} was downloaded."`
+		SmtpHost       string `default:"localhost"`
+		SmtpPort       uint16 `default:"25"`
+		SmtpUser       string
+		SmtpPass       string
+		From           string `default:"root@localhost"`
+		Subject        string `default:"File has been accessed: %s"`
+		SubjectReceipt string `default:"File download confirmed: %s"`
+		Body           string `default:"File with id {{.FileID}} has been downlowded."`
 	}
 	Header struct {
 		TLSVersion     string `default:"X-TLS-Version"`

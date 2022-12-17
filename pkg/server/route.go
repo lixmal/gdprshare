@@ -52,7 +52,7 @@ func (s *Server) uploadFile(c *gin.Context) {
 
 	name, err := uuid.NewV4()
 	if err != nil {
-		log.Printf("Failed to create uuid: %s", err)
+		log.Printf("Failed to create uuid: %s\n", err)
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -65,7 +65,7 @@ func (s *Server) uploadFile(c *gin.Context) {
 
 	fileId, err := misc.GenToken(s.config.IDLength)
 	if err != nil {
-		log.Printf("Failed to generate file ID: %s", err)
+		log.Printf("Failed to generate file ID: %s\n", err)
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -77,7 +77,7 @@ func (s *Server) uploadFile(c *gin.Context) {
 
 	ownerToken, err := misc.GenToken(OwnerTokenLen)
 	if err != nil {
-		log.Printf("Failed to generate file ID: %s", err)
+		log.Printf("Failed to generate file ID: %s\n", err)
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -89,7 +89,7 @@ func (s *Server) uploadFile(c *gin.Context) {
 
 	tx := s.db.Begin()
 	if err = tx.Error; err != nil {
-		log.Printf("Failed to begin transaction: %s", err)
+		log.Printf("Failed to begin transaction: %s\n", err)
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -106,9 +106,9 @@ func (s *Server) uploadFile(c *gin.Context) {
 	storedFile.SrcClient = s.getClientInfo(c)
 
 	if err = tx.Create(&storedFile).Error; err != nil {
-		log.Printf("Failed to create file in database: %s", err)
+		log.Printf("Failed to create file in database: %s\n", err)
 		if err = tx.Rollback().Error; err != nil {
-			log.Printf("Failed to rollback: %s", err)
+			log.Printf("Failed to rollback: %s\n", err)
 		}
 		c.JSON(
 			http.StatusInternalServerError,
@@ -121,9 +121,9 @@ func (s *Server) uploadFile(c *gin.Context) {
 
 	path := filepath.Join(s.config.StorePath, namestr)
 	if err := c.SaveUploadedFile(storedFile.File, path); err != nil {
-		log.Printf("Failed to save file: %s", err)
+		log.Printf("Failed to save file: %s\n", err)
 		if err = tx.Rollback().Error; err != nil {
-			log.Printf("Failed to rollback: %s", err)
+			log.Printf("Failed to rollback: %s\n", err)
 		}
 		c.JSON(
 			http.StatusInternalServerError,
@@ -135,10 +135,10 @@ func (s *Server) uploadFile(c *gin.Context) {
 	}
 
 	if err = tx.Commit().Error; err != nil {
-		log.Printf("Failed to commit: %s", err)
+		log.Printf("Failed to commit: %s\n", err)
 
 		if err = os.Remove(path); err != nil {
-			log.Printf("Failed to remove file %s: %s", path, err)
+			log.Printf("Failed to remove file %s: %s\n", path, err)
 		}
 		c.JSON(
 			http.StatusInternalServerError,
@@ -203,65 +203,20 @@ func (s *Server) validateFiles(c *gin.Context) {
 }
 
 func (s *Server) downloadFile(c *gin.Context) {
-	var f FileId
-	if err := c.ShouldBindUri(&f); err != nil {
-		// TODO: get FieldError and return relevant part only
-		c.JSON(
-			http.StatusBadRequest,
-			gin.H{
-				"message": err.Error(),
-			},
-		)
-		return
-	}
-	fileId := f.FileId
-
-	var storedFile database.StoredFile
-	if err := s.db.Where(&database.StoredFile{FileId: fileId}).Find(&storedFile).Error; err != nil {
-		log.Printf("Failed to find file with id %s in database: %s\n", fileId, err)
-		c.JSON(
-			http.StatusNotFound,
-			gin.H{
-				"message": "file not found or download limit exceeded",
-			},
-		)
+	fileId, err := bindFileID(c)
+	if err != nil {
 		return
 	}
 
-	var srcclient database.Client
-	if err := s.db.Model(&storedFile).Related(&srcclient).Error; err != nil {
-		log.Printf("Failed to access src client of file with id %s in database: %s\n", fileId, err)
-		c.JSON(
-			http.StatusNotFound,
-			gin.H{
-				"message": "file retrieval error",
-			},
-		)
+	storedFile, err := s.getStoredFile(fileId, c)
+	if err != nil {
+		fmt.Printf("Failed to retrieve file with ID %s: %s\n", fileId, err)
 		return
 	}
-	storedFile.SrcClient = &srcclient
-
-	var dstclients []database.DstClient
-	if err := s.db.Model(&storedFile).Related(&dstclients).Error; err != nil {
-		log.Printf("Failed to access dst clients of file with id %s in database: %s\n", fileId, err)
-		c.JSON(
-			http.StatusNotFound,
-			gin.H{
-				"message": "file retrieval error",
-			},
-		)
-		return
-	}
-	storedFile.DstClients = dstclients
 
 	path := filepath.Join(s.config.StorePath, storedFile.Name)
 
 	if storedFile.Count < 1 {
-		if errs := misc.DeleteStoredFile(&storedFile, s.db, s.config); len(errs) > 0 {
-			for _, err := range errs {
-				log.Printf("%s\n", err)
-			}
-		}
 		c.JSON(
 			http.StatusNotFound,
 			gin.H{
@@ -278,10 +233,6 @@ func (s *Server) downloadFile(c *gin.Context) {
 			log.Printf("File with id %s is a directory\n", fileId)
 		}
 
-		if err = s.db.Delete(&storedFile).Error; err != nil {
-			log.Printf("Failed to delete file with id %s from database: %s\n", fileId, err)
-		}
-
 		c.JSON(
 			http.StatusNotFound,
 			gin.H{
@@ -294,8 +245,9 @@ func (s *Server) downloadFile(c *gin.Context) {
 	client := database.DstClient{Client: *s.getClientInfo(c)}
 	storedFile.DstClients = append(
 		storedFile.DstClients,
-		client,
+		&client,
 	)
+
 	storedFile.Count--
 	if err := s.db.Save(&storedFile).Error; err != nil {
 		log.Printf("Failed to save decreased count on file with id %s: %s\n", fileId, err)
@@ -312,79 +264,52 @@ func (s *Server) downloadFile(c *gin.Context) {
 	c.FileAttachment(path, filename)
 
 	if storedFile.Count < 1 {
-		if err := s.db.Delete(&storedFile).Error; err != nil {
-			log.Printf("Failed to delete file with id %s from database: %s\n", fileId, err)
-		}
+		// Remove actual file only, db entry will be deleted on confirmation
 		if err := os.Remove(path); err != nil {
 			log.Printf("Failed to delete file with id %s from storage: %s\n", fileId, err)
 		}
 	}
 
 	if storedFile.Email != "" {
-		templ, err := template.New("mailbody").Parse(s.config.Mail.Body)
-		if err != nil {
-			log.Printf("Failed to parse mail body template: %s", err)
-			return
+		if err := s.sendMail(s.config.Mail.Subject, storedFile, &client); err != nil {
+			log.Printf("Failed to send access mail for ID %s: %s\n", fileId, err)
 		}
+	}
+}
 
-		fields := struct {
-			FileID            string
-			Addr              string
-			UserAgent         string
-			SrcTLSVersion     string
-			SrcTLSCipherSuite string
-			DstTLSVersion     string
-			DstTLSCipherSuite string
-			Location          *geoip.Location
-		}{
-			storedFile.FileId,
-			client.Addr,
-			client.UserAgent,
-			storedFile.SrcClient.TLSVersion,
-			storedFile.SrcClient.TLSCipherSuite,
-			client.TLSVersion,
-			client.TLSCipherSuite,
-			client.Location,
+func (s *Server) confirmReceipt(c *gin.Context) {
+	fileId, err := bindFileID(c)
+	if err != nil {
+		return
+	}
+
+	storedFile, err := s.getStoredFile(fileId, c)
+	if err != nil {
+		fmt.Printf("Failed to retrieve file with ID %s: %s\n", fileId, err)
+		return
+	}
+
+	if storedFile.Count < 1 {
+		// File already deleted from storage by download handler, so we're taking care of the db now
+		if err := s.db.Delete(storedFile).Error; err != nil {
+			log.Printf("Failed to delete file with id %s from database: %s\n", fileId, err)
 		}
+	}
 
-		var body strings.Builder
-		if err := templ.Execute(&body, fields); err != nil {
-			log.Printf("Failed to execute mail body template: %s", err)
-			return
-		}
-
-		msg := gomail.NewMessage()
-		msg.SetHeader("From", s.config.Mail.From)
-		msg.SetHeader("To", storedFile.Email)
-		msg.SetHeader(
-			"Subject",
-			fmt.Sprintf(
-				s.config.Mail.Subject,
-				fileId,
-			),
-		)
-		msg.SetBody("text/plain", body.String())
-
-		dialer := gomail.NewDialer(s.config.Mail.SmtpHost, int(s.config.Mail.SmtpPort), s.config.Mail.SmtpUser, s.config.Mail.SmtpPass)
-
-		if err := dialer.DialAndSend(msg); err != nil {
-			log.Printf("Failed to send mail for file with id %s to %s: %s\n", storedFile.FileId, storedFile.Email, err)
+	if storedFile.Email != "" {
+		client := database.DstClient{Client: *s.getClientInfo(c)}
+		if err := s.sendMail(s.config.Mail.SubjectReceipt, storedFile, &client); err != nil {
+			log.Printf("Failed to send confirmation mail for ID %s: %s\n", fileId, err)
 		}
 	}
 }
 
 func (s *Server) deleteFile(c *gin.Context) {
-	var f FileId
-	if err := c.ShouldBindUri(&f); err != nil {
-		// TODO: get FieldError and return relevant part only
-		c.JSON(
-			http.StatusBadRequest,
-			gin.H{
-				"message": err.Error(),
-			},
-		)
+	fileId, err := bindFileID(c)
+	if err != nil {
 		return
 	}
+
 	var o OwnerToken
 	if err := c.ShouldBind(&o); err != nil {
 		// TODO: get FieldError and return relevant part only
@@ -396,8 +321,6 @@ func (s *Server) deleteFile(c *gin.Context) {
 		)
 		return
 	}
-
-	fileId := f.FileId
 
 	var storedFile database.StoredFile
 	if err := s.db.Where(&database.StoredFile{FileId: fileId}).Find(&storedFile).Error; err != nil {
@@ -460,7 +383,7 @@ func (s *Server) setStats(c *gin.Context) {
 		stats.Client = s.getClientInfo(c)
 	}
 	if err := s.db.Save(&stats).Error; err != nil {
-		log.Printf("Failed to store stats: %s", err)
+		log.Printf("Failed to store stats: %s\n", err)
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -490,7 +413,7 @@ func (s *Server) getClientInfo(c *gin.Context) *database.Client {
 		if s.config.GeoIPPath != "" {
 			location, err = geoip.LookupIP(s.config.GeoIPPath, addr)
 			if err != nil {
-				log.Printf("Failed to lookup geo ip: %s", err)
+				log.Printf("Failed to lookup geo ip: %s\n", err)
 			}
 		}
 	} else {
@@ -512,4 +435,111 @@ func (s *Server) getClientInfo(c *gin.Context) *database.Client {
 		TLSCipherSuite: tlscipher,
 		Location:       location,
 	}
+}
+
+func (s *Server) sendMail(subject string, storedFile *database.StoredFile, client *database.DstClient) error {
+	templ, err := template.New("mailbody").Parse(s.config.Mail.Body)
+	if err != nil {
+		return fmt.Errorf("parse mail body template: %w", err)
+	}
+
+	fields := struct {
+		FileID            string
+		Addr              string
+		UserAgent         string
+		SrcTLSVersion     string
+		SrcTLSCipherSuite string
+		DstTLSVersion     string
+		DstTLSCipherSuite string
+		Location          *geoip.Location
+	}{
+		storedFile.FileId,
+		client.Addr,
+		client.UserAgent,
+		storedFile.SrcClient.TLSVersion,
+		storedFile.SrcClient.TLSCipherSuite,
+		client.TLSVersion,
+		client.TLSCipherSuite,
+		client.Location,
+	}
+
+	var body strings.Builder
+	if err := templ.Execute(&body, fields); err != nil {
+		return fmt.Errorf("execute mail body template: %w", err)
+	}
+
+	msg := gomail.NewMessage()
+	msg.SetHeader("From", s.config.Mail.From)
+	msg.SetHeader("To", storedFile.Email)
+	msg.SetHeader(
+		"Subject",
+		fmt.Sprintf(
+			subject,
+			storedFile.FileId,
+		),
+	)
+	msg.SetBody("text/plain", body.String())
+
+	dialer := gomail.NewDialer(s.config.Mail.SmtpHost, int(s.config.Mail.SmtpPort), s.config.Mail.SmtpUser, s.config.Mail.SmtpPass)
+
+	if err := dialer.DialAndSend(msg); err != nil {
+		return fmt.Errorf("send mail to %s: %w", storedFile.Email, err)
+	}
+
+	return nil
+}
+
+func (s *Server) getStoredFile(fileId string, c *gin.Context) (*database.StoredFile, error) {
+	var storedFile database.StoredFile
+
+	if err := s.db.Where(&database.StoredFile{FileId: fileId}).Find(&storedFile).Error; err != nil {
+		c.JSON(
+			http.StatusNotFound,
+			gin.H{
+				"message": "file not found or download limit exceeded",
+			},
+		)
+		return nil, fmt.Errorf("find file in database: %w", err)
+	}
+
+	var srcclient database.Client
+	if err := s.db.Model(&storedFile).Related(&srcclient).Error; err != nil {
+		c.JSON(
+			http.StatusNotFound,
+			gin.H{
+				"message": "file retrieval error",
+			},
+		)
+		return nil, fmt.Errorf("access src client: %w", err)
+	}
+	storedFile.SrcClient = &srcclient
+
+	var dstclients []*database.DstClient
+	if err := s.db.Model(&storedFile).Related(&dstclients).Error; err != nil {
+		c.JSON(
+			http.StatusNotFound,
+			gin.H{
+				"message": "file retrieval error",
+			},
+		)
+		return nil, fmt.Errorf("access dst clients: %w", err)
+	}
+	storedFile.DstClients = dstclients
+
+	return &storedFile, nil
+}
+
+func bindFileID(c *gin.Context) (string, error) {
+	var f FileId
+	// TODO: get FieldError and return relevant part only
+	if err := c.ShouldBindUri(&f); err != nil {
+		c.JSON(
+			http.StatusBadRequest,
+			gin.H{
+				"message": err.Error(),
+			},
+		)
+		return "", err
+	}
+	return f.FileId, nil
 }

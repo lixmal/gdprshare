@@ -29,10 +29,10 @@ func DeleteStoredFile(f *database.StoredFile, db *database.Database, config *con
 
 	path := filepath.Join(config.StorePath, f.Name)
 	if err := os.Remove(path); err != nil {
-		errors = append(errors, fmt.Errorf("delete file with id %s from storage: %s", f.FileId, err))
+		errors = append(errors, fmt.Errorf("delete file with id %s from storage: %w", f.FileId, err))
 	}
 	if err := db.Delete(&f).Error; err != nil {
-		errors = append(errors, fmt.Errorf("delete file with id %s from database: %s", f.FileId, err))
+		errors = append(errors, fmt.Errorf("delete file with id %s from database: %w", f.FileId, err))
 	}
 
 	return errors

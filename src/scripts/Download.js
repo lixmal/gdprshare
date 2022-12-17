@@ -157,12 +157,15 @@ export default class Download extends React.Component {
                                 modalContent: new TextDecoder().decode(fileClearText),
                                 modalOpen: true,
                             })
+                            gdprshare.confirmReceipt(fileId)
                         }
                         else {
                             // decryption of filename and download
                             this.decrypt(filename, salt, password, function (clearText) {
                                 var filename = new TextDecoder().decode(clearText)
                                 this.downloadFile(fileClearText, filename)
+
+                                gdprshare.confirmReceipt(fileId)
                             }.bind(this), gdprshare.rejecterr.bind(this))
                         }
                     }.bind(this), gdprshare.rejecterr.bind(this))
