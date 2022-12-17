@@ -50,34 +50,41 @@ export default class Download extends React.Component {
     }
 
     downloadFile(data, filename) {
-        var blob = new File([data], filename)
+        try {
+            var blob = new File([data], filename)
 
-        if (typeof window.navigator.msSaveBlob !== 'undefined') {
-            // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created.
-            // These URLs will no longer resolve as the data backing the URL has been freed."
-            window.navigator.msSaveBlob(blob, filename)
-        } else {
-            var URL = window.URL || window.webkitURL
-            var downloadUrl = URL.createObjectURL(blob)
-
-            if (filename) {
-                // use HTML5 a[download] attribute to specify filename
-                var a = document.createElement('a')
-                // safari doesn't support this yet
-                if (typeof a.download === 'undefined') {
-                    window.location = downloadUrl
-                } else {
-                    a.href = downloadUrl
-                    a.download = filename
-                    document.body.appendChild(a)
-                    a.click()
-                }
+            if (typeof window.navigator.msSaveBlob !== 'undefined') {
+                // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created.
+                // These URLs will no longer resolve as the data backing the URL has been freed."
+                window.navigator.msSaveBlob(blob, filename)
             } else {
-                window.location = downloadUrl
-            }
+                var URL = window.URL || window.webkitURL
+                var downloadUrl = URL.createObjectURL(blob)
 
-            setTimeout(function () { URL.revokeObjectURL(downloadUrl) }, 100)
+                if (filename) {
+                    // use HTML5 a[download] attribute to specify filename
+                    var a = document.createElement('a')
+                    // safari doesn't support this yet
+                    if (typeof a.download === 'undefined') {
+                        window.location = downloadUrl
+                    } else {
+                        a.href = downloadUrl
+                        a.download = filename
+                        document.body.appendChild(a)
+                        a.click()
+                    }
+                } else {
+                    window.location = downloadUrl
+                }
+
+                setTimeout(function () { URL.revokeObjectURL(downloadUrl) }, 100)
+            }
+        } catch (e) {
+            console.log(e)
+            return false
         }
+
+        return true
     }
 
     decrypt(cipherText, salt, password, callback) {
@@ -143,21 +150,28 @@ export default class Download extends React.Component {
                                 mask: false,
                                 disableForm: true,
                             })
+
                             gdprshare.confirmReceipt(fileId)
                         }
                         else {
                             // decryption of filename and download
                             this.decrypt(filename, salt, password, function (clearText) {
                                 var filename = new TextDecoder().decode(clearText)
-                                this.downloadFile(fileClearText, filename)
-                                this.setState({
-                                    // no second download allowed
-                                    successful: true,
-                                    mask: false,
-                                    disableForm: true,
-                                })
-
-                                gdprshare.confirmReceipt(fileId)
+                                if (this.downloadFile(fileClearText, filename)) {
+                                    this.setState({
+                                        // no second download allowed
+                                        successful: true,
+                                        mask: false,
+                                        disableForm: true,
+                                    })
+                                    gdprshare.confirmReceipt(fileId)
+                                }
+                                else {
+                                    this.setState({
+                                        error: "Failed to create download",
+                                        mask: false,
+                                    })
+                                }
                             }.bind(this), gdprshare.rejecterr.bind(this))
                         }
                     }.bind(this), gdprshare.rejecterr.bind(this))
