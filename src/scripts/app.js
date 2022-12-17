@@ -63,7 +63,7 @@ var errPage = function () {
 if (!window.crypto || !window.TextEncoder || !window.Promise || !window.File || !window.fetch) {
     errPage()
 }
-// Edge/IE, doesn't support PBKDF2
+// old Edge/IE, doesn't support PBKDF2
 try {
     window.crypto.subtle.importKey(
         'raw',
