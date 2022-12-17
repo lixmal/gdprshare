@@ -15,8 +15,8 @@ export default class Download extends React.Component {
         this.state = {
             error: null,
             mask: false,
-            direct: false,
-            finished: false,
+            disableForm: false,
+            successful: false,
             modalContent: null,
             modalOpen: false,
         }
@@ -28,7 +28,7 @@ export default class Download extends React.Component {
         // don't render password field
         if (password) {
             this.setState({
-                direct: true,
+                disableForm: true,
             })
 
             this.handleDownload(null, password)
@@ -78,11 +78,6 @@ export default class Download extends React.Component {
 
             setTimeout(function () { URL.revokeObjectURL(downloadUrl) }, 100)
         }
-        this.setState({
-            mask: false,
-            // no second download allowed
-            finished: true,
-        })
     }
 
     decrypt(cipherText, salt, password, callback) {
@@ -102,14 +97,10 @@ export default class Download extends React.Component {
                 }
 
                 window.crypto.subtle.decrypt(gcmParams, key, cipherT).then(callback, function (error) {
-                    console.log(error)
-                    var err = error.toString()
-                    if (err === 'OperationError')
-                        err = 'Decryption error. Wrong password?'
-                    this.setState({
-                        error: err,
-                        mask: false,
-                    })
+                    if (error.name === 'OperationError')
+                        error = 'Decryption error. Wrong password?'
+
+                    gdprshare.rejecterr.call(this, error)
                 }.bind(this))
             }.bind(this))
         }.bind(this), gdprshare.rejecterr.bind(this))
@@ -149,6 +140,8 @@ export default class Download extends React.Component {
                             this.setState({
                                 modalContent: new TextDecoder().decode(fileClearText),
                                 modalOpen: true,
+                                mask: false,
+                                disableForm: true,
                             })
                             gdprshare.confirmReceipt(fileId)
                         }
@@ -157,6 +150,12 @@ export default class Download extends React.Component {
                             this.decrypt(filename, salt, password, function (clearText) {
                                 var filename = new TextDecoder().decode(clearText)
                                 this.downloadFile(fileClearText, filename)
+                                this.setState({
+                                    // no second download allowed
+                                    successful: true,
+                                    mask: false,
+                                    disableForm: true,
+                                })
 
                                 gdprshare.confirmReceipt(fileId)
                             }.bind(this), gdprshare.rejecterr.bind(this))
@@ -168,13 +167,10 @@ export default class Download extends React.Component {
                 response.clone().json().then(function (data) {
                     this.setState({
                         error: data.message,
+                        mask: false,
                     })
                 }.bind(this), gdprshare.fetcherr.bind(this, response))
             }
-
-            this.setState({
-                mask: false
-            })
         }.bind(this), gdprshare.rejecterr.bind(this))
     }
 
@@ -197,10 +193,10 @@ export default class Download extends React.Component {
             <div className="container-fluid col-sm-4">
                 <div className={this.classes()}>
                     <h4 className="text-center">GDPRShare Download</h4>
-                    {this.state.direct || this.state.finished ? null : form}
+                    {this.state.disableForm ? null : form}
 
                     <br />
-                    {this.state.finished && <Success message="Successfully downloaded, check your download folder" />}
+                    {this.state.successful && <Success message="Successfully downloaded, check your download folder" />}
                     <Alert error={this.state.error} />
 
                     <div className="text-center col-sm-12">
