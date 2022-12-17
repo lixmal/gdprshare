@@ -179,10 +179,7 @@ export default class Download extends React.Component {
             }
             else {
                 response.clone().json().then(function (data) {
-                    this.setState({
-                        error: data.message,
-                        mask: false,
-                    })
+                    gdprshare.rejecterr.call(this, data.message)
                 }.bind(this), gdprshare.fetcherr.bind(this, response))
             }
         }.bind(this), gdprshare.rejecterr.bind(this))
