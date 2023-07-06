@@ -52,7 +52,7 @@ func New(path string) (*Config, error) {
 	}
 
 	var conf Config
-	if err := configor.Load(&conf, path); err != nil {
+	if err := configor.New(&configor.Config{ErrorOnUnmatchedKeys: true}).Load(&conf, path); err != nil {
 		return nil, fmt.Errorf("parsing config file %s: %s", path, err)
 	}
 
