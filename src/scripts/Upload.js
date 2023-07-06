@@ -21,6 +21,7 @@ export default class Upload extends React.Component {
         this.uploadFile = this.uploadFile.bind(this)
         this.reGenPassword = this.reGenPassword.bind(this)
         this.updateValidity = this.updateValidity.bind(this)
+        this.checkOnlyEEA = this.checkOnlyEEA.bind(this)
 
         this.state = {
             error: null,
@@ -28,6 +29,7 @@ export default class Upload extends React.Component {
             copy: null,
             fileInfo: null,
             type: 'file',
+            onlyEEAChecked: true,
         }
     }
 
@@ -144,6 +146,8 @@ export default class Upload extends React.Component {
         formData.append('count', this.refs.count.value)
         formData.append('expiry', this.refs.expiry.value)
         formData.append('email', email)
+        formData.append('only-eea', this.refs['only-eea'].checked)
+        formData.append('include-other', this.refs['include-other'].checked)
 
         window.localStorage.setItem('email', email)
 
@@ -388,6 +392,14 @@ export default class Upload extends React.Component {
         })
     }
 
+    checkOnlyEEA(event) {
+        console.log(event)
+        var cb = event.currentTarget
+        this.setState({
+            onlyEEAChecked: cb.checked
+        })
+    }
+
     render() {
         var savedFiles = []
         var files = {}
@@ -550,6 +562,29 @@ export default class Upload extends React.Component {
                                             <input className="form-control form-control-sm" id="expiry" type="number" ref="expiry" min="1" max="14" defaultValue="7" required aria-describedby="expiryHelp" />
                                             <small id="expiryHelp" className="form-text text-muted">Maximum days before link expires</small>
                                         </div>
+                                    </div>
+
+                                    <div className="row justify-content-center">
+                                        <div className="form-group form-check form-check-inline" data-tip data-for="only-eea-tip">
+                                            <input className="form-check-input" id="only-eea" type="checkbox" ref="only-eea" defaultChecked={this.state.onlyEEAChecked} onChange={this.checkOnlyEEA}/>
+                                            <label htmlFor="only-eea" className="form-check-label col-form-label-sm">
+                                                Only EU/EEA
+                                            </label>
+                                        </div>
+                                        <ReactTooltip id="only-eea-tip" variant="info" place="bottom">
+                                            Allows downloads only from EEA countries (European Union + Iceland/Norway/Liechtenstein)
+                                        </ReactTooltip>
+
+                                        <div className="form-group form-check form-check-inline" data-tip data-for="include-other-tip">
+                                            <input className="form-check-input" id="include-other" type="checkbox" ref="include-other" disabled={!this.state.onlyEEAChecked}/>
+                                            <label htmlFor="include-other" className="form-check-label col-form-label-sm">
+                                                Include Other
+                                            </label>
+                                        </div>
+                                        <ReactTooltip id="include-other-tip" place="bottom">
+                                            Allows downloads from EEA countries and additionally from countries with similar GDPR laws. <br/>
+                                            Currently: Switzerland, UK, Monaco, Andorra, San Marino, Vatican City
+                                        </ReactTooltip>
                                     </div>
                                 </div>
 

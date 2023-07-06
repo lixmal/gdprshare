@@ -25,7 +25,8 @@ mail:
     smtpuser: ''
     smtppass: ''
     from:     'root@localhost'
-    subject:  'File was downloaded: %s'
+    subject:  'File has been accessed: %s'
+    subjectReceipt: 'File download confirmed: %s'
 
     # available variables:
     #   .FileID
@@ -35,7 +36,15 @@ mail:
     #   .SrcTLSCipherSuite
     #   .DstTLSVersion
     #   .DstTLSCipherSuite
-    body:     'File with id {{.FileID}} was downloaded.'
+    #   .Location.Continent
+    #   .Location.Country
+    #   .Location.Subdivision1
+    #   .Location.Subdivision2
+    #   .Location.City
+    #   .Location.IsEU
+    #   .DeniedMsg
+    body: "File download with id {{.FileID}} has been attempted. {{.DeniedMsg}}"
+    deniedMsg: 'Download was denied.'
 
 
 # headers in case app is behind a reverse proxy
@@ -48,6 +57,9 @@ saveclientinfo: false
 
 # length of password pregenerated on the frontend
 passwordlength: 12
+
+# MaxMind GeoLite2 City database path (mmdb file)
+geoippath: ''
 
 
 # for config via env vars see https://github.com/jinzhu/configor#advanced-usage

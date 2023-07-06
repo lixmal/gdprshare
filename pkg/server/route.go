@@ -242,39 +242,82 @@ func (s *Server) downloadFile(c *gin.Context) {
 		return
 	}
 
-	client := database.DstClient{Client: *s.getClientInfo(c)}
-	storedFile.DstClients = append(
-		storedFile.DstClients,
-		&client,
-	)
+	client := (*database.DstClient)(s.getClientInfo(c))
 
-	storedFile.Count--
-	if err := s.db.Save(&storedFile).Error; err != nil {
-		log.Printf("Failed to save decreased count on file with id %s: %s\n", fileId, err)
-	}
+	allowed := s.isDownloadAllowed(storedFile, client)
 
-	var filename string
-	if storedFile.Filename != "" {
-		filename = storedFile.Filename
-	} else {
-		filename = storedFile.Name
-	}
-	c.Header("X-Filename", filename)
-	c.Header("X-Type", storedFile.Type)
-	c.FileAttachment(path, filename)
+	if allowed {
+		storedFile.DstClients = append(
+			storedFile.DstClients,
+			client,
+		)
 
-	if storedFile.Count < 1 {
-		// Remove actual file only, db entry will be deleted on confirmation
-		if err := os.Remove(path); err != nil {
-			log.Printf("Failed to delete file with id %s from storage: %s\n", fileId, err)
+		storedFile.Count--
+		if err := s.db.Save(&storedFile).Error; err != nil {
+			log.Printf("Failed to save decreased count on file with id %s: %s\n", fileId, err)
 		}
+
+		var filename string
+		if storedFile.Filename != "" {
+			filename = storedFile.Filename
+		} else {
+			filename = storedFile.Name
+		}
+		c.Header("X-Filename", filename)
+		c.Header("X-Type", storedFile.Type)
+		c.FileAttachment(path, filename)
+
+		if storedFile.Count < 1 {
+			// Remove actual file only, db entry will be deleted on confirmation
+			if err := os.Remove(path); err != nil {
+				log.Printf("Failed to delete file with id %s from storage: %s\n", fileId, err)
+			}
+		}
+	} else {
+		c.JSON(
+			http.StatusForbidden,
+			gin.H{
+				"message": "download from this location forbidden",
+			},
+		)
 	}
 
 	if storedFile.Email != "" {
-		if err := s.sendMail(s.config.Mail.Subject, storedFile, &client); err != nil {
+		if err := s.sendMail(s.config.Mail.Subject, storedFile, client, allowed); err != nil {
 			log.Printf("Failed to send access mail for ID %s: %s\n", fileId, err)
 		}
 	}
+}
+
+func (s *Server) isDownloadAllowed(storedFile *database.StoredFile, client *database.DstClient) bool {
+	if !storedFile.OnlyEEA {
+		return true
+	}
+
+	loc := client.Location
+	if loc == nil {
+		return false
+	}
+
+	if loc.IsEU ||
+		loc.Country == "Norway" ||
+		loc.Country == "Liechtenstein" ||
+		loc.Country == "Iceland" {
+
+		return true
+	}
+
+	if storedFile.IncludeOther && (loc.Country == "Switzerland" ||
+		loc.Country == "United Kingdom" ||
+		loc.Country == "Monaco" ||
+		loc.Country == "San Marino" ||
+		loc.Country == "Andorra" ||
+		loc.Country == "Vatican City") {
+
+		return true
+	}
+
+	return false
 }
 
 func (s *Server) confirmReceipt(c *gin.Context) {
@@ -297,8 +340,8 @@ func (s *Server) confirmReceipt(c *gin.Context) {
 	}
 
 	if storedFile.Email != "" {
-		client := database.DstClient{Client: *s.getClientInfo(c)}
-		if err := s.sendMail(s.config.Mail.SubjectReceipt, storedFile, &client); err != nil {
+		client := (*database.DstClient)(s.getClientInfo(c))
+		if err := s.sendMail(s.config.Mail.SubjectReceipt, storedFile, client, true); err != nil {
 			log.Printf("Failed to send confirmation mail for ID %s: %s\n", fileId, err)
 		}
 	}
@@ -437,10 +480,16 @@ func (s *Server) getClientInfo(c *gin.Context) *database.Client {
 	}
 }
 
-func (s *Server) sendMail(subject string, storedFile *database.StoredFile, client *database.DstClient) error {
+func (s *Server) sendMail(subject string, storedFile *database.StoredFile, client *database.DstClient, allowedDownload bool) error {
 	templ, err := template.New("mailbody").Parse(s.config.Mail.Body)
 	if err != nil {
 		return fmt.Errorf("parse mail body template: %w", err)
+	}
+
+	var deniedMsg string
+
+	if !allowedDownload {
+		deniedMsg = s.config.Mail.DeniedMsg
 	}
 
 	fields := struct {
@@ -452,6 +501,7 @@ func (s *Server) sendMail(subject string, storedFile *database.StoredFile, clien
 		DstTLSVersion     string
 		DstTLSCipherSuite string
 		Location          *geoip.Location
+		DeniedMsg         string
 	}{
 		storedFile.FileId,
 		client.Addr,
@@ -461,6 +511,7 @@ func (s *Server) sendMail(subject string, storedFile *database.StoredFile, clien
 		client.TLSVersion,
 		client.TLSCipherSuite,
 		client.Location,
+		deniedMsg,
 	}
 
 	var body strings.Builder

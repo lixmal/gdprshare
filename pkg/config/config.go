@@ -30,7 +30,8 @@ type Config struct {
 		From           string `default:"root@localhost"`
 		Subject        string `default:"File has been accessed: %s"`
 		SubjectReceipt string `default:"File download confirmed: %s"`
-		Body           string `default:"File with id {{.FileID}} has been downlowded."`
+		Body           string `default:"File download with id {{.FileID}} has been attempted. {{.Denied}}"`
+		DeniedMsg      string `default:"Download was denied."`
 	}
 	Header struct {
 		TLSVersion     string `default:"X-TLS-Version"`
