@@ -26,7 +26,7 @@
         "@babel/preset-env": "^7.19.0",
         "@babel/preset-react": "^7.18.6",
         "babelify": "^10.0.0",
-        "browserify": "^16.5.2",
+        "browserify": "^17.0.0",
         "browserify-css": "^0.15.0",
         "terser": "^4.8.1",
         "uglifyify": "^5.0.2"
