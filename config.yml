@@ -43,6 +43,32 @@ mail:
     #   .Location.City
     #   .Location.IsEU
     #   .DeniedMsg
+    #
+    # Example:
+    #
+    # body: |
+    #     File download has been attempted.
+
+    #     File ID: {{.FileID}}
+    #     IP Address: {{.Addr}}
+    #     User Agent: {{.UserAgent}}
+    #     Encryption Sender: {{.SrcTLSVersion}}/{{.SrcTLSCipherSuite}}
+    #     Encryption Receiver: {{.DstTLSVersion}}/{{.DstTLSCipherSuite}}
+
+    #     {{if .Location -}}
+    #     Continent: {{.Location.Continent}}
+    #     Country: {{.Location.Country}}
+    #     {{- if .Location.Subdivision1 }}
+    #     Subdivision1: {{.Location.Subdivision1}}
+    #     {{- end }}
+    #     {{- if .Location.Subdivision2 }}
+    #     Subdivision2: {{.Location.Subdivision2}}
+    #     {{- end }}
+    #     City: {{.Location.City}}
+    #     {{- end }}
+
+    #     {{.DeniedMsg}}
+
     body: "File download with id {{.FileID}} has been attempted. {{.DeniedMsg}}"
     deniedMsg: 'Download was denied.'
 
