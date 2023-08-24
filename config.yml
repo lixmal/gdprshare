@@ -47,8 +47,6 @@ mail:
     # Example:
     #
     # body: |
-    #     File download has been attempted.
-
     #     File ID: {{.FileID}}
     #     IP Address: {{.Addr}}
     #     User Agent: {{.UserAgent}}
