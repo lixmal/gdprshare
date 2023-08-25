@@ -136,10 +136,10 @@ export default class Uploaded extends React.Component {
                                         <button id="linkpw-copy" onClick={this.copyHandler} type="button" className="btn input-group-text" data-for="copy-tip" data-tip>
                                             <Octicon icon={Clippy} />
                                         </button>
-                                        <button id="linkpw-qr" onClick={this.qrHandler} type="button" className="btn input-group-text">
+                                        <button id="linkpw-qr" onClick={this.qrHandler} type="button" className="btn input-group-text" data-tip data-for="qrcode-tip">
                                             <Octicon icon={ScreenFull} />
                                         </button>
-                                        <button id="linkpw-share" onClick={this.shareHandler} type="button" className="btn input-group-text">
+                                        <button id="linkpw-share" onClick={this.shareHandler} type="button" className="btn input-group-text" data-tip data-for="share-tip">
                                             <Octicon icon={LinkExternal} />
                                         </button>
                                     </div>
@@ -159,6 +159,12 @@ export default class Uploaded extends React.Component {
                         <Link to="/">Upload another file</Link>
                     </div>
                     <ReactTooltip id="copy-tip" event="none" getContent={this.handleTipContent} delayHide={1000} />
+                    <ReactTooltip id="qrcode-tip" variant="info" place="bottom">
+                        Show QR code
+                    </ReactTooltip>
+                    <ReactTooltip id="share-tip" variant="info" place="bottom">
+                        Share
+                    </ReactTooltip>
                 </div>
             </div>
         )

@@ -454,10 +454,10 @@ export default class Upload extends React.Component {
                     <div className="card-header">
                         <div className="input-group">
                             <div className="input-group-prepend">
-                                <button id="delete" className="btn btn-sm" onClick={this.copyHandler} type="button" data-for="copy-tip" data-tip>
+                                <button id="copy" className="btn btn-sm" onClick={this.copyHandler} type="button" data-for="copy-tip" data-tip>
                                     <Octicon icon={Clippy} />
                                 </button>
-                                <button id="delete" className="btn btn-sm" onClick={this.handleDelete} type="button">
+                                <button id="delete" className="btn btn-sm" onClick={this.handleDelete} type="button" data-tip data-for="delete-tip">
                                     <Octicon icon={Trashcan} />
                                 </button>
                             </div>
@@ -595,7 +595,7 @@ export default class Upload extends React.Component {
                                     <div className="col-sm-9">
                                         <div className="input-group">
                                             <div className="input-group-prepend">
-                                                <button onClick={this.reGenPassword} type="button" className="btn input-group-text">
+                                                <button onClick={this.reGenPassword} type="button" className="btn input-group-text" data-tip data-for="rekey-tip">
                                                     <Octicon icon={Key} />
                                                 </button>
                                             </div>
@@ -615,6 +615,12 @@ export default class Upload extends React.Component {
                         </div>
                         {filesCol}
                         <ReactTooltip id="copy-tip" event="none" getContent={this.handleTipContent} delayHide={1000} />
+                        <ReactTooltip id="rekey-tip" variant="info" place="bottom">
+                            Generate new password
+                        </ReactTooltip>
+                        <ReactTooltip id="delete-tip" variant="info" place="bottom">
+                            Delete file
+                        </ReactTooltip>
                     </div>
                 </div>
             </div>
