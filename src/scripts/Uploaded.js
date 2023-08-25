@@ -28,7 +28,7 @@ export default class Uploaded extends React.Component {
         var btn = event.currentTarget
         btn.blur()
         var state = this.props.history.location.state
-        var downloadLink = state.location + '#' + state.password
+        var downloadLink = state.location + '#' + state.key
 
         if (window.navigator.share) {
             var shr = {
@@ -69,7 +69,7 @@ export default class Uploaded extends React.Component {
         if (this.state.dialogOpen) {
             dialog = (
                 <dialog className="dialog" open onClick={this.handleShowDialog}>
-                    <QRCodeSVG value={ this.props.history.location.state.location + '#' + this.props.history.location.state.password } onClick={this.qrHandler} />
+                    <QRCodeSVG value={ this.props.history.location.state.location + '#' + this.props.history.location.state.key } onClick={this.qrHandler} />
                 </dialog>
             )
         }
@@ -87,25 +87,7 @@ export default class Uploaded extends React.Component {
                                 <input className="form-control form-control-sm" id="filename" type="text" ref="filename" readOnly defaultValue={this.props.history.location.state.filename} />
                             </div>
                         </div>
-
-                        <div className="form-group row">
-                            <label htmlFor="password" className="col-sm-3 col-form-label col-form-label-sm">
-                                Password
-                            </label>
-                            <div className="col-sm-9">
-                                <div className="input-group">
-                                    <div className="input-group-prepend">
-                                        <button id="pw-copy" onClick={this.copyHandler} type="button" className="btn input-group-text" data-for="copy-tip" data-tip>
-                                            <Octicon icon={Clippy} />
-                                        </button>
-                                    </div>
-                                    <input className="form-control form-control-sm" id="password" type="text" ref="password" readOnly defaultValue={this.props.history.location.state.password} />
-                                </div>
-                            </div>
-                        </div>
-
-                        <br/>
-
+                        {dialog}
                         <div className="form-group row">
                             <label htmlFor="link" className="col-sm-3 col-form-label col-form-label-sm">
                                 Link
@@ -116,38 +98,18 @@ export default class Uploaded extends React.Component {
                                         <button id="link-copy" onClick={this.copyHandler} type="button" className="btn input-group-text" data-for="copy-tip" data-tip>
                                             <Octicon icon={Clippy} />
                                         </button>
-                                    </div>
-                                    <input className="form-control form-control-sm" id="link" type="text" ref="link" placeholder="Link" readOnly aria-describedby="linkHelp"
-                                        value={this.props.history.location.state.location}
-                                    />
-                                </div>
-                                <small id="linkHelp" className="form-text text-muted">Send link and password via different channels (e.g. one via email, one via chat or phone call)</small>
-                            </div>
-                        </div>
-
-                        {dialog}
-                        <div className="form-group row">
-                            <label htmlFor="linkpw" className="col-sm-3 col-form-label col-form-label-sm">
-                                Link and Password
-                            </label>
-                            <div className="col-sm-9">
-                                <div className="input-group">
-                                    <div className="input-group-prepend">
-                                        <button id="linkpw-copy" onClick={this.copyHandler} type="button" className="btn input-group-text" data-for="copy-tip" data-tip>
-                                            <Octicon icon={Clippy} />
-                                        </button>
-                                        <button id="linkpw-qr" onClick={this.qrHandler} type="button" className="btn input-group-text" data-tip data-for="qrcode-tip">
+                                        <button id="link-qr" onClick={this.qrHandler} type="button" className="btn input-group-text" data-tip data-for="qrcode-tip">
                                             <Octicon icon={ScreenFull} />
                                         </button>
-                                        <button id="linkpw-share" onClick={this.shareHandler} type="button" className="btn input-group-text" data-tip data-for="share-tip">
+                                        <button id="link-share" onClick={this.shareHandler} type="button" className="btn input-group-text" data-tip data-for="share-tip">
                                             <Octicon icon={LinkExternal} />
                                         </button>
                                     </div>
-                                    <input className="form-control form-control-sm" id="linkpassword" type="text" ref="linkpassword" placeholder="Link and passwod" readOnly aria-describedby="linkpasswordHelp"
-                                        value={ this.props.history.location.state.location + '#' + this.props.history.location.state.password }
+                                    <input className="form-control form-control-sm" id="linkKey" type="text" ref="linkKey" placeholder="Link" readOnly aria-describedby="link-key-help"
+                                        value={ this.props.history.location.state.location + '#' + this.props.history.location.state.key }
                                     />
                                 </div>
-                                <small id="linkpasswordHelp" className="form-text text-muted">Send link and password at once (less secure)</small>
+                                <small id="link-key-help" className="form-text text-muted">Download link</small>
                             </div>
                         </div>
                     </form>

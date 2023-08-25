@@ -79,9 +79,6 @@ header:
 # saves receiver IP addr and user agent in database
 saveclientinfo: false
 
-# length of password pregenerated on the frontend
-passwordlength: 12
-
 # MaxMind GeoLite2 City database path (mmdb file)
 geoippath: ''
 

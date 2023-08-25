@@ -28,8 +28,7 @@ func (s *Server) getConfig(c *gin.Context) {
 	c.JSON(
 		http.StatusOK,
 		gin.H{
-			"maxFileSize":    s.config.MaxUploadSize,
-			"passwordLength": s.config.PasswordLength,
+			"maxFileSize": s.config.MaxUploadSize,
 		},
 	)
 }

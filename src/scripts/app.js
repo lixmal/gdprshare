@@ -23,8 +23,8 @@ window.gdprshare = {}
 // TODO: get config from server
 gdprshare.config = {
     maxFileSize: 25,
-    passwordLength: 12,
     contentMaxLength: 1024,
+    keyLength: 32,
     saveFiles: true,
     apiPrefix: '/api/v1',
     apiUrl: '/api/v1/files',
@@ -48,6 +48,7 @@ gdprshare.fetcherr = function (response, error) {
     }.bind(this), gdprshare.rejecterr.bind(this))
 }
 
+
 var rootEl = document.getElementById('app-content')
 
 
@@ -63,33 +64,53 @@ var errPage = function () {
 if (!window.crypto || !window.TextEncoder || !window.Promise || !window.File || !window.fetch) {
     errPage()
 }
-// old Edge/IE, doesn't support PBKDF2
-try {
-    window.crypto.subtle.importKey(
-        'raw',
-        new ArrayBuffer(),
-        { name: 'PBKDF2' },
-        false,
-        [ 'deriveBits', 'deriveKey' ]
-    ).catch(errPage)
-}
-catch (e) {
-    errPage()
+
+gdprshare.encrypt = async function (clearText, key, callback) {
+    const iv = window.crypto.getRandomValues(new Uint8Array(12))
+    const gcmParams = {
+        name: 'aes-gcm',
+        iv: iv,
+    }
+    const cryptoKey = await window.crypto.subtle.importKey('raw', key, 'aes-gcm', true, ['encrypt'])
+    window.crypto.subtle.encrypt(gcmParams, cryptoKey, clearText).then(function (cipherText) {
+        callback(Buffer.concat([iv, Buffer.from(cipherText)]))
+    }.bind(this), gdprshare.rejecterr.bind(this))
 }
 
-gdprshare.deriveKey = function (keyMaterial, salt, callback) {
-    window.crypto.subtle.deriveKey(
-        {
-            'name': 'PBKDF2',
-            salt: salt,
-            'iterations': 100000,
-            'hash': 'SHA-256'
-        },
-        keyMaterial,
-        { 'name': 'AES-GCM', 'length': 256 },
-        true,
-        [ 'encrypt', 'decrypt' ]
-    ).then(callback, gdprshare.rejecterr.bind(this))
+gdprshare.decrypt = async function (data, key, callback) {
+    const iv = data.slice(0, 12)
+    const cipherText = data.slice(12)
+    var gcmParams = {
+        name: 'aes-gcm',
+        iv: iv,
+    }
+
+    let cryptoKey
+    try {
+        cryptoKey = await window.crypto.subtle.importKey('raw', key, 'aes-gcm', true, ['decrypt'])
+    } catch (error) {
+        if (error instanceof DOMException)
+            error = "Invalid password"
+        gdprshare.rejecterr.call(this, error)
+        return
+    }
+
+    window.crypto.subtle.decrypt(gcmParams, cryptoKey, cipherText).then(callback, function (error) {
+        if (error.name === 'OperationError')
+            error = 'Decryption error. Wrong password?'
+
+        gdprshare.rejecterr.call(this, error)
+    }.bind(this), gdprshare.rejecterr.bind(this))
+}
+
+gdprshare.keyToB64 = function (key) {
+    const b64 = Buffer.from(key).toString('base64')
+    return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+}
+
+gdprshare.keyFromB64 = function (b64) {
+    const key = b64.replace(/-/g, '+').replace(/_/g, '/')
+    return Buffer.from(key, 'base64')
 }
 
 gdprshare.copyHandler = function (event) {

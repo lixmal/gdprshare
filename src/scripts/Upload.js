@@ -11,6 +11,7 @@ export default class Upload extends React.Component {
 
         this.copyHandler = gdprshare.copyHandler.bind(this)
         this.handleTipContent = gdprshare.handleTipContent.bind(this)
+        this.encrypt = gdprshare.encrypt.bind(this)
         this.handleFile = this.handleFile.bind(this)
         this.handleUpload = this.handleUpload.bind(this)
         this.handleDelete = this.handleDelete.bind(this)
@@ -19,7 +20,6 @@ export default class Upload extends React.Component {
         this.handleDragOff = this.handleDragOff.bind(this)
         this.handleTypeToggle = this.handleTypeToggle.bind(this)
         this.uploadFile = this.uploadFile.bind(this)
-        this.reGenPassword = this.reGenPassword.bind(this)
         this.updateValidity = this.updateValidity.bind(this)
         this.checkOnlyEEA = this.checkOnlyEEA.bind(this)
 
@@ -106,31 +106,7 @@ export default class Upload extends React.Component {
         })
     }
 
-    genPassword(length) {
-        function genString() {
-            var array = new Uint16Array(length)
-            window.crypto.getRandomValues(array)
-            var array = Array.apply([], array)
-            array = array.filter(function (x) {
-                // -.0-9A-Za-z
-                return x >= 45 && x <= 46 || x >= 48 && x <= 57 || x >= 65 && x <= 90 || x >= 97 && x <= 122
-            })
-            return String.fromCharCode.apply(String, array)
-        }
-        var randomString = genString()
-        while (randomString.length < length) {
-            randomString += genString()
-        }
-        return randomString
-    }
-
-    reGenPassword(event) {
-        var btn = event.currentTarget
-        btn.blur()
-        var val = btn.parentNode.nextSibling.value = this.genPassword(gdprshare.config.passwordLength)
-    }
-
-    uploadFile(data, encFilename, plainFilename) {
+    uploadFile(key, data, encFilename, plainFilename) {
         var formData = new FormData()
         var file = new File(
             [data],
@@ -168,15 +144,15 @@ export default class Upload extends React.Component {
 
                     if (!files) files = {}
 
-                    var password = this.refs.password.value
-                    var loc = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + response.headers.get('Location')
 
+                    const loc = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + response.headers.get('Location')
+                    const b64Key = gdprshare.keyToB64(key)
                     if (gdprshare.config.saveFiles) {
                         files[data.fileId] = {
                             filename: plainFilename,
                             fileId: data.fileId,
                             ownerToken: data.ownerToken,
-                            location: loc + '#' + password,
+                            location: loc + '#' + b64Key,
                         }
 
                         try {
@@ -193,7 +169,7 @@ export default class Upload extends React.Component {
                             location: loc,
                             // unencrypted filename
                             filename: plainFilename,
-                            password: password,
+                            key: b64Key,
                             count: this.refs.count.value,
                         }
                     )
@@ -205,27 +181,6 @@ export default class Upload extends React.Component {
                     })
                 }
             }.bind(this), gdprshare.fetcherr.bind(this, response))
-        }.bind(this), gdprshare.rejecterr.bind(this))
-    }
-
-    encrypt(clearText, salt, password, callback) {
-        window.crypto.subtle.importKey(
-            'raw',
-            new TextEncoder().encode(password),
-            { name: 'PBKDF2' },
-            false,
-            ['deriveBits', 'deriveKey']
-        ).then(function (keyMaterial) {
-            gdprshare.deriveKey(keyMaterial, salt, function (key) {
-                var iv = window.crypto.getRandomValues(new Uint8Array(12))
-                var gcmParams = {
-                    name: 'aes-gcm',
-                    iv: iv,
-                }
-                window.crypto.subtle.encrypt(gcmParams, key, clearText).then(function (cipherText) {
-                    callback(Buffer.concat([iv, Buffer.from(cipherText)]))
-                }.bind(this), gdprshare.rejecterr.bind(this))
-            }.bind(this))
         }.bind(this), gdprshare.rejecterr.bind(this))
     }
 
@@ -255,8 +210,8 @@ export default class Upload extends React.Component {
             mask: true,
         })
 
-        var password = this.refs.password.value
-        var salt = window.crypto.getRandomValues(new Uint8Array(32))
+        const key = window.crypto.getRandomValues(new Uint8Array(gdprshare.config.keyLength))
+
 
         let file
         if (this.state.type === 'text') {
@@ -270,14 +225,14 @@ export default class Upload extends React.Component {
         }
 
         // encryption of filename
-        this.encrypt(new TextEncoder().encode(file.name), salt, password, function (cipherText) {
-            var filename = Buffer.concat([salt, Buffer.from(cipherText)]).toString('base64')
+        this.encrypt(new TextEncoder().encode(file.name), key, function (cipherText) {
+            var filename = Buffer.from(cipherText).toString('base64')
 
             var reader = new FileReader()
             reader.onload = function () {
                 // encryption of file
-                this.encrypt(reader.result, salt, password, function (cipherText) {
-                    this.uploadFile(cipherText, filename, file.name)
+                this.encrypt(reader.result, key, function (cipherText) {
+                    this.uploadFile(key, cipherText, filename, file.name)
                 }.bind(this))
             }.bind(this)
             reader.readAsArrayBuffer(file)
@@ -393,7 +348,6 @@ export default class Upload extends React.Component {
     }
 
     checkOnlyEEA(event) {
-        console.log(event)
         var cb = event.currentTarget
         this.setState({
             onlyEEAChecked: cb.checked
@@ -588,23 +542,6 @@ export default class Upload extends React.Component {
                                     </div>
                                 </div>
 
-                                <div className="form-group row">
-                                    <label htmlFor="password" className="col-sm-3 col-form-label col-form-label-sm">
-                                        Password
-                                    </label>
-                                    <div className="col-sm-9">
-                                        <div className="input-group">
-                                            <div className="input-group-prepend">
-                                                <button onClick={this.reGenPassword} type="button" className="btn input-group-text" data-tip data-for="rekey-tip">
-                                                    <Octicon icon={Key} />
-                                                </button>
-                                            </div>
-                                            <input className="form-control form-control-sm" id="password" type="text" ref="password" placeholder="Password" maxLength="255"
-                                                defaultValue={this.genPassword(gdprshare.config.passwordLength)} required minLength="10"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
                                 <div className="text-center col-sm-12">
                                     <input type="submit" ref="submit" className="btn btn-primary" value="Upload" />
                                 </div>
@@ -615,9 +552,6 @@ export default class Upload extends React.Component {
                         </div>
                         {filesCol}
                         <ReactTooltip id="copy-tip" event="none" getContent={this.handleTipContent} delayHide={1000} />
-                        <ReactTooltip id="rekey-tip" variant="info" place="bottom">
-                            Generate new password
-                        </ReactTooltip>
                         <ReactTooltip id="delete-tip" variant="info" place="bottom">
                             Delete file
                         </ReactTooltip>

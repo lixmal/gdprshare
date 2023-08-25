@@ -38,7 +38,6 @@ type Config struct {
 		TLSCipherSuite string `default:"X-TLS-CipherSuite"`
 	}
 	SaveClientInfo bool `default:"false"`
-	PasswordLength int  `default:"12"`
 	GeoIPPath      string
 }
 

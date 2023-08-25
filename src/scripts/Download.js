@@ -8,6 +8,7 @@ import Modal from 'react-modal'
 export default class Download extends React.Component {
     constructor() {
         super()
+        this.decrypt = gdprshare.decrypt.bind(this)
         this.handleDownload = this.handleDownload.bind(this)
         this.downloadFile = this.downloadFile.bind(this)
         this.closeModal = this.closeModal.bind(this)
@@ -23,15 +24,15 @@ export default class Download extends React.Component {
     }
 
     componentDidMount() {
-        var password = window.location.hash.substring(1)
+        let key = window.location.hash.substring(1)
 
         // don't render password field
-        if (password) {
+        if (key) {
             this.setState({
                 disableForm: true,
             })
 
-            this.handleDownload(null, password)
+            this.handleDownload(null, gdprshare.keyFromB64(key))
         }
     }
 
@@ -87,41 +88,16 @@ export default class Download extends React.Component {
         return true
     }
 
-    decrypt(cipherText, salt, password, callback) {
-        window.crypto.subtle.importKey(
-            'raw',
-            new TextEncoder().encode(password),
-            { name: 'PBKDF2' },
-            false,
-            ['deriveBits', 'deriveKey']
-        ).then(function (keyMaterial) {
-            gdprshare.deriveKey(keyMaterial, salt, function (key) {
-                var iv = cipherText.slice(0, 12)
-                var cipherT = cipherText.slice(12)
-                var gcmParams = {
-                    name: 'aes-gcm',
-                    iv: iv,
-                }
-
-                window.crypto.subtle.decrypt(gcmParams, key, cipherT).then(callback, function (error) {
-                    if (error.name === 'OperationError')
-                        error = 'Decryption error. Wrong password?'
-
-                    gdprshare.rejecterr.call(this, error)
-                }.bind(this))
-            }.bind(this))
-        }.bind(this), gdprshare.rejecterr.bind(this))
-    }
-
-    handleDownload(event, password) {
+    handleDownload(event, key) {
         if (event)
             event.preventDefault()
 
         if (this.state.mask)
             return
 
-        if (!password)
-            password = this.refs.password.value
+        if (!key) {
+            key = gdprshare.keyFromB64(this.refs.password.value)
+        }
 
         this.setState({
             error: null,
@@ -136,13 +112,11 @@ export default class Download extends React.Component {
             if (response.ok) {
                 let type = response.headers.get('X-Type')
 
-                var buf = Buffer.from(response.headers.get('X-Filename'), 'base64')
-                var salt = buf.slice(0, 32)
-                var filename = buf.slice(32)
+                var filename = Buffer.from(response.headers.get('X-Filename'), 'base64')
 
                 response.arrayBuffer().then(function (file) {
                     // decryption of file
-                    this.decrypt(file, salt, password, function (fileClearText) {
+                    this.decrypt(file, key, function (fileClearText) {
                         if (type === 'text') {
                             this.setState({
                                 modalContent: new TextDecoder().decode(fileClearText),
@@ -155,7 +129,7 @@ export default class Download extends React.Component {
                         }
                         else {
                             // decryption of filename and download
-                            this.decrypt(filename, salt, password, function (clearText) {
+                            this.decrypt(filename, key, function (clearText) {
                                 var filename = new TextDecoder().decode(clearText)
                                 if (this.downloadFile(fileClearText, filename)) {
                                     this.setState({
