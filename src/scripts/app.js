@@ -165,7 +165,7 @@ gdprshare.handleTipContent = function () {
 gdprshare.confirmReceipt = function (fileId) {
     window.fetch(gdprshare.config.apiUrl + '/' + fileId, {
         method: 'POST',
-    }, function (error) {
+    }).catch(function (error) {
         console.log(error)
     })
 }
