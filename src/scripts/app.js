@@ -1,10 +1,9 @@
-import Css from '../style/app.css'
+import '../style/app.css'
 import React from 'react'
 import ReactDOM from 'react-dom'
 
 import { Switch, Router, Route } from 'react-router'
 import { createBrowserHistory } from 'history'
-import Classnames from 'classnames'
 
 import ErrPage from './ErrPage'
 import Upload from './Upload'
