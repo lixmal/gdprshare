@@ -434,7 +434,7 @@ export default class Upload extends React.Component {
             colWidth = 8
             filesCol = (
                 <div className="col-sm">
-                    <h6 className="text-center">Uploaded Files</h6>
+                    <h6 className="text-center">Uploaded files</h6>
                     <div className="saved-files overflow-auto">
                         {savedFiles}
                     </div>
@@ -466,7 +466,7 @@ export default class Upload extends React.Component {
         return (
             <div className={'container-fluid col-sm-' + colWidth}>
                 <div className={this.outerClasses()}>
-                    <h4 className="text-center">GDPRShare Upload</h4>
+                    <h4 className="text-center">File upload</h4>
                     <div className="row">
                         <div className="col-sm" onDragEnter={this.handleDragOn}>
                             <div className={this.dndClasses()} onDrop={this.handleDrop} onDragEnter={this.handleDragOn} onDragOver={this.handleDragOn} onDragLeave={this.handleDragOff} onDragEnd={this.handleDragOff}>
@@ -532,7 +532,7 @@ export default class Upload extends React.Component {
                                         <div className="form-group form-check form-check-inline" data-tip data-for="include-other-tip">
                                             <input className="form-check-input" id="include-other" type="checkbox" ref="include-other" disabled={!this.state.onlyEEAChecked}/>
                                             <label htmlFor="include-other" className="form-check-label col-form-label-sm">
-                                                Include Other
+                                                Include other
                                             </label>
                                         </div>
                                         <ReactTooltip id="include-other-tip" place="bottom">

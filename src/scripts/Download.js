@@ -177,7 +177,7 @@ export default class Download extends React.Component {
         return (
             <div className="container-fluid col-sm-4">
                 <div className={this.classes()}>
-                    <h4 className="text-center">GDPRShare Download</h4>
+                    <h4 className="text-center">Download</h4>
                     {this.state.disableForm ? null : form}
 
                     <br />
@@ -185,7 +185,7 @@ export default class Download extends React.Component {
                     <Alert error={this.state.error} />
 
                     <div className="text-center col-sm-12">
-                        <Link to="/">Upload new file</Link>
+                        <Link to="/">Upload a file</Link>
                     </div>
                 </div>
                 <Modal isOpen={this.state.modalOpen}>

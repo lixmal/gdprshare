@@ -33,13 +33,13 @@ export default class Uploaded extends React.Component {
         if (window.navigator.share) {
             var shr = {
                 title: state.filename,
-                text: 'Sharing ' + state.filename,
+                text: 'Download ' + state.filename,
                 url: downloadLink,
             }
-            navigator.share(shr)
+            window.navigator.share(shr)
         }
         else {
-            var subject = '?subject=Sharing%20' + window.encodeURIComponent(state.filename)
+            var subject = '?subject=Download %20' + window.encodeURIComponent(state.filename)
             var body = '&body=Download link' + window.encodeURIComponent(': ' + downloadLink) +
                 '%0aMax downloads' + window.encodeURIComponent(': ' + state.count)
 
@@ -105,11 +105,11 @@ export default class Uploaded extends React.Component {
                                             <Octicon icon={LinkExternal} />
                                         </button>
                                     </div>
-                                    <input className="form-control form-control-sm" id="linkKey" type="text" ref="linkKey" placeholder="Link" readOnly aria-describedby="link-key-help"
+                                    <input className="form-control form-control-sm" id="link-key" type="text" ref="link-key" placeholder="Link" readOnly aria-describedby="link-key-help"
                                         value={ this.props.history.location.state.location + '#' + this.props.history.location.state.key }
                                     />
                                 </div>
-                                <small id="link-key-help" className="form-text text-muted">Download link</small>
+                                <small id="link-key-help" className="form-text text-muted">Share this download link with the recipient</small>
                             </div>
                         </div>
                     </form>
