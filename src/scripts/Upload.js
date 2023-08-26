@@ -39,7 +39,7 @@ export default class Upload extends React.Component {
         this.updateValidity()
     }
 
-    updateValidity() {
+    async updateValidity() {
         try {
             var files = JSON.parse(window.localStorage.getItem('savedFiles'))
         }
@@ -62,25 +62,32 @@ export default class Upload extends React.Component {
             error: null,
         })
 
-        var fileInfo
-        window.fetch(gdprshare.config.apiUrl + '/' + 'validate', {
-            method: 'POST',
-            body: JSON.stringify(fileIds),
-        }).then(function (response) {
-            response.clone().json().then(function (data) {
-                if (response.ok) {
-                    this.setState({
-                        fileInfo: data.fileInfo
-                    })
-                }
-                else {
-                    console.log(data.message)
-                    this.setState({
-                        error: 'fetching file validity failed: ' + data.message,
-                    })
-                }
-            }.bind(this), gdprshare.fetcherr.bind(this, response))
-        }.bind(this), gdprshare.rejecterr.bind(this))
+        let response
+        try {
+            response = await window.fetch(gdprshare.config.apiUrl + '/' + 'validate', {
+                method: 'POST',
+                body: JSON.stringify(fileIds),
+            })
+        } catch (error) {
+            return gdprshare.displayErr.call(this, error)
+        }
+
+        let fetchData
+        try {
+            fetchData = await response.clone().json()
+        } catch (error) {
+            return gdprshare.asTextErr.call(this, response, error)
+        }
+
+        if (!response.ok) {
+            error = 'fetching file validity failed: ' + fetchData.message
+            // TODO: mask removal could be a race with something else
+            return gdprshare.displayErr.call(this, error)
+        }
+
+        this.setState({
+            fileInfo: fetchData.fileInfo
+        })
     }
 
     outerClasses() {
@@ -106,7 +113,7 @@ export default class Upload extends React.Component {
         })
     }
 
-    uploadFile(key, data, encFilename, plainFilename) {
+    async uploadFile(key, data, encFilename, plainFilename) {
         var formData = new FormData()
         var file = new File(
             [data],
@@ -127,61 +134,66 @@ export default class Upload extends React.Component {
 
         window.localStorage.setItem('email', email)
 
-        window.fetch(gdprshare.config.apiUrl, {
-            method: 'POST',
-            body: formData,
-        }).then(function (response) {
-            response.clone().json().then(function (data) {
-                if (response.ok) {
-                    var files = {}
+        let response
+        try {
+            response = await window.fetch(gdprshare.config.apiUrl, {
+                method: 'POST',
+                body: formData,
+            })
+        } catch (error) {
+            return gdprshare.displayErr.call(this, error)
+        }
 
-                    try {
-                        files = JSON.parse(window.localStorage.getItem('savedFiles'))
-                    }
-                    catch (e) {
-                        console.log(e)
-                    }
+        let fetchData
+        try {
+            fetchData = await response.clone().json()
+        } catch (error) {
+            return gdprshare.asTextErr.call(this, response, error)
+        }
 
-                    if (!files) files = {}
+        if (!response.ok)
+            return gdprshare.displayErr.call(this, fetchData.message)
+
+        var files = {}
+
+        try {
+            files = JSON.parse(window.localStorage.getItem('savedFiles'))
+        }
+        catch (e) {
+            console.log(e)
+        }
+
+        if (!files) files = {}
 
 
-                    const loc = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + response.headers.get('Location')
-                    const b64Key = gdprshare.keyToB64(key)
-                    if (gdprshare.config.saveFiles) {
-                        files[data.fileId] = {
-                            filename: plainFilename,
-                            fileId: data.fileId,
-                            ownerToken: data.ownerToken,
-                            location: loc + '#' + b64Key,
-                        }
+        const loc = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + response.headers.get('Location')
+        const b64Key = gdprshare.keyToB64(key)
+        if (gdprshare.config.saveFiles) {
+            files[fetchData.fileId] = {
+                filename: plainFilename,
+                fileId: fetchData.fileId,
+                ownerToken: fetchData.ownerToken,
+                location: loc + '#' + b64Key,
+            }
 
-                        try {
-                            window.localStorage.setItem('savedFiles', JSON.stringify(files))
-                        }
-                        catch (e) {
-                            console.log(e)
-                        }
-                    }
+            try {
+                window.localStorage.setItem('savedFiles', JSON.stringify(files))
+            }
+            catch (e) {
+                console.log(e)
+            }
+        }
 
-                    this.props.history.push(
-                        'uploaded',
-                        {
-                            location: loc,
-                            // unencrypted filename
-                            filename: plainFilename,
-                            key: b64Key,
-                            count: this.refs.count.value,
-                        }
-                    )
-                }
-                else {
-                    this.setState({
-                        error: data.message,
-                        mask: false,
-                    })
-                }
-            }.bind(this), gdprshare.fetcherr.bind(this, response))
-        }.bind(this), gdprshare.rejecterr.bind(this))
+        this.props.history.push(
+            'uploaded',
+            {
+                location: loc,
+                // unencrypted filename
+                filename: plainFilename,
+                key: b64Key,
+                count: this.refs.count.value,
+            }
+        )
     }
 
     handleDrop(event) {
@@ -200,7 +212,7 @@ export default class Upload extends React.Component {
         this.refs.submit.click()
     }
 
-    handleUpload(event) {
+    async handleUpload(event) {
         event.preventDefault()
         if (this.state.mask)
             return
@@ -224,19 +236,23 @@ export default class Upload extends React.Component {
             file = this.refs.file.files[0]
         }
 
-        // encryption of filename
-        this.encrypt(new TextEncoder().encode(file.name), key, function (cipherText) {
+        try {
+            // encryption of filename
+            const cipherText = await gdprshare.encrypt(new TextEncoder().encode(file.name), key)
+
             var filename = Buffer.from(cipherText).toString('base64')
 
             var reader = new FileReader()
-            reader.onload = function () {
+            reader.onload = async function (event) {
                 // encryption of file
-                this.encrypt(reader.result, key, function (cipherText) {
-                    this.uploadFile(key, cipherText, filename, file.name)
-                }.bind(this))
+                const cipherText = await gdprshare.encrypt(event.target.result, key)
+
+                this.uploadFile(key, cipherText, filename, file.name)
             }.bind(this)
             reader.readAsArrayBuffer(file)
-        }.bind(this))
+        } catch (error) {
+            gdprshare.displayErr.call(this, error)
+        }
     }
 
     deleteFileId(fileId) {
@@ -253,7 +269,7 @@ export default class Upload extends React.Component {
         }
     }
 
-    handleDelete(event) {
+    async handleDelete(event) {
         if (this.state.mask)
             return
 
@@ -265,42 +281,38 @@ export default class Upload extends React.Component {
         var btn = event.currentTarget
         btn.blur()
 
+        let fileID
+        let response
         try {
-            var fileId = btn.parentNode.nextSibling.textContent
+            fileID = btn.parentNode.nextSibling.textContent
             let files = JSON.parse(window.localStorage.getItem('savedFiles'))
-            var ownerToken = files[fileId].ownerToken
-        }
-        catch (e) {
-            console.log(e)
-            this.setState({
-                error: e,
-                mask: false,
+            let ownerToken = files[fileID].ownerToken
+
+            let formData = new FormData()
+            formData.append('ownerToken', ownerToken)
+
+            response = await window.fetch(gdprshare.config.apiUrl + '/' + fileID, {
+                method: 'DELETE',
+                body: formData,
             })
-            return
+        } catch (error) {
+            return gdprshare.displayErr.call(this, error)
         }
 
-        var formData = new FormData()
-        formData.append('ownerToken', ownerToken)
-
-        window.fetch(gdprshare.config.apiUrl + '/' + fileId, {
-            method: 'DELETE',
-            body: formData,
-        }).then(function (response) {
-            if (response.ok || response.status === 404) {
-                this.deleteFileId(fileId)
-            }
-            else {
-                response.clone().json().then(function (data) {
-                    console.log(data.message)
-                    this.setState({
-                        error: data.message,
-                    })
-                }.bind(this), gdprshare.fetcherr.bind(this, response))
-            }
+        if (response.ok || response.status === 404) {
+            this.deleteFileId(fileID)
             this.setState({
                 mask: false,
             })
-        }.bind(this), gdprshare.rejecterr.bind(this))
+        }
+        else {
+            try {
+                fetchData = await response.clone().json()
+                gdprshare.displayErr.call(this, fetchData.message)
+            } catch (error) {
+                gdprshare.asTextErr.call(this, response, error)
+            }
+        }
     }
 
     checkFileSize(file) {
@@ -368,39 +380,40 @@ export default class Upload extends React.Component {
         for (var i in files) {
             let expiry
             let file = this.state.fileInfo && this.state.fileInfo[files[i].fileId]
-            if (file) {
-                if (file.error) {
-                    console.log(file.error)
-                    expiry = (
-                        <span className="expiry expiry-error">
-                            &lt;error&gt;
-                        </span>
-                    )
+            if (!file)
+                continue
+
+            if (file.error) {
+                console.log(file.error)
+                expiry = (
+                    <span className="expiry expiry-error">
+                        &lt;error&gt;
+                    </span>
+                )
+            }
+            else {
+                let expiryDate = new Date(file.expiryDate)
+                // go's time.Time zero value
+                let isInitDate = expiryDate.getTime() == new Date('0001-01-01T00:00:00Z').getTime()
+                let isExpired = isInitDate || file.count < 1 || Date.now() > expiryDate
+
+                let text
+                let classes
+                if (isExpired) {
+                    classes = 'expiry expiry-expired'
+                    text = '<expired>'
                 }
                 else {
-                    let expiryDate = new Date(file.expiryDate)
-                    // go's time.Time zero value
-                    let isInitDate = expiryDate.getTime() == new Date('0001-01-01T00:00:00Z').getTime()
-                    let isExpired = isInitDate || file.count < 1 || Date.now() > expiryDate
-
-                    let text
-                    let classes
-                    if (isExpired) {
-                        classes = 'expiry expiry-expired'
-                        text = '<expired>'
-                    }
-                    else {
-                        classes = 'expiry'
-                        let expires = isInitDate ? '<no data>' : expiryDate.toLocaleString()
-                        let s = file.count > 1 ? 's' : ''
-                        text = `${file.count} DL${s} or ${expires}`
-                    }
-                    expiry = (
-                        <span className={classes}>
-                            {text}
-                        </span>
-                    )
+                    classes = 'expiry'
+                    let expires = isInitDate ? '<no data>' : expiryDate.toLocaleString()
+                    let s = file.count > 1 ? 's' : ''
+                    text = `${file.count} DL${s} or ${expires}`
                 }
+                expiry = (
+                    <span className={classes}>
+                        {text}
+                    </span>
+                )
             }
 
             savedFiles.push(

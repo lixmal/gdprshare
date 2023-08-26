@@ -8,7 +8,6 @@ import Modal from 'react-modal'
 export default class Download extends React.Component {
     constructor() {
         super()
-        this.decrypt = gdprshare.decrypt.bind(this)
         this.handleDownload = this.handleDownload.bind(this)
         this.downloadFile = this.downloadFile.bind(this)
         this.closeModal = this.closeModal.bind(this)
@@ -88,7 +87,7 @@ export default class Download extends React.Component {
         return true
     }
 
-    handleDownload(event, key) {
+    async handleDownload(event, key) {
         if (event)
             event.preventDefault()
 
@@ -106,57 +105,62 @@ export default class Download extends React.Component {
 
         let fileId = window.location.pathname.split('/').pop()
 
-        window.fetch(gdprshare.config.apiUrl + '/' + fileId, {
-            method: 'GET',
-        }).then(function (response) {
-            if (response.ok) {
-                let type = response.headers.get('X-Type')
+        try {
+            const response = await window.fetch(gdprshare.config.apiUrl + '/' + fileId, {
+                method: 'GET',
+            })
 
-                var filename = Buffer.from(response.headers.get('X-Filename'), 'base64')
+            if (!response.ok) {
+                let fetchData
+                try {
+                    fetchData = await response.clone().json()
+                } catch (error) {
+                    return gdprshare.asTextErr.call(this, response, error)
+                }
+                return gdprshare.displayErr.call(this, fetchData.message)
+            }
 
-                response.arrayBuffer().then(function (file) {
-                    // decryption of file
-                    this.decrypt(file, key, function (fileClearText) {
-                        if (type === 'text') {
-                            this.setState({
-                                modalContent: new TextDecoder().decode(fileClearText),
-                                modalOpen: true,
-                                mask: false,
-                                disableForm: true,
-                            })
+            let type = response.headers.get('X-Type')
 
-                            gdprshare.confirmReceipt(fileId)
-                        }
-                        else {
-                            // decryption of filename and download
-                            this.decrypt(filename, key, function (clearText) {
-                                var filename = new TextDecoder().decode(clearText)
-                                if (this.downloadFile(fileClearText, filename)) {
-                                    this.setState({
-                                        // no second download allowed
-                                        successful: true,
-                                        mask: false,
-                                        disableForm: true,
-                                    })
-                                    gdprshare.confirmReceipt(fileId)
-                                }
-                                else {
-                                    this.setState({
-                                        error: "Failed to create download",
-                                        mask: false,
-                                    })
-                                }
-                            }.bind(this), gdprshare.rejecterr.bind(this))
-                        }
-                    }.bind(this), gdprshare.rejecterr.bind(this))
-                }.bind(this), gdprshare.rejecterr.bind(this))
+            var filename = Buffer.from(response.headers.get('X-Filename'), 'base64')
+
+            const file = await response.arrayBuffer()
+            // decryption of file
+            const fileClearText = await gdprshare.decrypt(file, key)
+            if (type === 'text') {
+                this.setState({
+                    modalContent: new TextDecoder().decode(fileClearText),
+                    modalOpen: true,
+                    mask: false,
+                    disableForm: true,
+                })
+
+                gdprshare.confirmReceipt(fileId)
             }
             else {
-                response.clone().json().then(function (data) {
-                    gdprshare.rejecterr.call(this, data.message)
-                }.bind(this), gdprshare.fetcherr.bind(this, response))
+                // decryption of filename and download
+                const filenameClearText = await gdprshare.decrypt(filename, key)
+
+                var filename = new TextDecoder().decode(filenameClearText)
+                if (this.downloadFile(fileClearText, filename)) {
+                    this.setState({
+                        // no second download allowed
+                        successful: true,
+                        mask: false,
+                        disableForm: true,
+                    })
+                    gdprshare.confirmReceipt(fileId)
+                }
+                else {
+                    this.setState({
+                        error: "Failed to create download",
+                        mask: false,
+                    })
+                }
             }
-        }.bind(this), gdprshare.rejecterr.bind(this))
+        } catch (error) {
+            gdprshare.displayErr.call(this, error)
+        }
     }
 
     render() {
