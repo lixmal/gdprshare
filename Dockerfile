@@ -1,4 +1,4 @@
-FROM golang:alpine AS build
+FROM docker.io/golang:alpine AS build
 
 WORKDIR /workspace
 
