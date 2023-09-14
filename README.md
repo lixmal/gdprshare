@@ -69,8 +69,8 @@ gdprshare will look for a `config.yml` in it's working directory, but you can sp
 
 Take a look at `misc/gdprshare.service` for an example systemd unit and `misc/crontab` for the cronjob to delete expired files.
 
-Alternatively run the [docker image](https://hub.docker.com/r/lixmal/gdprshare):
+Alternatively run the [docker image](https://ghcr.io/lixmal/gdprshare):
 
-`sudo docker run  -p 8080:8080 -v conf/path:/conf -v data/path:/data lixmal/gdprshare`
+`sudo docker run -p 8080:8080 -v conf/path:/conf -v data/path:/data ghcr.io/lixmal/gdprshare`
 
 The `/data` volume needs to be writable by the `nobody` user, and it requires a `files` directory inside (automatically created).
