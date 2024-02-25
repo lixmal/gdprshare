@@ -80,7 +80,7 @@ export default class Upload extends React.Component {
         }
 
         if (!response.ok) {
-            error = 'fetching file validity failed: ' + fetchData.message
+            let error = 'fetching file validity failed: ' + fetchData.message
             // TODO: mask removal could be a race with something else
             return gdprshare.displayErr.call(this, error)
         }
@@ -307,7 +307,7 @@ export default class Upload extends React.Component {
         }
         else {
             try {
-                fetchData = await response.clone().json()
+                let fetchData = await response.clone().json()
                 gdprshare.displayErr.call(this, fetchData.message)
             } catch (error) {
                 gdprshare.asTextErr.call(this, response, error)
