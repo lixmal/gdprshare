@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/lixmal/gdprshare/pkg/config"
 	"github.com/lixmal/gdprshare/pkg/database"
@@ -39,20 +40,21 @@ func DeleteStoredFile(f *database.StoredFile, db *database.Database, config *con
 }
 
 func Cleanup(db *database.Database, config *config.Config) []error {
-	var expired []database.StoredFile
+	now := time.Now()
 	var errors []error
 
-	if errs := db.Where("datetime(created_at, expiry || ' days') < datetime('now')").Find(&expired).GetErrors(); errs != nil {
-		for _, err := range errs {
-			if !db.IsRecordNotFoundError(err) {
-				errors = append(errors, err)
-			}
-		}
+	var files []database.StoredFile
+	if err := db.Find(&files).Error; err != nil && !db.IsRecordNotFoundError(err) {
+		return append(errors, fmt.Errorf("fetch files from database: %w", err))
 	}
 
-	for _, v := range expired {
-		if errs := DeleteStoredFile(&v, db, config); len(errs) > 0 {
-			errors = append(errors, errs...)
+	for _, f := range files {
+		expiryTime := f.CreatedAt.AddDate(0, 0, int(f.Expiry))
+
+		if now.After(expiryTime) {
+			if errs := DeleteStoredFile(&f, db, config); len(errs) > 0 {
+				errors = append(errors, errs...)
+			}
 		}
 	}
 
