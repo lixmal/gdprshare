@@ -243,7 +243,7 @@ func (s *Server) downloadFile(c *gin.Context) {
 
 	client := (*database.DstClient)(s.getClientInfo(c))
 
-	allowed := s.isDownloadAllowed(storedFile, client)
+	allowed := s.isDownloadAllowed(storedFile, client) && !s.isUserAgentDisallowed(client.UserAgent)
 
 	if allowed {
 		storedFile.DstClients = append(
@@ -273,6 +273,7 @@ func (s *Server) downloadFile(c *gin.Context) {
 			}
 		}
 	} else {
+		log.Printf("Download from %s forbidden, user agent: %s\n", client.Addr, client.UserAgent)
 		c.JSON(
 			http.StatusForbidden,
 			gin.H{
@@ -316,6 +317,15 @@ func (s *Server) isDownloadAllowed(storedFile *database.StoredFile, client *data
 		return true
 	}
 
+	return false
+}
+
+func (s *Server) isUserAgentDisallowed(userAgent string) bool {
+	for _, disallowedUA := range s.config.DisallowedUserAgents {
+		if strings.Contains(userAgent, disallowedUA) {
+			return true
+		}
+	}
 	return false
 }
 

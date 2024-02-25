@@ -37,8 +37,9 @@ type Config struct {
 		TLSVersion     string `default:"X-TLS-Version"`
 		TLSCipherSuite string `default:"X-TLS-CipherSuite"`
 	}
-	SaveClientInfo bool `default:"false"`
-	GeoIPPath      string
+	SaveClientInfo       bool `default:"false"`
+	GeoIPPath            string
+	DisallowedUserAgents []string
 }
 
 func Default() *Config {
