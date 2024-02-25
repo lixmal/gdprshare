@@ -9,7 +9,7 @@ require (
 	github.com/gin-contrib/size v0.0.0-20230212012657-e14a14094dc4
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-playground/validator/v10 v10.15.5 // indirect
-	github.com/jinzhu/configor v1.2.1
+	github.com/jinzhu/configor v1.2.2
 	github.com/jinzhu/gorm v1.9.16
 	github.com/klauspost/cpuid/v2 v2.2.5 // indirect
 	github.com/mattn/go-sqlite3 v1.14.22 // indirect
