@@ -1,6 +1,6 @@
 import React from 'react'
 import Classnames from 'classnames'
-import Octicon, { Clippy, Trashcan, CloudUpload, Key } from '@primer/octicons-react'
+import Octicon, {Clippy, CloudUpload, Trashcan} from '@primer/octicons-react'
 import BsCustomFileInput from 'bs-custom-file-input'
 import Alert from './Alert'
 import ReactTooltip from 'react-tooltip'
@@ -44,8 +44,7 @@ export default class Upload extends React.Component {
     async updateValidity() {
         try {
             var files = JSON.parse(window.localStorage.getItem('savedFiles'))
-        }
-        catch (e) {
+        } catch (e) {
             console.log(e)
             return
         }
@@ -162,8 +161,7 @@ export default class Upload extends React.Component {
 
         try {
             files = JSON.parse(window.localStorage.getItem('savedFiles'))
-        }
-        catch (e) {
+        } catch (e) {
             console.log(e)
         }
 
@@ -182,8 +180,7 @@ export default class Upload extends React.Component {
 
             try {
                 window.localStorage.setItem('savedFiles', JSON.stringify(files))
-            }
-            catch (e) {
+            } catch (e) {
                 console.log(e)
             }
         }
@@ -234,9 +231,8 @@ export default class Upload extends React.Component {
             let text = this.refs.text.value
             // using first few chars as filename for recognizability
             // TODO: sanitize for usage in file names
-            file = new File([text], text.slice(0, 21) + '.txt', { type: 'text/plain' })
-        }
-        else {
+            file = new File([text], text.slice(0, 21) + '.txt', {type: 'text/plain'})
+        } else {
             file = this.refs.file.files[0]
         }
 
@@ -264,8 +260,7 @@ export default class Upload extends React.Component {
             var files = JSON.parse(window.localStorage.getItem('savedFiles'))
             delete files[fileId]
             window.localStorage.setItem('savedFiles', JSON.stringify(files))
-        }
-        catch (e) {
+        } catch (e) {
             console.log(e)
             this.setState({
                 error: e,
@@ -308,8 +303,7 @@ export default class Upload extends React.Component {
             this.setState({
                 mask: false,
             })
-        }
-        else {
+        } else {
             try {
                 let fetchData = await response.clone().json()
                 gdprshare.displayErr.call(this, fetchData.message)
@@ -370,14 +364,19 @@ export default class Upload extends React.Component {
         })
     }
 
+    handleDelayDownloadToggle(event) {
+        this.setState({
+            delayDownload: event.target.checked
+        })
+    }
+
     render() {
         var savedFiles = []
         var files = {}
 
         try {
             files = JSON.parse(window.localStorage.getItem('savedFiles'))
-        }
-        catch (e) {
+        } catch (e) {
             console.log(e)
         }
 
@@ -394,8 +393,7 @@ export default class Upload extends React.Component {
                         &lt;error&gt;
                     </span>
                 )
-            }
-            else {
+            } else {
                 let expiryDate = new Date(file.expiryDate)
                 // go's time.Time zero value
                 let isInitDate = expiryDate.getTime() == new Date('0001-01-01T00:00:00Z').getTime()
@@ -406,8 +404,7 @@ export default class Upload extends React.Component {
                 if (isExpired) {
                     classes = 'expiry expiry-expired'
                     text = '<expired>'
-                }
-                else {
+                } else {
                     classes = 'expiry'
                     let expires = isInitDate ? '<no data>' : expiryDate.toLocaleString()
                     let s = file.count > 1 ? 's' : ''
@@ -425,11 +422,13 @@ export default class Upload extends React.Component {
                     <div className="card-header">
                         <div className="input-group">
                             <div className="input-group-prepend">
-                                <button id="copy" className="btn btn-sm" onClick={this.copyHandler} type="button" data-for="copy-tip" data-tip>
-                                    <Octicon icon={Clippy} />
+                                <button id="copy" className="btn btn-sm" onClick={this.copyHandler} type="button"
+                                        data-for="copy-tip" data-tip>
+                                    <Octicon icon={Clippy}/>
                                 </button>
-                                <button id="delete" className="btn btn-sm" onClick={this.handleDelete} type="button" data-tip data-for="delete-tip">
-                                    <Octicon icon={Trashcan} />
+                                <button id="delete" className="btn btn-sm" onClick={this.handleDelete} type="button"
+                                        data-tip data-for="delete-tip">
+                                    <Octicon icon={Trashcan}/>
                                 </button>
                             </div>
                             <span className="card-header-text long-text">
@@ -464,18 +463,19 @@ export default class Upload extends React.Component {
             contentInput = (
                 <div className="col-sm-9">
                     <div className="custom-file">
-                        <input className="custom-file-input form-control form-control-sm" id="content" type="file" ref="file" onChange={this.handleFile} required autoFocus />
+                        <input className="custom-file-input form-control form-control-sm" id="content" type="file"
+                               ref="file" onChange={this.handleFile} required autoFocus/>
                         <label className="custom-file-label col-form-label col-form-label-sm" htmlFor="file">
                             Select or drop file
                         </label>
                     </div>
                 </div>
             )
-        }
-        else {
+        } else {
             contentInput = (
                 <div className="col-sm-9">
-                    <textarea className="form-control" id="text" ref="text" rows="2" minLength="3" maxLength={gdprshare.config.contentMaxLength} required />
+                    <textarea className="form-control" id="text" ref="text" rows="2" minLength="3"
+                              maxLength={gdprshare.config.contentMaxLength} required/>
                 </div>
             )
         }
@@ -486,8 +486,10 @@ export default class Upload extends React.Component {
                     <h4 className="text-center">File upload</h4>
                     <div className="row">
                         <div className="col-sm" onDragEnter={this.handleDragOn}>
-                            <div className={this.dndClasses()} onDrop={this.handleDrop} onDragEnter={this.handleDragOn} onDragOver={this.handleDragOn} onDragLeave={this.handleDragOff} onDragEnd={this.handleDragOff}>
-                                <Octicon size="large" icon={CloudUpload} />
+                            <div className={this.dndClasses()} onDrop={this.handleDrop} onDragEnter={this.handleDragOn}
+                                 onDragOver={this.handleDragOn} onDragLeave={this.handleDragOff}
+                                 onDragEnd={this.handleDragOff}>
+                                <Octicon size="large" icon={CloudUpload}/>
                                 <h3>
                                     drop file here
                                 </h3>
@@ -495,7 +497,7 @@ export default class Upload extends React.Component {
                             <form ref="form" className={this.innerClasses()} onSubmit={this.handleUpload}>
                                 <div className="form-group row">
                                     <label className="col-sm-3 col-form-label col-form-label-sm toggle">
-                                        <input type="checkbox" id="type" ref="type" onChange={this.handleTypeToggle} />
+                                        <input type="checkbox" id="type" ref="type" onChange={this.handleTypeToggle}/>
                                         <span className="slider"></span>
                                         <span className="labels" data-on="File" data-off="Text"></span>
                                     </label>
@@ -508,10 +510,13 @@ export default class Upload extends React.Component {
                                             Notification
                                         </label>
                                         <div className="col-sm-9">
-                                            <input className="form-control form-control-sm" id="email" type="email" ref="email" placeholder="Enter email (optional)" maxLength="255" aria-describedby="emailHelp"
-                                                defaultValue={window.localStorage.getItem('email')} minLength="6"
+                                            <input className="form-control form-control-sm" id="email" type="email"
+                                                   ref="email" placeholder="Enter email (optional)" maxLength="255"
+                                                   aria-describedby="emailHelp"
+                                                   defaultValue={window.localStorage.getItem('email')} minLength="6"
                                             />
-                                            <small id="emailHelp" className="form-text text-muted">Email to receive download notifications</small>
+                                            <small id="emailHelp" className="form-text text-muted">Email to receive
+                                                download notifications</small>
                                         </div>
                                     </div>
 
@@ -520,8 +525,11 @@ export default class Upload extends React.Component {
                                             Count
                                         </label>
                                         <div className="col-sm-9">
-                                            <input className="form-control form-control-sm" id="count" type="number" ref="count" min="1" max="15" defaultValue="1" required aria-describedby="countHelp" />
-                                            <small id="countHelp" className="form-text text-muted">Maximum downloads before link expires</small>
+                                            <input className="form-control form-control-sm" id="count" type="number"
+                                                   ref="count" min="1" max="15" defaultValue="1" required
+                                                   aria-describedby="countHelp"/>
+                                            <small id="countHelp" className="form-text text-muted">Maximum downloads
+                                                before link expires</small>
                                         </div>
                                     </div>
 
@@ -530,20 +538,27 @@ export default class Upload extends React.Component {
                                             Expiry
                                         </label>
                                         <div className="col-sm-9">
-                                            <input className="form-control form-control-sm" id="expiry" type="number" ref="expiry" min="1" max="14" defaultValue="7" required aria-describedby="expiryHelp" />
-                                            <small id="expiryHelp" className="form-text text-muted">Maximum days before link expires</small>
+                                            <input className="form-control form-control-sm" id="expiry" type="number"
+                                                   ref="expiry" min="1" max="14" defaultValue="7" required
+                                                   aria-describedby="expiryHelp"/>
+                                            <small id="expiryHelp" className="form-text text-muted">Maximum days before
+                                                link expires</small>
                                         </div>
                                     </div>
 
                                     <div className="row justify-content-center">
-                                        <div className="form-group form-check form-check-inline" data-tip data-for="only-eea-tip">
-                                            <input className="form-check-input" id="only-eea" type="checkbox" ref="only-eea" defaultChecked={this.state.onlyEEAChecked} onChange={this.checkOnlyEEA}/>
+                                        <div className="form-group form-check form-check-inline" data-tip
+                                             data-for="only-eea-tip">
+                                            <input className="form-check-input" id="only-eea" type="checkbox"
+                                                   ref="only-eea" defaultChecked={this.state.onlyEEAChecked}
+                                                   onChange={this.checkOnlyEEA}/>
                                             <label htmlFor="only-eea" className="form-check-label col-form-label-sm">
                                                 Only EU/EEA
                                             </label>
                                         </div>
                                         <ReactTooltip id="only-eea-tip" variant="info" place="bottom">
-                                            Allows downloads only from EEA countries (European Union + Iceland/Norway/Liechtenstein)
+                                            Allows downloads only from EEA countries (European Union +
+                                            Iceland/Norway/Liechtenstein)
                                         </ReactTooltip>
 
                                         <div className="form-group form-check form-check-inline" data-tip
@@ -556,7 +571,8 @@ export default class Upload extends React.Component {
                                             </label>
                                         </div>
                                         <ReactTooltip id="include-other-tip" place="bottom">
-                                            Allows downloads from EEA countries and additionally from countries with similar GDPR laws. <br/>
+                                            Allows downloads from EEA countries and additionally from countries with
+                                            similar GDPR laws. <br/>
                                             Currently: Switzerland, UK, Monaco, Andorra, San Marino, Vatican City
                                         </ReactTooltip>
                                         <div className="form-group form-check form-check-inline" data-tip
@@ -599,15 +615,15 @@ export default class Upload extends React.Component {
                                 </div>
 
                                 <div className="text-center col-sm-12">
-                                    <input type="submit" ref="submit" className="btn btn-primary" value="Upload" />
+                                    <input type="submit" ref="submit" className="btn btn-primary" value="Upload"/>
                                 </div>
                             </form>
 
-                            <br />
-                            <Alert error={this.state.error} />
+                            <br/>
+                            <Alert error={this.state.error}/>
                         </div>
                         {filesCol}
-                        <ReactTooltip id="copy-tip" event="none" getContent={this.handleTipContent} delayHide={1000} />
+                        <ReactTooltip id="copy-tip" event="none" getContent={this.handleTipContent} delayHide={1000}/>
                         <ReactTooltip id="delete-tip" variant="info" place="bottom">
                             Delete file
                         </ReactTooltip>
