@@ -22,6 +22,7 @@ export default class Upload extends React.Component {
         this.uploadFile = this.uploadFile.bind(this)
         this.updateValidity = this.updateValidity.bind(this)
         this.checkOnlyEEA = this.checkOnlyEEA.bind(this)
+        this.handleDelayDownloadToggle = this.handleDelayDownloadToggle.bind(this)
 
         this.state = {
             error: null,
@@ -30,6 +31,7 @@ export default class Upload extends React.Component {
             fileInfo: null,
             type: 'file',
             onlyEEAChecked: true,
+            delayDownload: false,
         }
     }
 
@@ -131,6 +133,8 @@ export default class Upload extends React.Component {
         formData.append('email', email)
         formData.append('only-eea', this.refs['only-eea'].checked)
         formData.append('include-other', this.refs['include-other'].checked)
+        if (this.state.delayDownload)
+            formData.append('delay', this.refs['delay-minutes'].value)
 
         window.localStorage.setItem('email', email)
 
@@ -247,7 +251,7 @@ export default class Upload extends React.Component {
                 // encryption of file
                 const cipherText = await gdprshare.encrypt(event.target.result, key)
 
-                this.uploadFile(key, cipherText, filename, file.name)
+                await this.uploadFile(key, cipherText, filename, file.name)
             }.bind(this)
             reader.readAsArrayBuffer(file)
         } catch (error) {
@@ -542,16 +546,55 @@ export default class Upload extends React.Component {
                                             Allows downloads only from EEA countries (European Union + Iceland/Norway/Liechtenstein)
                                         </ReactTooltip>
 
-                                        <div className="form-group form-check form-check-inline" data-tip data-for="include-other-tip">
-                                            <input className="form-check-input" id="include-other" type="checkbox" ref="include-other" disabled={!this.state.onlyEEAChecked}/>
-                                            <label htmlFor="include-other" className="form-check-label col-form-label-sm">
-                                                Include other
+                                        <div className="form-group form-check form-check-inline" data-tip
+                                             data-for="include-other-tip">
+                                            <input className="form-check-input" id="include-other" type="checkbox"
+                                                   ref="include-other" disabled={!this.state.onlyEEAChecked}/>
+                                            <label htmlFor="include-other"
+                                                   className="form-check-label col-form-label-sm">
+                                                Other
                                             </label>
                                         </div>
                                         <ReactTooltip id="include-other-tip" place="bottom">
                                             Allows downloads from EEA countries and additionally from countries with similar GDPR laws. <br/>
                                             Currently: Switzerland, UK, Monaco, Andorra, San Marino, Vatican City
                                         </ReactTooltip>
+                                        <div className="form-group form-check form-check-inline" data-tip
+                                             data-for="delay-download-tip"
+                                        >
+                                            <input
+                                                className="form-check-input"
+                                                type="checkbox"
+                                                id="delay-download"
+                                                onChange={this.handleDelayDownloadToggle}
+                                            />
+                                            <label htmlFor="delay-download"
+                                                   className="form-check-label col-form-label-sm">
+                                                Delay
+                                            </label>
+                                        </div>
+                                        <ReactTooltip id="delay-download-tip" place="bottom">
+                                            Delay download availability by a set amount of time in minutes.
+                                        </ReactTooltip>
+                                        {this.state.delayDownload && (
+                                            <div className="form-group row">
+                                                <label htmlFor="delay-minutes"
+                                                       className="col-sm-3 col-form-label col-form-label-sm">
+                                                    Delay Minutes
+                                                </label>
+                                                <div className="col-sm-9">
+                                                    <input
+                                                        className="form-control form-control-sm"
+                                                        id="delay-minutes"
+                                                        type="number"
+                                                        ref="delay-minutes"
+                                                        min="1"
+                                                        defaultValue="1"
+                                                        required={this.state.delayDownload}
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 

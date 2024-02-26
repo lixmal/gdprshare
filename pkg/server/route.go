@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	uuid "github.com/nu7hatch/gouuid"
@@ -245,7 +246,21 @@ func (s *Server) downloadFile(c *gin.Context) {
 
 	allowed := s.isDownloadAllowed(storedFile, client) && !s.isUserAgentDisallowed(client.UserAgent)
 
-	if allowed {
+	if time.Now().Before(storedFile.CreatedAt.Add(time.Duration(storedFile.Delay) * time.Minute)) {
+		c.JSON(
+			http.StatusForbidden, gin.H{
+				"message": "file not yet downloadable",
+			},
+		)
+	} else if !allowed {
+		log.Printf("Download from %s forbidden, user agent: %s\n", client.Addr, client.UserAgent)
+		c.JSON(
+			http.StatusForbidden,
+			gin.H{
+				"message": "download from this location forbidden",
+			},
+		)
+	} else {
 		storedFile.DstClients = append(
 			storedFile.DstClients,
 			client,
@@ -272,14 +287,6 @@ func (s *Server) downloadFile(c *gin.Context) {
 				log.Printf("Failed to delete file with id %s from storage: %s\n", fileId, err)
 			}
 		}
-	} else {
-		log.Printf("Download from %s forbidden, user agent: %s\n", client.Addr, client.UserAgent)
-		c.JSON(
-			http.StatusForbidden,
-			gin.H{
-				"message": "download from this location forbidden",
-			},
-		)
 	}
 
 	if storedFile.Email != "" {
