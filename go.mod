@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/BurntSushi/toml v1.3.2 // indirect
-	github.com/gin-contrib/size v0.0.0-20230212012657-e14a14094dc4
+	github.com/gin-contrib/size v1.0.1
 	github.com/gin-gonic/gin v1.10.0
 	github.com/jinzhu/configor v1.2.2
 	github.com/jinzhu/gorm v1.9.16
