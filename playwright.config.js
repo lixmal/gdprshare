@@ -30,9 +30,9 @@ module.exports = defineConfig({
   ],
 
   webServer: {
-    command: 'go run cmd/gdprshare/main.go',
+    command: process.env.CI ? './gdprshare' : 'go run cmd/gdprshare/main.go',
     url: 'http://localhost:8089',
-    reuseExistingServer: true,
+    reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
   },
 });
