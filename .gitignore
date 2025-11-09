@@ -25,3 +25,11 @@ disc.html
 
 config_test.yml
 test/
+
+# Test outputs
+coverage/
+coverage-*.out
+coverage-*.html
+test-results/
+playwright-report/
+e2e/*.txt

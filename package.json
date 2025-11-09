@@ -4,7 +4,12 @@
     "description": "share files according to gdpr rules",
     "main": "src/scripts/app.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
+        "test": "jest --watchAll=false",
+        "test:watch": "jest --watch",
+        "test:coverage": "jest --coverage",
+        "test:e2e": "playwright test --reporter=list",
+        "test:e2e:ui": "playwright test --ui",
+        "test:e2e:headed": "playwright test --headed --reporter=list",
         "dev": "browserify -t browserify-css -t [ babelify --presets [ @babel/preset-env @babel/preset-react ] ] src/scripts/app.js -o public/scripts/bundle.js; sed -i 's/node_modules\\/bootstrap\\/dist\\///g' public/scripts/bundle.js",
         "build": "NODE_ENV=production browserify -t browserify-css -t [ babelify --presets [ @babel/preset-env @babel/preset-react ] ] -p [ uglifyify --no-sourcemap ] src/scripts/app.js | terser --compress --mangle > public/scripts/bundle.js; sed -i 's/node_modules\\/bootstrap\\/dist\\///g' public/scripts/bundle.js"
     },
@@ -25,10 +30,18 @@
         "@babel/core": "^7.24.6",
         "@babel/preset-env": "^7.25.4",
         "@babel/preset-react": "^7.23.3",
+        "@playwright/test": "^1.56.1",
+        "@testing-library/jest-dom": "^6.9.1",
+        "@testing-library/react": "^12.1.5",
+        "@testing-library/user-event": "^14.6.1",
+        "babel-jest": "^30.2.0",
         "babelify": "^10.0.0",
         "browserify": "^17.0.0",
         "browserify-css": "^0.15.0",
+        "jest": "^30.2.0",
+        "jest-environment-jsdom": "^30.2.0",
         "terser": "^5.29.1",
+        "text-encoding": "^0.7.0",
         "uglifyify": "^5.0.2"
     },
     "dependencies": {
@@ -48,5 +61,11 @@
         "autoInject": true,
         "minify": true,
         "rootDir": "."
+    },
+    "babel": {
+        "presets": [
+            "@babel/preset-env",
+            "@babel/preset-react"
+        ]
     }
 }

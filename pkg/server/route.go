@@ -111,6 +111,14 @@ func (s *Server) uploadFile(c *gin.Context) {
 		if err = tx.Rollback().Error; err != nil {
 			log.Printf("Failed to rollback: %s\n", err)
 		}
+		if !c.IsAborted() {
+			c.JSON(
+				http.StatusForbidden,
+				gin.H{
+					"message": "TLS requirements not met",
+				},
+			)
+		}
 		return
 	}
 

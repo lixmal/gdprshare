@@ -42,8 +42,7 @@ It is recommended to allow TLS1.2 and above only. As the config options are not 
 
 
 ## BUILDING
-The default database backend is SQLite, if you want to change this, comment/uncomment the import lines in `main.go`. Also see the [ORM docs](https://godoc.org/github.com/jinzhu/gorm#Open).
-Then build the binary:
+Build the binary:
 
     go build \
       -o gdprshare github.com/lixmal/gdprshare/cmd/gdprshare
