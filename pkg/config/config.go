@@ -40,6 +40,11 @@ type Config struct {
 	SaveClientInfo       bool `default:"false"`
 	GeoIPPath            string
 	DisallowedUserAgents []string
+	RateLimit            struct {
+		Enabled bool    `default:"true"`
+		RPS     float64 `default:"10"`
+		Burst   int     `default:"20"`
+	}
 }
 
 // Default returns a Config instance with default values.

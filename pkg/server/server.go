@@ -54,6 +54,12 @@ func setupRoutes(router *gin.Engine, srv *Server) {
 	router.GET("/d/:fileId", srv.index)
 
 	v1 := router.Group("/api/v1")
+
+	if srv.config.RateLimit.Enabled {
+		limiter := newRateLimiter(srv.config.RateLimit.RPS, srv.config.RateLimit.Burst)
+		v1.Use(limiter.middleware())
+	}
+
 	v1.POST("/stats", srv.setStats)
 	v1.GET("/config", srv.getConfig)
 	v1.POST("/files", srv.uploadFile)
