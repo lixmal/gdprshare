@@ -8,9 +8,10 @@ module.exports = defineConfig({
   workers: 1,
   reporter: process.env.CI ? [['html'], ['github']] : 'html',
   use: {
-    baseURL: 'http://localhost:8089',
+    baseURL: 'http://localhost:8080',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
+    acceptDownloads: true,
   },
 
   projects: [
@@ -31,8 +32,10 @@ module.exports = defineConfig({
 
   webServer: {
     command: process.env.CI ? './gdprshare' : 'go run cmd/gdprshare/main.go',
-    url: 'http://localhost:8089',
+    url: 'http://localhost:8080',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
+    stdout: 'pipe',
+    stderr: 'pipe',
   },
 });
