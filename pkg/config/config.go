@@ -45,6 +45,11 @@ type Config struct {
 		RPS     float64 `default:"10"`
 		Burst   int     `default:"20"`
 	}
+	TLSValidation struct {
+		Enabled        bool   `default:"true"`
+		MinVersion     string `default:"1.2"`
+		BlockedCiphers []string
+	}
 }
 
 // Default returns a Config instance with default values.

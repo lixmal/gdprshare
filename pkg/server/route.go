@@ -104,6 +104,12 @@ func (s *Server) uploadFile(c *gin.Context) {
 	storedFile.Name = namestr
 
 	storedFile.SrcClient = s.getClientInfo(c)
+	if storedFile.SrcClient == nil {
+		if err = tx.Rollback().Error; err != nil {
+			log.Printf("Failed to rollback: %s\n", err)
+		}
+		return
+	}
 
 	if err = tx.Create(&storedFile).Error; err != nil {
 		log.Printf("Failed to create file in database: %s\n", err)
@@ -243,6 +249,9 @@ func (s *Server) downloadFile(c *gin.Context) {
 	}
 
 	client := (*database.DstClient)(s.getClientInfo(c))
+	if client == nil {
+		return
+	}
 
 	allowed := s.isDownloadAllowed(storedFile, client) && !s.isUserAgentDisallowed(client.UserAgent)
 
@@ -357,8 +366,10 @@ func (s *Server) confirmReceipt(c *gin.Context) {
 
 	if storedFile.Email != "" {
 		client := (*database.DstClient)(s.getClientInfo(c))
-		if err := s.sendMail(s.config.Mail.SubjectReceipt, storedFile, client, true); err != nil {
-			log.Printf("Failed to send confirmation mail for ID %s: %s\n", fileId, err)
+		if client != nil {
+			if err := s.sendMail(s.config.Mail.SubjectReceipt, storedFile, client, true); err != nil {
+				log.Printf("Failed to send confirmation mail for ID %s: %s\n", fileId, err)
+			}
 		}
 	}
 }
@@ -440,6 +451,9 @@ func (s *Server) setStats(c *gin.Context) {
 
 	if s.config.SaveClientInfo {
 		stats.Client = s.getClientInfo(c)
+		if stats.Client == nil {
+			return
+		}
 	}
 	if err := s.db.Save(&stats).Error; err != nil {
 		log.Printf("Failed to store stats: %s\n", err)
@@ -485,6 +499,17 @@ func (s *Server) getClientInfo(c *gin.Context) *database.Client {
 	} else {
 		tlsversion = c.Request.Header.Get(s.config.Header.TLSVersion)
 		tlscipher = c.Request.Header.Get(s.config.Header.TLSCipherSuite)
+	}
+
+	if err := s.validateTLS(tlsversion, tlscipher); err != nil {
+		c.JSON(
+			http.StatusForbidden,
+			gin.H{
+				"message": "TLS requirements not met",
+			},
+		)
+		c.Abort()
+		return nil
 	}
 
 	return &database.Client{
