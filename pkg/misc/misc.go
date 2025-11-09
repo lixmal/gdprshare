@@ -12,6 +12,7 @@ import (
 	"github.com/lixmal/gdprshare/pkg/database"
 )
 
+// GenToken generates a cryptographically secure random token of the specified length.
 func GenToken(length int) (string, error) {
 	buf := make([]byte, length)
 
@@ -25,6 +26,7 @@ func GenToken(length int) (string, error) {
 	return token, nil
 }
 
+// DeleteStoredFile removes a stored file from both the filesystem and database.
 func DeleteStoredFile(f *database.StoredFile, db *database.Database, config *config.Config) []error {
 	var errors []error
 
@@ -39,6 +41,7 @@ func DeleteStoredFile(f *database.StoredFile, db *database.Database, config *con
 	return errors
 }
 
+// Cleanup removes expired files from the database and filesystem.
 func Cleanup(db *database.Database, config *config.Config) []error {
 	now := time.Now()
 	var errors []error

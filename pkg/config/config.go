@@ -42,22 +42,24 @@ type Config struct {
 	DisallowedUserAgents []string
 }
 
+// Default returns a Config instance with default values.
 func Default() *Config {
 	return &Config{}
 }
 
+// New loads and validates a configuration from the specified file path.
 func New(path string) (*Config, error) {
 	if _, err := os.Stat(path); err != nil {
-		return nil, fmt.Errorf("open config file: %s", err)
+		return nil, fmt.Errorf("open config file: %w", err)
 	}
 
 	var conf Config
 	if err := configor.New(&configor.Config{ErrorOnUnmatchedKeys: true}).Load(&conf, path); err != nil {
-		return nil, fmt.Errorf("parsing config file %s: %s", path, err)
+		return nil, fmt.Errorf("parsing config file %s: %w", path, err)
 	}
 
 	if err := conf.validate(); err != nil {
-		return nil, fmt.Errorf("validation: %s", err)
+		return nil, fmt.Errorf("validation: %w", err)
 	}
 
 	return &conf, nil

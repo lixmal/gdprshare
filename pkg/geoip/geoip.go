@@ -2,6 +2,7 @@ package geoip
 
 import (
 	"fmt"
+	"log"
 	"net"
 
 	"github.com/oschwald/geoip2-golang"
@@ -16,12 +17,17 @@ type Location struct {
 	IsEU         bool
 }
 
+// LookupIP performs a GeoIP lookup for the given IP address and returns location information.
 func LookupIP(path string, rawip string) (*Location, error) {
 	db, err := geoip2.Open(path)
 	if err != nil {
 		return nil, fmt.Errorf("open: %w", err)
 	}
-	defer db.Close()
+	defer func() {
+		if err := db.Close(); err != nil {
+			log.Printf("Failed to close geoip database: %s\n", err)
+		}
+	}()
 
 	ip := net.ParseIP(rawip)
 	record, err := db.City(ip)

@@ -63,6 +63,7 @@ func setupRoutes(router *gin.Engine, srv *Server) {
 	v1.POST("/files/validate", srv.validateFiles)
 }
 
+// New creates a new Server instance with the given database and configuration.
 func New(db *database.Database, conf *config.Config) *Server {
 	router := gin.Default()
 
@@ -80,10 +81,10 @@ func New(db *database.Database, conf *config.Config) *Server {
 	return srv
 }
 
+// Start starts the HTTP or HTTPS server based on the TLS configuration.
 func (s *Server) Start() error {
 	if s.config.TLS.Use {
 		return s.ListenAndServeTLS(s.config.TLS.Cert, s.config.TLS.Key)
-	} else {
-		return s.ListenAndServe()
 	}
+	return s.ListenAndServe()
 }
