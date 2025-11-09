@@ -82,5 +82,18 @@ saveclientinfo: false
 # MaxMind GeoLite2 City database path (mmdb file)
 geoippath: ''
 
+# rate limiting per IP address
+ratelimit:
+    enabled: true
+    rps:     10    # requests per second per IP
+    burst:   20    # maximum burst size
+
+# TLS version and cipher validation
+tlsvalidation:
+    enabled:    false  # set to true in production with TLS/reverse proxy
+    minversion: '1.2'  # minimum TLS version (1.0, 1.1, 1.2, 1.3)
+    # optional: additional ciphers to block (hex format)
+    # blockedciphers:
+    #   - '0x000a'
 
 # for config via env vars see https://github.com/jinzhu/configor#advanced-usage
