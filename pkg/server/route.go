@@ -50,6 +50,9 @@ func (s *Server) uploadFile(c *gin.Context) {
 		return
 	}
 
+	storedFile.Filename = sanitizeFilename(storedFile.Filename)
+	storedFile.Type = sanitizeType(storedFile.Type)
+
 	name, err := uuid.NewV4()
 	if err != nil {
 		log.Printf("Failed to create uuid: %s\n", err)
@@ -481,7 +484,7 @@ func (s *Server) getClientInfo(c *gin.Context) *database.Client {
 
 	if s.config.SaveClientInfo {
 		addr = c.ClientIP()
-		ua = c.Request.Header.Get("User-Agent")
+		ua = sanitizeUserAgent(c.Request.Header.Get("User-Agent"))
 
 		if s.config.GeoIPPath != "" {
 			location, err = geoip.LookupIP(s.config.GeoIPPath, addr)
