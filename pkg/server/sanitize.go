@@ -1,10 +1,8 @@
 package server
 
 import (
-	"path/filepath"
 	"regexp"
 	"strings"
-	"unicode"
 )
 
 var (
@@ -18,23 +16,11 @@ func sanitizeFilename(filename string) string {
 		return ""
 	}
 
-	filename = filepath.Base(filename)
+	// Remove control characters to prevent header injection.
 	filename = controlCharsRegex.ReplaceAllString(filename, "")
 	filename = strings.TrimSpace(filename)
 
-	var filtered strings.Builder
-	for _, r := range filename {
-		if unicode.IsPrint(r) && r != '/' && r != '\\' {
-			filtered.WriteRune(r)
-		}
-	}
-
-	result := filtered.String()
-	if len(result) > 255 {
-		result = result[:255]
-	}
-
-	return result
+	return filename
 }
 
 func sanitizeType(mimeType string) string {

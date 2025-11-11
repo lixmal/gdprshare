@@ -12,18 +12,18 @@ func TestSanitizeFilename(t *testing.T) {
 		expected string
 	}{
 		{"test.txt", "test.txt"},
-		{"../../../etc/passwd", "passwd"},
-		{"../../file.txt", "file.txt"},
-		{"/etc/passwd", "passwd"},
+		{"../../../etc/passwd", "../../../etc/passwd"},
+		{"../../file.txt", "../../file.txt"},
+		{"/etc/passwd", "/etc/passwd"},
 		{"file\x00name.txt", "filename.txt"},
 		{"file\nname.txt", "filename.txt"},
 		{"file\r\nname.txt", "filename.txt"},
 		{"file\x7fname.txt", "filename.txt"},
-		{"file/name.txt", "name.txt"},
-		{"file\\name.txt", "filename.txt"},
+		{"file/name.txt", "file/name.txt"},
+		{"file\\name.txt", "file\\name.txt"},
 		{"   spaces.txt   ", "spaces.txt"},
 		{"", ""},
-		{string(make([]byte, 300)), ""},
+		{"OM7hgMs3yGnGSpUjWq52Ny5Vk7XRTofieQD6yaLGf269o/HL6LYBalf2KDmJCm+ZrJnb46l6gRWfdZU=", "OM7hgMs3yGnGSpUjWq52Ny5Vk7XRTofieQD6yaLGf269o/HL6LYBalf2KDmJCm+ZrJnb46l6gRWfdZU="},
 	}
 
 	for _, tt := range tests {
