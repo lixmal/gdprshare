@@ -4,12 +4,7 @@
     "description": "share files according to gdpr rules",
     "main": "src/scripts/app.js",
     "scripts": {
-        "test": "jest --watchAll=false",
-        "test:watch": "jest --watch",
-        "test:coverage": "jest --coverage",
-        "test:e2e": "playwright test --reporter=list",
-        "test:e2e:ui": "playwright test --ui",
-        "test:e2e:headed": "playwright test --headed --reporter=list",
+        "test": "echo \"Error: no test specified\" && exit 1",
         "dev": "browserify -t browserify-css -t [ babelify --presets [ @babel/preset-env @babel/preset-react ] ] src/scripts/app.js -o public/scripts/bundle.js; sed -i 's/node_modules\\/bootstrap\\/dist\\///g' public/scripts/bundle.js",
         "build": "NODE_ENV=production browserify -t browserify-css -t [ babelify --presets [ @babel/preset-env @babel/preset-react ] ] -p [ uglifyify --no-sourcemap ] src/scripts/app.js | terser --compress --mangle > public/scripts/bundle.js; sed -i 's/node_modules\\/bootstrap\\/dist\\///g' public/scripts/bundle.js"
     },
@@ -28,32 +23,24 @@
     },
     "devDependencies": {
         "@babel/core": "^7.24.6",
-        "@babel/preset-env": "^7.25.4",
-        "@babel/preset-react": "^7.28.5",
-        "@playwright/test": "^1.56.1",
-        "@testing-library/jest-dom": "^6.9.1",
-        "@testing-library/react": "^12.1.5",
-        "@testing-library/user-event": "^14.6.1",
-        "babel-jest": "^30.2.0",
+        "@babel/preset-env": "^7.23.2",
+        "@babel/preset-react": "^7.23.3",
         "babelify": "^10.0.0",
-        "browserify": "^17.0.1",
+        "browserify": "^17.0.0",
         "browserify-css": "^0.15.0",
-        "jest": "^30.2.0",
-        "jest-environment-jsdom": "^30.2.0",
         "terser": "^5.29.1",
-        "text-encoding": "^0.7.0",
         "uglifyify": "^5.0.2"
     },
     "dependencies": {
         "@primer/octicons-react": "^9.6.0",
-        "bootstrap": "^5.3.8",
+        "bootstrap": "^5.0.0",
         "bs-custom-file-input": "^1.3.4",
         "classnames": "^2.5.1",
         "clipboard-polyfill": "^2.8.6",
-        "qrcode.react": "^3.2.0",
+        "qrcode.react": "^3.1.0",
         "react": "^16.14.0",
         "react-dom": "^16.14.0",
-        "react-modal": "^3.16.3",
+        "react-modal": "^3.16.1",
         "react-router-dom": "^5.3.4",
         "react-tooltip": "^4.5.1"
     },
@@ -61,11 +48,5 @@
         "autoInject": true,
         "minify": true,
         "rootDir": "."
-    },
-    "babel": {
-        "presets": [
-            "@babel/preset-env",
-            "@babel/preset-react"
-        ]
     }
 }
