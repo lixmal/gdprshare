@@ -35,7 +35,7 @@ jobs:
         run: go test -v -race -coverprofile=coverage-backend.out ./...
 
       - name: Upload backend coverage
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           files: ./coverage-backend.out
           flags: backend
@@ -62,7 +62,7 @@ jobs:
         run: npm test -- --coverage
 
       - name: Upload frontend coverage
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           files: ./coverage/lcov.info
           flags: frontend-utils
