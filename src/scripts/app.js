@@ -1,9 +1,8 @@
 import '../style/app.css'
 import React from 'react'
-import ReactDOM from 'react-dom'
+import ReactDOM from 'react-dom/client'
 
-import { Switch, Router, Route } from 'react-router'
-import { createBrowserHistory } from 'history'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
 import ErrPage from './ErrPage'
 import Upload from './Upload'
@@ -11,10 +10,8 @@ import Uploaded from './Uploaded'
 import Download from './Download'
 
 import './Polyfills'
-import ReactTooltip from 'react-tooltip'
+import { Tooltip } from 'react-tooltip'
 import * as Clipboard from "clipboard-polyfill/dist/clipboard-polyfill.promise"
-
-const history = createBrowserHistory()
 
 // global namespace
 window.gdprshare = {}
@@ -52,10 +49,8 @@ var rootEl = document.getElementById('app-content')
 
 
 var errPage = function () {
-    ReactDOM.render(
-        <ErrPage />,
-        rootEl
-    )
+    const root = ReactDOM.createRoot(rootEl)
+    root.render(<ErrPage />)
     throw 'browser does not support required functions'
 }
 
@@ -151,8 +146,6 @@ gdprshare.showTooltip = function (btn, message) {
     this.setState({
         copy: message,
     })
-    ReactTooltip.show(btn)
-    ReactTooltip.hide(btn)
 }
 
 gdprshare.handleTipContent = function () {
@@ -167,13 +160,13 @@ gdprshare.confirmReceipt = function (fileId) {
     })
 }
 
-ReactDOM.render(
-    <Router history={history}>
-        <Switch>
-            <Route path="/" exact    component={Upload} />
-            <Route path="/uploaded"  component={Uploaded} />
-            <Route path="/d/:fileId" component={Download} />
-        </Switch>
-    </Router>,
-    rootEl
+const root = ReactDOM.createRoot(rootEl)
+root.render(
+    <BrowserRouter>
+        <Routes>
+            <Route path="/" element={<Upload />} />
+            <Route path="/uploaded" element={<Uploaded />} />
+            <Route path="/d/:fileId" element={<Download />} />
+        </Routes>
+    </BrowserRouter>
 )

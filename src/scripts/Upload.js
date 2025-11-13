@@ -3,9 +3,10 @@ import Classnames from 'classnames'
 import Octicon, {Clippy, CloudUpload, Trashcan} from '@primer/octicons-react'
 import BsCustomFileInput from 'bs-custom-file-input'
 import Alert from './Alert'
-import ReactTooltip from 'react-tooltip'
+import { Tooltip } from 'react-tooltip'
+import { withRouter } from './withRouter'
 
-export default class Upload extends React.Component {
+class Upload extends React.Component {
     constructor() {
         super()
 
@@ -185,16 +186,15 @@ export default class Upload extends React.Component {
             }
         }
 
-        this.props.history.push(
-            'uploaded',
-            {
+        this.props.router.navigate('/uploaded', {
+            state: {
                 location: loc,
                 // unencrypted filename
                 filename: plainFilename,
                 key: b64Key,
                 count: this.refs.count.value,
             }
-        )
+        })
     }
 
     handleDrop(event) {
@@ -556,10 +556,7 @@ export default class Upload extends React.Component {
                                                 Only EU/EEA
                                             </label>
                                         </div>
-                                        <ReactTooltip id="only-eea-tip" variant="info" place="bottom">
-                                            Allows downloads only from EEA countries (European Union +
-                                            Iceland/Norway/Liechtenstein)
-                                        </ReactTooltip>
+                                        <Tooltip id="only-eea-tip" variant="info" place="bottom" content="Allows downloads only from EEA countries (European Union + Iceland/Norway/Liechtenstein)" />
 
                                         <div className="form-group form-check form-check-inline" data-tip
                                              data-for="include-other-tip">
@@ -570,11 +567,11 @@ export default class Upload extends React.Component {
                                                 Other
                                             </label>
                                         </div>
-                                        <ReactTooltip id="include-other-tip" place="bottom">
+                                        <Tooltip id="include-other-tip" place="bottom">
                                             Allows downloads from EEA countries and additionally from countries with
                                             similar GDPR laws. <br/>
                                             Currently: Switzerland, UK, Monaco, Andorra, San Marino, Vatican City
-                                        </ReactTooltip>
+                                        </Tooltip>
                                         <div className="form-group form-check form-check-inline" data-tip
                                              data-for="delay-download-tip"
                                         >
@@ -589,9 +586,7 @@ export default class Upload extends React.Component {
                                                 Delay
                                             </label>
                                         </div>
-                                        <ReactTooltip id="delay-download-tip" place="bottom">
-                                            Delay download availability by a set amount of time in minutes.
-                                        </ReactTooltip>
+                                        <Tooltip id="delay-download-tip" place="bottom" content="Delay download availability by a set amount of time in minutes." />
                                         {this.state.delayDownload && (
                                             <div className="form-group row">
                                                 <label htmlFor="delay-minutes"
@@ -623,13 +618,13 @@ export default class Upload extends React.Component {
                             <Alert error={this.state.error}/>
                         </div>
                         {filesCol}
-                        <ReactTooltip id="copy-tip" event="none" getContent={this.handleTipContent} delayHide={1000}/>
-                        <ReactTooltip id="delete-tip" variant="info" place="bottom">
-                            Delete file
-                        </ReactTooltip>
+                        <Tooltip id="copy-tip" openOnClick={false} render={() => this.state.copy} delayHide={1000}/>
+                        <Tooltip id="delete-tip" variant="info" place="bottom" content="Delete file" />
                     </div>
                 </div>
             </div>
         )
     }
 }
+
+export default withRouter(Upload)

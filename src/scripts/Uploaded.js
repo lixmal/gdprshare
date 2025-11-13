@@ -2,10 +2,11 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import Octicon, { LinkExternal, Clippy, ScreenFull } from '@primer/octicons-react'
 import Alert from './Alert'
-import ReactTooltip from 'react-tooltip'
+import { Tooltip } from 'react-tooltip'
 import { QRCodeSVG } from 'qrcode.react'
+import { withRouter } from './withRouter'
 
-export default class Uploaded extends React.Component {
+class Uploaded extends React.Component {
     constructor() {
         super()
 
@@ -27,7 +28,7 @@ export default class Uploaded extends React.Component {
 
         var btn = event.currentTarget
         btn.blur()
-        var state = this.props.history.location.state
+        var state = this.props.router.location.state
         var downloadLink = state.location + '#' + state.key
 
         if (window.navigator.share) {
@@ -59,17 +60,19 @@ export default class Uploaded extends React.Component {
     }
 
     render() {
-        if (!this.props.history.location.state) {
-            this.props.history.replace('/')
+        if (!this.props.router.location.state) {
+            this.props.router.navigate('/', { replace: true })
             return null
         }
+
+        const state = this.props.router.location.state
 
         let dialog
 
         if (this.state.dialogOpen) {
             dialog = (
                 <dialog className="dialog" open onClick={this.handleShowDialog}>
-                    <QRCodeSVG value={ this.props.history.location.state.location + '#' + this.props.history.location.state.key } onClick={this.qrHandler} />
+                    <QRCodeSVG value={ state.location + '#' + state.key } onClick={this.qrHandler} />
                 </dialog>
             )
         }
@@ -84,7 +87,7 @@ export default class Uploaded extends React.Component {
                                 Filename
                             </label>
                             <div className="col-sm-9">
-                                <input className="form-control form-control-sm" id="filename" type="text" ref="filename" readOnly defaultValue={this.props.history.location.state.filename} />
+                                <input className="form-control form-control-sm" id="filename" type="text" ref="filename" readOnly defaultValue={state.filename} />
                             </div>
                         </div>
                         {dialog}
@@ -106,7 +109,7 @@ export default class Uploaded extends React.Component {
                                         </button>
                                     </div>
                                     <input className="form-control form-control-sm" id="link-key" type="text" ref="link-key" placeholder="Link" readOnly aria-describedby="link-key-help"
-                                        value={ this.props.history.location.state.location + '#' + this.props.history.location.state.key }
+                                        value={ state.location + '#' + state.key }
                                     />
                                 </div>
                                 <small id="link-key-help" className="form-text text-muted">Share this download link with the recipient</small>
@@ -120,15 +123,13 @@ export default class Uploaded extends React.Component {
                     <div className="text-center col-sm-12">
                         <Link to="/">Upload another file</Link>
                     </div>
-                    <ReactTooltip id="copy-tip" event="none" getContent={this.handleTipContent} delayHide={1000} />
-                    <ReactTooltip id="qrcode-tip" variant="info" place="bottom">
-                        Show QR code
-                    </ReactTooltip>
-                    <ReactTooltip id="share-tip" variant="info" place="bottom">
-                        Share
-                    </ReactTooltip>
+                    <Tooltip id="copy-tip" openOnClick={false} render={() => this.state.copy} delayHide={1000} />
+                    <Tooltip id="qrcode-tip" variant="info" place="bottom" content="Show QR code" />
+                    <Tooltip id="share-tip" variant="info" place="bottom" content="Share" />
                 </div>
             </div>
         )
     }
 }
+
+export default withRouter(Uploaded)
