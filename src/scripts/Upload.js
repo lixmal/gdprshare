@@ -1,7 +1,6 @@
 import React from 'react'
 import Classnames from 'classnames'
 import Octicon, {Clippy, CloudUpload, Trashcan} from '@primer/octicons-react'
-import BsCustomFileInput from 'bs-custom-file-input'
 import Alert from './Alert'
 import { Tooltip } from 'react-tooltip'
 import { withRouter } from './withRouter'
@@ -37,8 +36,6 @@ class Upload extends React.Component {
     }
 
     componentDidMount() {
-        BsCustomFileInput.init()
-
         this.updateValidity()
     }
 
@@ -461,14 +458,9 @@ class Upload extends React.Component {
         let contentInput
         if (this.state.type === 'file') {
             contentInput = (
-                <div className="col-sm-9">
-                    <div className="custom-file">
-                        <input className="custom-file-input form-control form-control-sm" id="content" type="file"
-                               ref="file" onChange={this.handleFile} required autoFocus/>
-                        <label className="custom-file-label col-form-label col-form-label-sm" htmlFor="file">
-                            Select or drop file
-                        </label>
-                    </div>
+                <div className="col-sm-9 mb-3">
+                    <input className="form-control form-control-sm" id="content" type="file"
+                           ref="file" onChange={this.handleFile} required autoFocus/>
                 </div>
             )
         } else {
@@ -495,7 +487,7 @@ class Upload extends React.Component {
                                 </h3>
                             </div>
                             <form ref="form" className={this.innerClasses()} onSubmit={this.handleUpload}>
-                                <div className="form-group row">
+                                <div className="mb-3 row">
                                     <label className="col-sm-3 col-form-label col-form-label-sm toggle">
                                         <input type="checkbox" id="type" ref="type" onChange={this.handleTypeToggle}/>
                                         <span className="slider"></span>
@@ -505,7 +497,7 @@ class Upload extends React.Component {
                                 </div>
 
                                 <div>
-                                    <div className="form-group row">
+                                    <div className="mb-3 row">
                                         <label htmlFor="email" className="col-sm-3 col-form-label col-form-label-sm">
                                             Notification
                                         </label>
@@ -520,7 +512,7 @@ class Upload extends React.Component {
                                         </div>
                                     </div>
 
-                                    <div className="form-group row">
+                                    <div className="mb-3 row">
                                         <label htmlFor="count" className="col-sm-3 col-form-label col-form-label-sm">
                                             Count
                                         </label>
@@ -533,7 +525,7 @@ class Upload extends React.Component {
                                         </div>
                                     </div>
 
-                                    <div className="form-group row">
+                                    <div className="mb-3 row">
                                         <label htmlFor="expiry" className="col-sm-3 col-form-label col-form-label-sm">
                                             Expiry
                                         </label>
@@ -546,8 +538,8 @@ class Upload extends React.Component {
                                         </div>
                                     </div>
 
-                                    <div className="row justify-content-center">
-                                        <div className="form-group form-check form-check-inline" data-tip
+                                    <div className="mb-3 d-flex justify-content-center">
+                                        <div className="form-check form-check-inline" data-tip
                                              data-for="only-eea-tip">
                                             <input className="form-check-input" id="only-eea" type="checkbox"
                                                    ref="only-eea" defaultChecked={this.state.onlyEEAChecked}
@@ -556,9 +548,8 @@ class Upload extends React.Component {
                                                 Only EU/EEA
                                             </label>
                                         </div>
-                                        <Tooltip id="only-eea-tip" variant="info" place="bottom" content="Allows downloads only from EEA countries (European Union + Iceland/Norway/Liechtenstein)" />
 
-                                        <div className="form-group form-check form-check-inline" data-tip
+                                        <div className="form-check form-check-inline" data-tip
                                              data-for="include-other-tip">
                                             <input className="form-check-input" id="include-other" type="checkbox"
                                                    ref="include-other" disabled={!this.state.onlyEEAChecked}/>
@@ -567,12 +558,8 @@ class Upload extends React.Component {
                                                 Other
                                             </label>
                                         </div>
-                                        <Tooltip id="include-other-tip" place="bottom">
-                                            Allows downloads from EEA countries and additionally from countries with
-                                            similar GDPR laws. <br/>
-                                            Currently: Switzerland, UK, Monaco, Andorra, San Marino, Vatican City
-                                        </Tooltip>
-                                        <div className="form-group form-check form-check-inline" data-tip
+
+                                        <div className="form-check form-check-inline" data-tip
                                              data-for="delay-download-tip"
                                         >
                                             <input
@@ -586,9 +573,17 @@ class Upload extends React.Component {
                                                 Delay
                                             </label>
                                         </div>
-                                        <Tooltip id="delay-download-tip" place="bottom" content="Delay download availability by a set amount of time in minutes." />
-                                        {this.state.delayDownload && (
-                                            <div className="form-group row">
+                                    </div>
+                                    <Tooltip id="only-eea-tip" variant="info" place="bottom" content="Allows downloads only from EEA countries (European Union + Iceland/Norway/Liechtenstein)" />
+                                    <Tooltip id="include-other-tip" place="bottom">
+                                        Allows downloads from EEA countries and additionally from countries with
+                                        similar GDPR laws. <br/>
+                                        Currently: Switzerland, UK, Monaco, Andorra, San Marino, Vatican City
+                                    </Tooltip>
+                                    <Tooltip id="delay-download-tip" place="bottom" content="Delay download availability by a set amount of time in minutes." />
+
+                                    {this.state.delayDownload && (
+                                            <div className="mb-3 row">
                                                 <label htmlFor="delay-minutes"
                                                        className="col-sm-3 col-form-label col-form-label-sm">
                                                     Delay Minutes
@@ -606,7 +601,6 @@ class Upload extends React.Component {
                                                 </div>
                                             </div>
                                         )}
-                                    </div>
                                 </div>
 
                                 <div className="text-center col-sm-12">

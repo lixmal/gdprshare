@@ -82,7 +82,7 @@ class Uploaded extends React.Component {
                 <div className="app-outer">
                     <h4 className="text-center">File was uploaded</h4>
                     <form className="app-inner">
-                        <div className="form-group row">
+                        <div className="mb-3 row">
                             <label htmlFor="filename" className="col-sm-3 col-form-label col-form-label-sm">
                                 Filename
                             </label>
@@ -91,24 +91,22 @@ class Uploaded extends React.Component {
                             </div>
                         </div>
                         {dialog}
-                        <div className="form-group row">
+                        <div className="mb-3 row">
                             <label htmlFor="link" className="col-sm-3 col-form-label col-form-label-sm">
                                 Link
                             </label>
                             <div className="col-sm-9">
-                                <div className="input-group">
-                                    <div className="input-group-prepend">
-                                        <button id="link-copy" onClick={this.copyHandler} type="button" className="btn input-group-text" data-for="copy-tip" data-tip>
-                                            <Octicon icon={Clippy} />
-                                        </button>
-                                        <button id="link-qr" onClick={this.qrHandler} type="button" className="btn input-group-text" data-tip data-for="qrcode-tip">
-                                            <Octicon icon={ScreenFull} />
-                                        </button>
-                                        <button id="link-share" onClick={this.shareHandler} type="button" className="btn input-group-text" data-tip data-for="share-tip">
-                                            <Octicon icon={LinkExternal} />
-                                        </button>
-                                    </div>
-                                    <input className="form-control form-control-sm" id="link-key" type="text" ref="link-key" placeholder="Link" readOnly aria-describedby="link-key-help"
+                                <div className="input-group input-group-sm">
+                                    <button id="link-copy" onClick={this.copyHandler} type="button" className="btn btn-light border" data-for="copy-tip" data-tip>
+                                        <Octicon icon={Clippy} />
+                                    </button>
+                                    <button id="link-qr" onClick={this.qrHandler} type="button" className="btn btn-light border" data-tip data-for="qrcode-tip">
+                                        <Octicon icon={ScreenFull} />
+                                    </button>
+                                    <button id="link-share" onClick={this.shareHandler} type="button" className="btn btn-light border" data-tip data-for="share-tip">
+                                        <Octicon icon={LinkExternal} />
+                                    </button>
+                                    <input className="form-control" id="link-key" type="text" ref="link-key" placeholder="Link" readOnly aria-describedby="link-key-help"
                                         value={ state.location + '#' + state.key }
                                     />
                                 </div>

@@ -111,9 +111,11 @@ gdprshare.copyHandler = function (event) {
 
     var btn = event.currentTarget
     btn.blur()
-    var element = btn.parentNode.nextSibling
+    var element = btn.parentNode.classList.contains('input-group')
+        ? btn.parentNode.querySelector('input')
+        : btn.parentNode.nextSibling
     var value
-    if (element.tagName === 'INPUT') {
+    if (element && element.tagName === 'INPUT') {
         value = element.value
     }
     else {

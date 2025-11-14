@@ -32,7 +32,7 @@ test.describe('Full E2E Upload and Download Flow', () => {
     await page.waitForURL(/\/uploaded/);
 
     // Verify we got a file ID and owner token
-    const downloadLink = page.locator('input[readonly]').nth(1);
+    const downloadLink = page.locator('input#link-key');
     await expect(downloadLink).toBeVisible();
 
     const linkValue = await downloadLink.inputValue();
@@ -73,9 +73,7 @@ test.describe('Full E2E Upload and Download Flow', () => {
     const passwordHash = hashMatch[1];
 
     // Step 3: Test clipboard functionality
-    const copyButton = page.locator('button').filter({ hasText: /copy/i }).or(
-      page.locator('button').filter({ has: page.locator('svg') })
-    ).first();
+    const copyButton = page.locator('button#link-copy');
 
     if (await copyButton.isVisible()) {
       await copyButton.click();
@@ -125,15 +123,11 @@ test.describe('Full E2E Upload and Download Flow', () => {
     await page.waitForURL(/\/uploaded/);
 
     // Find and click the copy button
-    const copyButtons = page.locator('button').filter({
-      has: page.locator('svg')
-    });
-
-    const firstCopyButton = copyButtons.first();
-    await expect(firstCopyButton).toBeVisible();
+    const copyButton = page.locator('button#link-copy');
+    await expect(copyButton).toBeVisible();
 
     // Click the copy button
-    await firstCopyButton.click();
+    await copyButton.click();
 
     // Wait for clipboard operation
     await page.waitForTimeout(500);
@@ -167,7 +161,7 @@ test.describe('Full E2E Upload and Download Flow', () => {
 
     await page.waitForURL(/\/uploaded/);
 
-    const downloadLinkInput = page.locator('input[readonly]').nth(1);
+    const downloadLinkInput = page.locator('input#link-key');
     const downloadUrl = await downloadLinkInput.inputValue();
 
     // First download
@@ -227,7 +221,7 @@ test.describe('Full E2E Upload and Download Flow', () => {
     await page.waitForURL(/\/uploaded/);
 
     // Get download link with embedded password
-    const downloadLinkInput = page.locator('input[readonly]').nth(1);
+    const downloadLinkInput = page.locator('input#link-key');
     const downloadUrl = await downloadLinkInput.inputValue();
 
     // Verify the URL has a hash (password)
