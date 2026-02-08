@@ -334,4 +334,15 @@
     color: #dc3545;
 }
 
+@media print {
+    .image-modal, .image-container, .image-modal img {
+        display: none !important;
+        visibility: hidden !important;
+    }
+}
+
+.image-modal.image-hidden img {
+    filter: blur(80px) !important;
+}
+
 @import url('node_modules/bootstrap/dist/css/bootstrap.min.css');

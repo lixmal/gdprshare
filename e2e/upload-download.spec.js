@@ -265,6 +265,90 @@ test.describe('Full E2E Upload and Download Flow', () => {
     expect(antiSave.hasOverlay).toBe(true);
   });
 
+  test('should blur image when tab loses focus', async ({ page, context }) => {
+    const testImagePath = path.join(__dirname, 'test-image.png');
+
+    await page.locator('select#type').selectOption('image');
+
+    const fileInput = page.locator('input#image-content');
+    await fileInput.setInputFiles(testImagePath);
+
+    await page.locator('input#count').fill('2');
+    await page.locator('input#only-eea').uncheck();
+
+    const uploadButton = page.locator('input[type="submit"][value="Upload"]');
+    await uploadButton.click();
+
+    await page.waitForURL(/\/uploaded/);
+
+    const downloadLinkInput = page.locator('input#link-key');
+    const downloadUrl = await downloadLinkInput.inputValue();
+
+    const downloadPage = await context.newPage();
+    await downloadPage.goto(downloadUrl, { waitUntil: 'load' });
+
+    const inlineImage = downloadPage.locator('#inline-image');
+    await expect(inlineImage).toBeVisible({ timeout: 10000 });
+
+    // Initially not blurred
+    const modal = downloadPage.locator('.image-modal');
+    await expect(modal).not.toHaveClass(/image-hidden/);
+
+    // Simulate visibilitychange to hidden
+    await downloadPage.evaluate(() => {
+      Object.defineProperty(document, 'hidden', { value: true, writable: true });
+      Object.defineProperty(document, 'visibilityState', { value: 'hidden', writable: true });
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+
+    await expect(modal).toHaveClass(/image-hidden/);
+
+    // Verify blur is applied
+    const blurFilter = await downloadPage.evaluate(() => {
+      const img = document.querySelector('#inline-image');
+      return window.getComputedStyle(img).filter;
+    });
+    expect(blurFilter).toBe('blur(80px)');
+
+    // Simulate visibilitychange back to visible (unblur is delayed 1.5s)
+    await downloadPage.evaluate(() => {
+      Object.defineProperty(document, 'hidden', { value: false, writable: true });
+      Object.defineProperty(document, 'visibilityState', { value: 'visible', writable: true });
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+
+    // Should still be blurred immediately after focus (1.5s delay)
+    await expect(modal).toHaveClass(/image-hidden/);
+
+    // After the delay, blur should be removed
+    await expect(modal).not.toHaveClass(/image-hidden/, { timeout: 3000 });
+
+    // Verify blur is removed
+    const noBlur = await downloadPage.evaluate(() => {
+      const img = document.querySelector('#inline-image');
+      return window.getComputedStyle(img).filter;
+    });
+    expect(noBlur).toBe('none');
+
+    // Test window blur event
+    await downloadPage.evaluate(() => {
+      window.dispatchEvent(new Event('blur'));
+    });
+
+    await expect(modal).toHaveClass(/image-hidden/);
+
+    // Test window focus event (also delayed)
+    await downloadPage.evaluate(() => {
+      window.dispatchEvent(new Event('focus'));
+    });
+
+    // Should still be blurred immediately
+    await expect(modal).toHaveClass(/image-hidden/);
+
+    // After delay, blur removed
+    await expect(modal).not.toHaveClass(/image-hidden/, { timeout: 3000 });
+  });
+
   test('should upload a disappearing image with countdown', async ({ page, context }) => {
     const testImagePath = path.join(__dirname, 'test-image.png');
 

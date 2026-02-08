@@ -13,6 +13,7 @@ export default class Download extends React.Component {
         this.closeModal = this.closeModal.bind(this)
         this.handleViewImage = this.handleViewImage.bind(this)
         this.handleImageZoom = this.handleImageZoom.bind(this)
+        this.handleVisibilityChange = this.handleVisibilityChange.bind(this)
 
         this.state = {
             error: null,
@@ -24,6 +25,7 @@ export default class Download extends React.Component {
             imageData: null,
             imageReady: false,
             imageZoomed: false,
+            imageHidden: false,
             ephemeral: 0,
             countdown: 0,
         }
@@ -35,13 +37,24 @@ export default class Download extends React.Component {
             clearInterval(this.countdownTimer)
             this.countdownTimer = null
         }
+        if (this.unblurTimeout) {
+            clearTimeout(this.unblurTimeout)
+            this.unblurTimeout = null
+        }
         if (this.state.imageData) {
             var URL = window.URL || window.webkitURL
             URL.revokeObjectURL(this.state.imageData)
         }
+        document.removeEventListener('visibilitychange', this.handleVisibilityChange)
+        window.removeEventListener('blur', this.handleVisibilityChange)
+        window.removeEventListener('focus', this.handleVisibilityChange)
     }
 
     componentDidMount() {
+        document.addEventListener('visibilitychange', this.handleVisibilityChange)
+        window.addEventListener('blur', this.handleVisibilityChange)
+        window.addEventListener('focus', this.handleVisibilityChange)
+
         let key = window.location.hash.substring(1)
 
         // don't render password field
@@ -104,6 +117,23 @@ export default class Download extends React.Component {
 
     handleImageZoom() {
         this.setState({ imageZoomed: !this.state.imageZoomed })
+    }
+
+    handleVisibilityChange(event) {
+        if (this.unblurTimeout) {
+            clearTimeout(this.unblurTimeout)
+            this.unblurTimeout = null
+        }
+
+        var shouldHide = event.type === 'blur' || (event.type === 'visibilitychange' && document.hidden)
+
+        if (shouldHide) {
+            this.setState({ imageHidden: true })
+        } else {
+            this.unblurTimeout = setTimeout(function () {
+                this.setState({ imageHidden: false })
+            }.bind(this), 1500)
+        }
     }
 
     downloadFile(data, filename) {
@@ -251,6 +281,10 @@ export default class Download extends React.Component {
             </form>
         )
 
+        var imageModalClass = 'image-modal'
+            + (this.state.imageZoomed ? ' image-zoomed' : '')
+            + (this.state.imageHidden ? ' image-hidden' : '')
+
         return (
             <div className="container-fluid col-sm-4">
                 <div className={this.classes()}>
@@ -260,7 +294,7 @@ export default class Download extends React.Component {
                     <br />
                     {this.state.successful && <Success message="Successfully downloaded, check your download folder" />}
                     {this.state.imageReady && !this.state.ephemeral && (
-                        <div className={'image-modal' + (this.state.imageZoomed ? ' image-zoomed' : '')}
+                        <div className={imageModalClass}
                              onContextMenu={function(e) { e.preventDefault() }}
                              onDragStart={function(e) { e.preventDefault() }}>
                             <div className="image-container">
@@ -293,7 +327,7 @@ export default class Download extends React.Component {
                         </div>
                     )}
                     {this.state.imageData && this.state.ephemeral > 0 && (
-                        <div className={'image-modal' + (this.state.imageZoomed ? ' image-zoomed' : '')}
+                        <div className={imageModalClass}
                              onContextMenu={function(e) { e.preventDefault() }}
                              onDragStart={function(e) { e.preventDefault() }}>
                             <div className="image-container">

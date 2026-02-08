@@ -215,6 +215,50 @@ class Upload extends React.Component {
         this.refs.submit.click()
     }
 
+
+    stripImageMetadata(file) {
+        if (file.type === 'image/gif') {
+            return Promise.resolve(file)
+        }
+
+        return new Promise(function (resolve, reject) {
+            var img = new Image()
+            var url = (window.URL || window.webkitURL).createObjectURL(file)
+
+            img.onload = function () {
+                (window.URL || window.webkitURL).revokeObjectURL(url)
+
+                var canvas = document.createElement('canvas')
+                canvas.width = img.naturalWidth
+                canvas.height = img.naturalHeight
+
+                var ctx = canvas.getContext('2d')
+                ctx.drawImage(img, 0, 0)
+
+                var mimeType = file.type
+                if (mimeType !== 'image/png' && mimeType !== 'image/webp') {
+                    mimeType = 'image/jpeg'
+                }
+                var quality = mimeType === 'image/jpeg' ? 0.92 : undefined
+
+                canvas.toBlob(function (blob) {
+                    if (!blob) {
+                        reject(new Error('canvas toBlob failed'))
+                        return
+                    }
+                    resolve(new File([blob], file.name, { type: mimeType }))
+                }, mimeType, quality)
+            }
+
+            img.onerror = function () {
+                (window.URL || window.webkitURL).revokeObjectURL(url)
+                reject(new Error('failed to load image'))
+            }
+
+            img.src = url
+        })
+    }
+
     async handleUpload(event) {
         event.preventDefault()
         if (this.state.mask)
@@ -236,6 +280,11 @@ class Upload extends React.Component {
             file = new File([text], text.slice(0, 21) + '.txt', {type: 'text/plain'})
         } else if (this.state.type === 'image') {
             file = this.refs.image.files[0]
+            try {
+                file = await this.stripImageMetadata(file)
+            } catch (err) {
+                console.log('metadata strip failed, using original:', err)
+            }
         } else {
             file = this.refs.file.files[0]
         }
