@@ -205,6 +205,7 @@ class Upload extends React.Component {
                 fileId: fetchData.fileId,
                 ownerToken: fetchData.ownerToken,
                 location: loc + '#' + b64Key,
+                totalCount: parseInt(this.refs.count.value, 10) || 1,
             }
 
             try {
@@ -554,8 +555,10 @@ class Upload extends React.Component {
                 } else {
                     classes = 'expiry'
                     let expires = isInitDate ? '<no data>' : expiryDate.toLocaleString()
+                    let total = files[i].totalCount
+                    let countText = total ? `${file.count}/${total}` : `${file.count}`
                     let s = file.count > 1 ? 's' : ''
-                    text = `${file.count} DL${s} or ${expires}`
+                    text = `${countText} DL${s} or ${expires}`
                 }
                 expiry = (
                     <span className={classes}>
