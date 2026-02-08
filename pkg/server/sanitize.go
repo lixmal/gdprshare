@@ -7,7 +7,6 @@ import (
 
 var (
 	controlCharsRegex = regexp.MustCompile(`[\x00-\x1f\x7f-\x9f]`)
-	pathTraversal     = regexp.MustCompile(`\.\.|/|\\`)
 	validTypes        = map[string]bool{"file": true, "text": true, "image": true}
 )
 
