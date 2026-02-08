@@ -45,7 +45,7 @@
         "uglifyify": "^5.0.2"
     },
     "dependencies": {
-        "@primer/octicons-react": "^9.6.0",
+        "@primer/octicons-react": "^19.21.2",
         "bootstrap": "^5.3.8",
         "classnames": "^2.5.1",
         "clipboard-polyfill": "^2.8.6",
