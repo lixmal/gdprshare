@@ -50,8 +50,8 @@
         "classnames": "^2.5.1",
         "clipboard-polyfill": "^2.8.6",
         "qrcode.react": "^3.2.0",
-        "react": "^18.3.1",
-        "react-dom": "^18.3.1",
+        "react": "^19.2.4",
+        "react-dom": "^19.2.4",
         "react-modal": "^3.16.3",
         "react-router-dom": "^6.30.1",
         "react-tooltip": "^5.30.0"
