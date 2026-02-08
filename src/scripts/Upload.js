@@ -19,11 +19,14 @@ class Upload extends React.Component {
         this.handleDragOn = this.handleDragOn.bind(this)
         this.handleDragOff = this.handleDragOff.bind(this)
         this.handleTypeChange = this.handleTypeChange.bind(this)
-        this.handleDisappearToggle = this.handleDisappearToggle.bind(this)
+        this.handleEphemeralChange = this.handleEphemeralChange.bind(this)
         this.uploadFile = this.uploadFile.bind(this)
         this.updateValidity = this.updateValidity.bind(this)
-        this.checkOnlyEEA = this.checkOnlyEEA.bind(this)
-        this.handleDelayDownloadToggle = this.handleDelayDownloadToggle.bind(this)
+        this.handleGeoRestrictionChange = this.handleGeoRestrictionChange.bind(this)
+        this.handleCountryToggle = this.handleCountryToggle.bind(this)
+        this.handleCountrySearch = this.handleCountrySearch.bind(this)
+        this.handleDeselectAll = this.handleDeselectAll.bind(this)
+        this.handleDelayChange = this.handleDelayChange.bind(this)
 
         this.state = {
             error: null,
@@ -31,14 +34,37 @@ class Upload extends React.Component {
             copy: null,
             fileInfo: null,
             type: 'file',
-            onlyEEAChecked: true,
-            delayDownload: false,
-            disappear: false,
+            geoRestriction: 'eea',
+            countryList: [],
+            countryGroups: {},
+            selectedCountries: [],
+            yourCountry: '',
+            countrySearch: '',
+            customCountriesUsed: false,
+            delay: '0',
+            ephemeral: '0',
         }
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         this.updateValidity()
+        try {
+            var response = await window.fetch(gdprshare.config.apiPrefix + '/countries')
+            if (response.ok) {
+                var data = await response.json()
+                this.setState({
+                    countryList: data.countries,
+                    countryGroups: data.groups,
+                    yourCountry: data.yourCountry || '',
+                    selectedCountries: data.groups.euEEA || [],
+                })
+            } else {
+                this.setState({ geoRestriction: 'none' })
+            }
+        } catch (e) {
+            console.log('fetch countries:', e)
+            this.setState({ geoRestriction: 'none' })
+        }
     }
 
     async updateValidity() {
@@ -130,12 +156,13 @@ class Upload extends React.Component {
         formData.append('count', this.refs.count.value)
         formData.append('expiry', this.refs.expiry.value)
         formData.append('email', email)
-        formData.append('only-eea', this.refs['only-eea'].checked)
-        formData.append('include-other', this.refs['include-other'].checked)
-        if (this.state.delayDownload)
-            formData.append('delay', this.refs['delay-minutes'].value)
-        if (this.state.type === 'image' && this.state.disappear)
-            formData.append('ephemeral', this.refs['ephemeral-seconds'].value)
+        if (this.state.geoRestriction !== 'none') {
+            formData.append('allowed-countries', this.state.selectedCountries.join(','))
+        }
+        if (this.state.delay !== '0')
+            formData.append('delay', this.state.delay)
+        if (this.state.type === 'image' && this.state.ephemeral !== '0')
+            formData.append('ephemeral', this.state.ephemeral)
 
         window.localStorage.setItem('email', email)
 
@@ -407,26 +434,86 @@ class Upload extends React.Component {
     handleTypeChange(event) {
         this.setState({
             type: event.target.value,
-            disappear: false,
+            ephemeral: '0',
         })
     }
 
-    handleDisappearToggle(event) {
+    handleEphemeralChange(event) {
         this.setState({
-            disappear: event.target.checked,
+            ephemeral: event.target.value,
         })
     }
 
-    checkOnlyEEA(event) {
-        var cb = event.currentTarget
-        this.setState({
-            onlyEEAChecked: cb.checked
+    handleGeoRestrictionChange(event) {
+        var value = event.target.value
+        var selectedCountries = []
+        var updates = { geoRestriction: value, countrySearch: '' }
+        if (value === 'eea') {
+            selectedCountries = (this.state.countryGroups.euEEA || []).slice()
+        } else if (value === 'gdpr-aligned') {
+            selectedCountries = (this.state.countryGroups.gdprAligned || []).slice()
+        } else if (value === 'custom') {
+            if (!this.state.customCountriesUsed) {
+                selectedCountries = this.state.yourCountry ? [this.state.yourCountry] : []
+                updates.customCountriesUsed = true
+            } else {
+                selectedCountries = this.state.customCountries || []
+            }
+        }
+        updates.selectedCountries = selectedCountries
+        this.setState(updates)
+    }
+
+    handleCountryToggle(code) {
+        this.setState(function (prevState) {
+            var selected = prevState.selectedCountries.slice()
+            var idx = selected.indexOf(code)
+            if (idx === -1) {
+                selected.push(code)
+            } else {
+                selected.splice(idx, 1)
+            }
+            var updates = { selectedCountries: selected }
+            if (prevState.geoRestriction === 'custom') {
+                updates.customCountries = selected.slice()
+            }
+            return updates
         })
     }
 
-    handleDelayDownloadToggle(event) {
+    handleCountrySearch(event) {
+        this.setState({ countrySearch: event.target.value })
+    }
+
+    handleDeselectAll() {
+        var search = this.state.countrySearch.toLowerCase()
+        if (!search) {
+            var updates = { selectedCountries: [] }
+            if (this.state.geoRestriction === 'custom') {
+                updates.customCountries = []
+            }
+            this.setState(updates)
+            return
+        }
+        var filtered = this.state.countryList.filter(function (c) {
+            return c.name.toLowerCase().indexOf(search) !== -1
+        })
+        var removeCodes = filtered.map(function (c) { return c.code })
+        this.setState(function (prevState) {
+            var selected = prevState.selectedCountries.filter(function (c) {
+                return removeCodes.indexOf(c) === -1
+            })
+            var updates = { selectedCountries: selected }
+            if (prevState.geoRestriction === 'custom') {
+                updates.customCountries = selected.slice()
+            }
+            return updates
+        })
+    }
+
+    handleDelayChange(event) {
         this.setState({
-            delayDownload: event.target.checked
+            delay: event.target.value
         })
     }
 
@@ -619,113 +706,120 @@ class Upload extends React.Component {
                                         </div>
                                     </div>
 
-                                    <div className="mb-3 d-flex justify-content-center">
-                                        <div className="form-check form-check-inline" data-tip
-                                             data-for="only-eea-tip">
-                                            <input className="form-check-input" id="only-eea" type="checkbox"
-                                                   ref="only-eea" defaultChecked={this.state.onlyEEAChecked}
-                                                   onChange={this.checkOnlyEEA}/>
-                                            <label htmlFor="only-eea" className="form-check-label col-form-label-sm">
-                                                Only EU/EEA
-                                            </label>
-                                        </div>
-
-                                        <div className="form-check form-check-inline" data-tip
-                                             data-for="include-other-tip">
-                                            <input className="form-check-input" id="include-other" type="checkbox"
-                                                   ref="include-other" disabled={!this.state.onlyEEAChecked}/>
-                                            <label htmlFor="include-other"
-                                                   className="form-check-label col-form-label-sm">
-                                                Other
-                                            </label>
-                                        </div>
-
-                                        <div className="form-check form-check-inline" data-tip
-                                             data-for="delay-download-tip"
-                                        >
-                                            <input
-                                                className="form-check-input"
-                                                type="checkbox"
-                                                id="delay-download"
-                                                onChange={this.handleDelayDownloadToggle}
-                                            />
-                                            <label htmlFor="delay-download"
-                                                   className="form-check-label col-form-label-sm">
-                                                Delay
-                                            </label>
+                                    <div className="mb-3 row">
+                                        <label htmlFor="geo-restriction" className="col-sm-3 col-form-label col-form-label-sm">
+                                            Region
+                                        </label>
+                                        <div className="col-sm-9">
+                                            <select className="form-select form-select-sm" id="geo-restriction"
+                                                    value={this.state.geoRestriction}
+                                                    onChange={this.handleGeoRestrictionChange}>
+                                                <option value="none">No restriction</option>
+                                                <option value="eea">EU/EEA</option>
+                                                <option value="gdpr-aligned">EU/EEA + GDPR-aligned</option>
+                                                <option value="custom">Custom</option>
+                                            </select>
                                         </div>
                                     </div>
-                                    <Tooltip id="only-eea-tip" variant="info" place="bottom" content="Allows downloads only from EEA countries (European Union + Iceland/Norway/Liechtenstein)" />
-                                    <Tooltip id="include-other-tip" place="bottom">
-                                        Allows downloads from EEA countries and additionally from countries with
-                                        similar GDPR laws. <br/>
-                                        Currently: Switzerland, UK, Monaco, Andorra, San Marino, Vatican City
-                                    </Tooltip>
-                                    <Tooltip id="delay-download-tip" place="bottom" content="Delay download availability by a set amount of time in minutes." />
 
-                                    {this.state.delayDownload && (
-                                            <div className="mb-3 row">
-                                                <label htmlFor="delay-minutes"
-                                                       className="col-sm-3 col-form-label col-form-label-sm">
-                                                    Delay Minutes
-                                                </label>
-                                                <div className="col-sm-9">
-                                                    <input
-                                                        className="form-control form-control-sm"
-                                                        id="delay-minutes"
-                                                        type="number"
-                                                        ref="delay-minutes"
-                                                        min="1"
-                                                        defaultValue="1"
-                                                        required={this.state.delayDownload}
-                                                    />
+                                    {this.state.geoRestriction === 'custom' && (
+                                        <div className="mb-3 row">
+                                            <label className="col-sm-3 col-form-label col-form-label-sm">
+                                                Countries
+                                            </label>
+                                            <div className="col-sm-9">
+                                                <input className="form-control form-control-sm mb-1"
+                                                       type="text"
+                                                       placeholder="Search countries..."
+                                                       value={this.state.countrySearch}
+                                                       onChange={this.handleCountrySearch} />
+                                                <div className="d-flex gap-1 mb-1">
+                                                    <button type="button" className="btn btn-sm btn-outline-secondary"
+                                                            onClick={this.handleDeselectAll}>Clear</button>
+                                                    <span className="col-form-label-sm ms-auto">
+                                                        {this.state.selectedCountries.length} selected
+                                                    </span>
                                                 </div>
-                                            </div>
-                                        )}
-
-                                    {this.state.type === 'image' && (
-                                        <div className="mb-3 d-flex justify-content-center">
-                                            <div className="form-check form-check-inline" data-tip
-                                                 data-for="disappear-tip">
-                                                <input className="form-check-input" id="disappear" type="checkbox"
-                                                       checked={this.state.disappear}
-                                                       onChange={this.handleDisappearToggle}/>
-                                                <label htmlFor="disappear" className="form-check-label col-form-label-sm">
-                                                    Disappear
-                                                </label>
+                                                <div className="country-picker">
+                                                    {this.state.countryList
+                                                        .filter(function (c) {
+                                                            if (!this.state.countrySearch) return true
+                                                            return c.name.toLowerCase().indexOf(
+                                                                this.state.countrySearch.toLowerCase()
+                                                            ) !== -1
+                                                        }.bind(this))
+                                                        .sort(function (a, b) {
+                                                            var yours = this.state.yourCountry
+                                                            if (a.code === yours) return -1
+                                                            if (b.code === yours) return 1
+                                                            return 0
+                                                        }.bind(this))
+                                                        .map(function (c) {
+                                                            return (
+                                                                <div key={c.code} className="form-check form-check-sm">
+                                                                    <input className="form-check-input"
+                                                                           type="checkbox"
+                                                                           id={'country-' + c.code}
+                                                                           checked={this.state.selectedCountries.indexOf(c.code) !== -1}
+                                                                           onChange={function () { this.handleCountryToggle(c.code) }.bind(this)} />
+                                                                    <label htmlFor={'country-' + c.code}
+                                                                           className="form-check-label col-form-label-sm">
+                                                                        {c.name}
+                                                                    </label>
+                                                                </div>
+                                                            )
+                                                        }.bind(this))
+                                                    }
+                                                </div>
                                             </div>
                                         </div>
                                     )}
-                                    <Tooltip id="disappear-tip" variant="info" place="bottom" content="Image auto-closes after the specified duration" />
 
-                                    {this.state.type === 'image' && this.state.disappear && (
+                                    <div className="mb-3 row">
+                                        <label htmlFor="delay" className="col-sm-3 col-form-label col-form-label-sm">
+                                            Delay
+                                        </label>
+                                        <div className="col-sm-9">
+                                            <select className="form-select form-select-sm" id="delay"
+                                                    value={this.state.delay}
+                                                    onChange={this.handleDelayChange}>
+                                                <option value="0">No delay</option>
+                                                <option value="1">1 minute</option>
+                                                <option value="5">5 minutes</option>
+                                                <option value="15">15 minutes</option>
+                                                <option value="30">30 minutes</option>
+                                                <option value="60">1 hour</option>
+                                                <option value="120">2 hours</option>
+                                                <option value="1440">1 day</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    {this.state.type === 'image' && (
                                         <div className="mb-3 row">
-                                            <label htmlFor="ephemeral-seconds"
-                                                   className="col-sm-3 col-form-label col-form-label-sm">
-                                                View Duration
+                                            <label htmlFor="ephemeral" className="col-sm-3 col-form-label col-form-label-sm">
+                                                Disappear
                                             </label>
                                             <div className="col-sm-9">
-                                                <input
-                                                    className="form-control form-control-sm"
-                                                    id="ephemeral-seconds"
-                                                    type="number"
-                                                    ref="ephemeral-seconds"
-                                                    min="1"
-                                                    max="300"
-                                                    defaultValue="10"
-                                                    required
-                                                    aria-describedby="ephemeralHelp"
-                                                />
-                                                <small id="ephemeralHelp" className="form-text text-muted">
-                                                    Seconds before the image auto-closes
-                                                </small>
+                                                <select className="form-select form-select-sm" id="ephemeral"
+                                                        value={this.state.ephemeral}
+                                                        onChange={this.handleEphemeralChange}>
+                                                    <option value="0">No</option>
+                                                    <option value="5">5 seconds</option>
+                                                    <option value="10">10 seconds</option>
+                                                    <option value="30">30 seconds</option>
+                                                    <option value="60">1 minute</option>
+                                                    <option value="120">2 minutes</option>
+                                                    <option value="300">5 minutes</option>
+                                                </select>
                                             </div>
                                         </div>
                                     )}
                                 </div>
 
                                 <div className="text-center col-sm-12">
-                                    <input type="submit" ref="submit" className="btn btn-primary" value="Upload"/>
+                                    <input type="submit" ref="submit" className="btn btn-primary" value="Upload"
+                                           disabled={this.state.geoRestriction !== 'none' && this.state.selectedCountries.length === 0}/>
                                 </div>
                             </form>
 

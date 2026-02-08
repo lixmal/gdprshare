@@ -334,6 +334,19 @@
     color: #dc3545;
 }
 
+.country-picker {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 4px 8px;
+}
+
+.country-picker .form-check {
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+
 @media print {
     .image-modal, .image-container, .image-modal img {
         display: none !important;

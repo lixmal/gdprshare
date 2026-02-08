@@ -11,6 +11,7 @@ import (
 type Location struct {
 	Continent    string
 	Country      string
+	CountryCode  string
 	Subdivision1 string
 	Subdivision2 string
 	City         string
@@ -46,6 +47,7 @@ func LookupIP(path string, rawip string) (*Location, error) {
 	return &Location{
 		Continent:    record.Continent.Names["en"],
 		Country:      record.Country.Names["en"],
+		CountryCode:  record.Country.IsoCode,
 		Subdivision1: sub1,
 		Subdivision2: sub2,
 		City:         record.City.Names["en"],

@@ -52,6 +52,11 @@ func (s *Server) uploadFile(c *gin.Context) {
 
 	storedFile.Filename = sanitizeFilename(storedFile.Filename)
 	storedFile.Type = sanitizeType(storedFile.Type)
+	storedFile.AllowedCountries = sanitizeCountries(storedFile.AllowedCountries)
+	if storedFile.AllowedCountries != "" {
+		storedFile.OnlyEEA = false
+		storedFile.IncludeOther = false
+	}
 	if storedFile.Type != "image" {
 		storedFile.Ephemeral = 0
 	}
@@ -321,6 +326,14 @@ func (s *Server) downloadFile(c *gin.Context) {
 }
 
 func (s *Server) isDownloadAllowed(storedFile *database.StoredFile, client *database.DstClient) bool {
+	if storedFile.AllowedCountries != "" {
+		loc := client.Location
+		if loc == nil || loc.CountryCode == "" {
+			return false
+		}
+		return isCountryInList(loc.CountryCode, storedFile.AllowedCountries)
+	}
+
 	if !storedFile.OnlyEEA {
 		return true
 	}
@@ -348,6 +361,15 @@ func (s *Server) isDownloadAllowed(storedFile *database.StoredFile, client *data
 		return true
 	}
 
+	return false
+}
+
+func isCountryInList(code, csvList string) bool {
+	for _, c := range strings.Split(csvList, ",") {
+		if c == code {
+			return true
+		}
+	}
 	return false
 }
 

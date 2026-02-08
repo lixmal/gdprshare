@@ -62,6 +62,7 @@ func setupRoutes(router *gin.Engine, srv *Server) {
 
 	v1.POST("/stats", srv.setStats)
 	v1.GET("/config", srv.getConfig)
+	v1.GET("/countries", srv.getCountries)
 	v1.POST("/files", srv.uploadFile)
 	v1.GET("/files/:fileId", srv.downloadFile)
 	v1.POST("/files/:fileId", srv.confirmReceipt)

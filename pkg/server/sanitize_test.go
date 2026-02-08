@@ -81,3 +81,33 @@ func TestSanitizeUserAgent(t *testing.T) {
 	result := sanitizeUserAgent(string(longUA))
 	assert.Equal(t, 512, len(result), "Long user agent should be truncated to 512")
 }
+
+func TestSanitizeCountries(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"DE,FR,NL", "DE,FR,NL"},
+		{"de,fr", "DE,FR"},
+		{" DE , FR ", "DE,FR"},
+		{"XX,DE,YY", "DE"},
+		{"DE,DE,FR", "DE,FR"},
+		{"", ""},
+		{"INVALID", ""},
+		{"US,GB,JP", "US,GB,JP"},
+	}
+
+	for _, tt := range tests {
+		result := sanitizeCountries(tt.input)
+		assert.Equal(t, tt.expected, result, "Input: %q", tt.input)
+	}
+}
+
+func TestIsCountryInList(t *testing.T) {
+	assert.True(t, isCountryInList("DE", "DE,FR,NL"))
+	assert.True(t, isCountryInList("FR", "DE,FR,NL"))
+	assert.True(t, isCountryInList("NL", "DE,FR,NL"))
+	assert.False(t, isCountryInList("US", "DE,FR,NL"))
+	assert.False(t, isCountryInList("DE", ""))
+	assert.True(t, isCountryInList("US", "US"))
+}

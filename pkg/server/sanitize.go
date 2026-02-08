@@ -30,6 +30,22 @@ func sanitizeType(t string) string {
 	return "file"
 }
 
+func sanitizeCountries(raw string) string {
+	if raw == "" {
+		return ""
+	}
+	var valid []string
+	seen := make(map[string]bool)
+	for _, code := range strings.Split(raw, ",") {
+		code = strings.TrimSpace(strings.ToUpper(code))
+		if len(code) == 2 && countries[code] != "" && !seen[code] {
+			valid = append(valid, code)
+			seen[code] = true
+		}
+	}
+	return strings.Join(valid, ",")
+}
+
 func sanitizeUserAgent(ua string) string {
 	if ua == "" {
 		return ""

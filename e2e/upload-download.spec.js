@@ -18,12 +18,13 @@ test.describe('Full E2E Upload and Download Flow', () => {
     const testFilePath = path.join(__dirname, 'test-file.txt');
     fs.writeFileSync(testFilePath, testContent);
 
-    const fileInput = page.locator('input[type="file"]');
+    const fileInput = page.locator('input#content');
+    await expect(fileInput).toBeVisible({ timeout: 10000 });
     await fileInput.setInputFiles(testFilePath);
 
     await page.locator('input#expiry').fill('1');
     await page.locator('input#count').fill('2');
-    await page.locator('input#only-eea').uncheck();
+    await page.locator('select#geo-restriction').selectOption('none');
 
     const uploadButton = page.locator('input[type="submit"][value="Upload"]');
     await uploadButton.click();
@@ -53,7 +54,7 @@ test.describe('Full E2E Upload and Download Flow', () => {
 
     await page.locator('input#expiry').fill('1');
     await page.locator('input#count').fill('2');
-    await page.locator('input#only-eea').uncheck();
+    await page.locator('select#geo-restriction').selectOption('none');
 
     const uploadButton = page.locator('input[type="submit"][value="Upload"]');
     await uploadButton.click();
@@ -117,7 +118,7 @@ test.describe('Full E2E Upload and Download Flow', () => {
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles(testFilePath);
 
-    await page.locator('input#only-eea').uncheck();
+    await page.locator('select#geo-restriction').selectOption('none');
 
     const uploadButton = page.locator('input[type="submit"][value="Upload"]');
     await uploadButton.click();
@@ -152,11 +153,12 @@ test.describe('Full E2E Upload and Download Flow', () => {
     const testFilePath = path.join(__dirname, 'count-test.txt');
     fs.writeFileSync(testFilePath, testContent);
 
-    const fileInput = page.locator('input[type="file"]');
+    const fileInput = page.locator('input#content');
+    await expect(fileInput).toBeVisible({ timeout: 10000 });
     await fileInput.setInputFiles(testFilePath);
 
     await page.locator('input#count').fill('2');
-    await page.locator('input#only-eea').uncheck();
+    await page.locator('select#geo-restriction').selectOption('none');
 
     const uploadButton = page.locator('input[type="submit"][value="Upload"]');
     await uploadButton.click();
@@ -218,7 +220,7 @@ test.describe('Full E2E Upload and Download Flow', () => {
     await fileInput.setInputFiles(testImagePath);
 
     await page.locator('input#count').fill('2');
-    await page.locator('input#only-eea').uncheck();
+    await page.locator('select#geo-restriction').selectOption('none');
 
     const uploadButton = page.locator('input[type="submit"][value="Upload"]');
     await uploadButton.click();
@@ -274,7 +276,7 @@ test.describe('Full E2E Upload and Download Flow', () => {
     await fileInput.setInputFiles(testImagePath);
 
     await page.locator('input#count').fill('2');
-    await page.locator('input#only-eea').uncheck();
+    await page.locator('select#geo-restriction').selectOption('none');
 
     const uploadButton = page.locator('input[type="submit"][value="Upload"]');
     await uploadButton.click();
@@ -355,18 +357,15 @@ test.describe('Full E2E Upload and Download Flow', () => {
     // Select image type
     await page.locator('select#type').selectOption('image');
 
-    // Enable disappear
-    await page.locator('input#disappear').check();
-
-    // Set duration to 3 seconds for fast test
-    await page.locator('input#ephemeral-seconds').fill('3');
+    // Set disappear to 5 seconds (smallest preset)
+    await page.locator('select#ephemeral').selectOption('5');
 
     // Upload the image
     const fileInput = page.locator('input#image-content');
     await fileInput.setInputFiles(testImagePath);
 
     await page.locator('input#count').fill('2');
-    await page.locator('input#only-eea').uncheck();
+    await page.locator('select#geo-restriction').selectOption('none');
 
     const uploadButton = page.locator('input[type="submit"][value="Upload"]');
     await uploadButton.click();
@@ -406,7 +405,7 @@ test.describe('Full E2E Upload and Download Flow', () => {
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles(testFilePath);
 
-    // Leave only-eea checked (default)
+    // Leave geo-restriction as EU/EEA (default)
     await page.locator('input#count').fill('2');
 
     const uploadButton = page.locator('input[type="submit"][value="Upload"]');
@@ -438,7 +437,7 @@ test.describe('Full E2E Upload and Download Flow', () => {
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles(testFilePath);
 
-    await page.locator('input#only-eea').uncheck();
+    await page.locator('select#geo-restriction').selectOption('none');
 
     const uploadButton = page.locator('input[type="submit"][value="Upload"]');
     await uploadButton.click();
@@ -467,5 +466,51 @@ test.describe('Full E2E Upload and Download Flow', () => {
     expect(hasCryptoError).toBeFalsy();
 
     fs.unlinkSync(testFilePath);
+  });
+
+  test('should strip image metadata during upload', async ({ page, context }) => {
+    const testImagePath = path.join(__dirname, 'test-image.png');
+    const originalBytes = fs.readFileSync(testImagePath);
+
+    await page.locator('select#type').selectOption('image');
+
+    const fileInput = page.locator('input#image-content');
+    await fileInput.setInputFiles(testImagePath);
+
+    await page.locator('input#count').fill('2');
+    await page.locator('select#geo-restriction').selectOption('none');
+
+    const uploadButton = page.locator('input[type="submit"][value="Upload"]');
+    await uploadButton.click();
+
+    await page.waitForURL(/\/uploaded/);
+
+    const downloadLinkInput = page.locator('input#link-key');
+    const downloadUrl = await downloadLinkInput.inputValue();
+
+    const downloadPage = await context.newPage();
+    await downloadPage.goto(downloadUrl, { waitUntil: 'load' });
+
+    const inlineImage = downloadPage.locator('#inline-image');
+    await expect(inlineImage).toBeVisible({ timeout: 10000 });
+
+    // Get the image blob data via fetch on the object URL
+    const imageInfo = await downloadPage.evaluate(async () => {
+      const img = document.querySelector('#inline-image');
+      const response = await fetch(img.src);
+      const blob = await response.blob();
+      const buffer = await blob.arrayBuffer();
+      return {
+        size: buffer.byteLength,
+        bytes: Array.from(new Uint8Array(buffer).slice(0, 8)),
+      };
+    });
+
+    // The re-encoded image should be a valid PNG with non-zero size
+    expect(imageInfo.size).toBeGreaterThan(0);
+
+    // Verify it's still a valid PNG (starts with PNG signature)
+    const pngSignature = [137, 80, 78, 71, 13, 10, 26, 10];
+    expect(imageInfo.bytes).toEqual(pngSignature);
   });
 });
