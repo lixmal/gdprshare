@@ -129,7 +129,7 @@ func TestUploadDownloadFlow(t *testing.T) {
 	_, err = part.Write(testContent)
 	require.NoError(t, err)
 
-	err = writer.WriteField("type", "text/plain")
+	err = writer.WriteField("type", "text")
 	require.NoError(t, err)
 	err = writer.WriteField("filename", "test-download.txt")
 	require.NoError(t, err)
@@ -164,7 +164,8 @@ func TestUploadDownloadFlow(t *testing.T) {
 	assert.Equal(t, testContent, downloadedContent, "Downloaded content should match uploaded content")
 
 	assert.Equal(t, "test-download.txt", downloadW.Header().Get("X-Filename"))
-	assert.Equal(t, "text/plain", downloadW.Header().Get("X-Type"))
+	assert.Equal(t, "text", downloadW.Header().Get("X-Type"))
+	assert.Equal(t, "0", downloadW.Header().Get("X-Ephemeral"))
 }
 
 // TestDownloadCountDecrement verifies that download count decreases correctly

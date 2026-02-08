@@ -37,20 +37,17 @@ func TestSanitizeType(t *testing.T) {
 		input    string
 		expected string
 	}{
-		{"text/plain", "text/plain"},
-		{"application/json", "application/json"},
-		{"image/png", "image/png"},
-		{"TEXT/PLAIN", "text/plain"},
-		{"text/plain; charset=utf-8", "text/plain"},
-		{"text/plain ; charset=utf-8", "text/plain"},
-		{"invalid", ""},
-		{"text/", ""},
-		{"/plain", ""},
-		{"text//plain", ""},
-		{"text\x00/plain", ""},
-		{"", ""},
-		{"application/vnd.ms-excel", "application/vnd.ms-excel"},
-		{"application/x-custom+json", "application/x-custom+json"},
+		{"file", "file"},
+		{"text", "text"},
+		{"image", "image"},
+		{"FILE", "file"},
+		{"Text", "text"},
+		{"IMAGE", "image"},
+		{"  file  ", "file"},
+		{"invalid", "file"},
+		{"text/plain", "file"},
+		{"", "file"},
+		{"application/json", "file"},
 	}
 
 	for _, tt := range tests {

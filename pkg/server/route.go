@@ -52,6 +52,9 @@ func (s *Server) uploadFile(c *gin.Context) {
 
 	storedFile.Filename = sanitizeFilename(storedFile.Filename)
 	storedFile.Type = sanitizeType(storedFile.Type)
+	if storedFile.Type != "image" {
+		storedFile.Ephemeral = 0
+	}
 
 	name, err := uuid.NewV4()
 	if err != nil {
@@ -299,6 +302,7 @@ func (s *Server) downloadFile(c *gin.Context) {
 		}
 		c.Header("X-Filename", filename)
 		c.Header("X-Type", storedFile.Type)
+		c.Header("X-Ephemeral", strconv.FormatUint(uint64(storedFile.Ephemeral), 10))
 		c.FileAttachment(path, filename)
 
 		if storedFile.Count < 1 {

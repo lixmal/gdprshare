@@ -18,7 +18,8 @@ class Upload extends React.Component {
         this.handleDrop = this.handleDrop.bind(this)
         this.handleDragOn = this.handleDragOn.bind(this)
         this.handleDragOff = this.handleDragOff.bind(this)
-        this.handleTypeToggle = this.handleTypeToggle.bind(this)
+        this.handleTypeChange = this.handleTypeChange.bind(this)
+        this.handleDisappearToggle = this.handleDisappearToggle.bind(this)
         this.uploadFile = this.uploadFile.bind(this)
         this.updateValidity = this.updateValidity.bind(this)
         this.checkOnlyEEA = this.checkOnlyEEA.bind(this)
@@ -32,6 +33,7 @@ class Upload extends React.Component {
             type: 'file',
             onlyEEAChecked: true,
             delayDownload: false,
+            disappear: false,
         }
     }
 
@@ -132,6 +134,8 @@ class Upload extends React.Component {
         formData.append('include-other', this.refs['include-other'].checked)
         if (this.state.delayDownload)
             formData.append('delay', this.refs['delay-minutes'].value)
+        if (this.state.type === 'image' && this.state.disappear)
+            formData.append('ephemeral', this.refs['ephemeral-seconds'].value)
 
         window.localStorage.setItem('email', email)
 
@@ -206,7 +210,8 @@ class Upload extends React.Component {
         if (!this.checkFileSize(files[0], event))
             return
 
-        this.refs.file.files = files
+        var ref = this.state.type === 'image' ? this.refs.image : this.refs.file
+        if (ref) ref.files = files
         this.refs.submit.click()
     }
 
@@ -229,6 +234,8 @@ class Upload extends React.Component {
             // using first few chars as filename for recognizability
             // TODO: sanitize for usage in file names
             file = new File([text], text.slice(0, 21) + '.txt', {type: 'text/plain'})
+        } else if (this.state.type === 'image') {
+            file = this.refs.image.files[0]
         } else {
             file = this.refs.file.files[0]
         }
@@ -319,7 +326,8 @@ class Upload extends React.Component {
             this.setState({
                 error: 'File too big, maximum allowed size: ' + allowedSize + ' MiB.',
             })
-            this.refs.file.value = null
+            var ref = this.state.type === 'image' ? this.refs.image : this.refs.file
+            if (ref) ref.value = null
             return false
         }
         return true
@@ -347,10 +355,16 @@ class Upload extends React.Component {
         })
     }
 
-    handleTypeToggle(event) {
-        var cb = event.currentTarget
+    handleTypeChange(event) {
         this.setState({
-            type: cb.checked ? 'text' : 'file'
+            type: event.target.value,
+            disappear: false,
+        })
+    }
+
+    handleDisappearToggle(event) {
+        this.setState({
+            disappear: event.target.checked,
         })
     }
 
@@ -463,6 +477,13 @@ class Upload extends React.Component {
                            ref="file" onChange={this.handleFile} required autoFocus/>
                 </div>
             )
+        } else if (this.state.type === 'image') {
+            contentInput = (
+                <div className="col-sm-9 mb-3">
+                    <input className="form-control form-control-sm" id="image-content" type="file"
+                           ref="image" accept="image/*" onChange={this.handleFile} required autoFocus/>
+                </div>
+            )
         } else {
             contentInput = (
                 <div className="col-sm-9">
@@ -488,10 +509,21 @@ class Upload extends React.Component {
                             </div>
                             <form ref="form" className={this.innerClasses()} onSubmit={this.handleUpload}>
                                 <div className="mb-3 row">
-                                    <label className="col-sm-3 col-form-label col-form-label-sm toggle">
-                                        <input type="checkbox" id="type" ref="type" onChange={this.handleTypeToggle}/>
-                                        <span className="slider"></span>
-                                        <span className="labels" data-on="File" data-off="Text"></span>
+                                    <label htmlFor="type" className="col-sm-3 col-form-label col-form-label-sm">
+                                        Type
+                                    </label>
+                                    <div className="col-sm-9 mb-1">
+                                        <select className="form-select form-select-sm" id="type"
+                                                value={this.state.type} onChange={this.handleTypeChange}>
+                                            <option value="file">File</option>
+                                            <option value="text">Text</option>
+                                            <option value="image">Image</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="mb-3 row">
+                                    <label className="col-sm-3 col-form-label col-form-label-sm">
+                                        Content
                                     </label>
                                     {contentInput}
                                 </div>
@@ -601,6 +633,46 @@ class Upload extends React.Component {
                                                 </div>
                                             </div>
                                         )}
+
+                                    {this.state.type === 'image' && (
+                                        <div className="mb-3 d-flex justify-content-center">
+                                            <div className="form-check form-check-inline" data-tip
+                                                 data-for="disappear-tip">
+                                                <input className="form-check-input" id="disappear" type="checkbox"
+                                                       checked={this.state.disappear}
+                                                       onChange={this.handleDisappearToggle}/>
+                                                <label htmlFor="disappear" className="form-check-label col-form-label-sm">
+                                                    Disappear
+                                                </label>
+                                            </div>
+                                        </div>
+                                    )}
+                                    <Tooltip id="disappear-tip" variant="info" place="bottom" content="Image auto-closes after the specified duration" />
+
+                                    {this.state.type === 'image' && this.state.disappear && (
+                                        <div className="mb-3 row">
+                                            <label htmlFor="ephemeral-seconds"
+                                                   className="col-sm-3 col-form-label col-form-label-sm">
+                                                View Duration
+                                            </label>
+                                            <div className="col-sm-9">
+                                                <input
+                                                    className="form-control form-control-sm"
+                                                    id="ephemeral-seconds"
+                                                    type="number"
+                                                    ref="ephemeral-seconds"
+                                                    min="1"
+                                                    max="300"
+                                                    defaultValue="10"
+                                                    required
+                                                    aria-describedby="ephemeralHelp"
+                                                />
+                                                <small id="ephemeralHelp" className="form-text text-muted">
+                                                    Seconds before the image auto-closes
+                                                </small>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="text-center col-sm-12">

@@ -34,6 +34,7 @@ type StoredFile struct {
 	OnlyEEA      bool                  `form:"only-eea"`
 	IncludeOther bool                  `form:"include-other"`
 	Delay        uint                  `form:"delay"                                    binding:"omitempty,min=0,max=1440"`
+	Ephemeral    uint                  `form:"ephemeral"          gorm:"default:0"      binding:"omitempty,min=0,max=300"`
 	SrcClient    *Client               `form:"-"`
 	DstClients   []*DstClient          `form:"-"`
 }

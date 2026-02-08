@@ -11,6 +11,8 @@ export default class Download extends React.Component {
         this.handleDownload = this.handleDownload.bind(this)
         this.downloadFile = this.downloadFile.bind(this)
         this.closeModal = this.closeModal.bind(this)
+        this.handleViewImage = this.handleViewImage.bind(this)
+        this.handleImageZoom = this.handleImageZoom.bind(this)
 
         this.state = {
             error: null,
@@ -19,6 +21,23 @@ export default class Download extends React.Component {
             successful: false,
             modalContent: null,
             modalOpen: false,
+            imageData: null,
+            imageReady: false,
+            imageZoomed: false,
+            ephemeral: 0,
+            countdown: 0,
+        }
+        this.countdownTimer = null
+    }
+
+    componentWillUnmount() {
+        if (this.countdownTimer) {
+            clearInterval(this.countdownTimer)
+            this.countdownTimer = null
+        }
+        if (this.state.imageData) {
+            var URL = window.URL || window.webkitURL
+            URL.revokeObjectURL(this.state.imageData)
         }
     }
 
@@ -43,10 +62,48 @@ export default class Download extends React.Component {
     }
 
     closeModal() {
+        if (this.countdownTimer) {
+            clearInterval(this.countdownTimer)
+            this.countdownTimer = null
+        }
+        if (this.state.imageData) {
+            var URL = window.URL || window.webkitURL
+            URL.revokeObjectURL(this.state.imageData)
+        }
         this.setState({
             modalOpen: false,
             modalContent: null,
+            imageData: null,
+            imageReady: false,
         })
+    }
+
+    handleViewImage() {
+        if (this.countdownTimer) {
+            clearInterval(this.countdownTimer)
+            this.countdownTimer = null
+        }
+
+        var ephemeral = this.state.ephemeral
+        this.setState({
+            modalOpen: true,
+            countdown: ephemeral > 0 ? ephemeral : 0,
+        })
+
+        if (ephemeral > 0) {
+            this.countdownTimer = setInterval(function () {
+                var next = this.state.countdown - 1
+                if (next <= 0) {
+                    this.closeModal()
+                } else {
+                    this.setState({ countdown: next })
+                }
+            }.bind(this), 1000)
+        }
+    }
+
+    handleImageZoom() {
+        this.setState({ imageZoomed: !this.state.imageZoomed })
     }
 
     downloadFile(data, filename) {
@@ -121,6 +178,7 @@ export default class Download extends React.Component {
             }
 
             let type = response.headers.get('X-Type')
+            let ephemeral = parseInt(response.headers.get('X-Ephemeral') || '0', 10)
 
             var filename = Buffer.from(response.headers.get('X-Filename'), 'base64')
 
@@ -131,6 +189,21 @@ export default class Download extends React.Component {
                 this.setState({
                     modalContent: new TextDecoder().decode(fileClearText),
                     modalOpen: true,
+                    mask: false,
+                    disableForm: true,
+                })
+
+                gdprshare.confirmReceipt(fileId)
+            }
+            else if (type === 'image') {
+                var URL = window.URL || window.webkitURL
+                var blob = new Blob([fileClearText])
+                var imageUrl = URL.createObjectURL(blob)
+
+                this.setState({
+                    imageData: imageUrl,
+                    imageReady: true,
+                    ephemeral: ephemeral,
                     mask: false,
                     disableForm: true,
                 })
@@ -186,6 +259,23 @@ export default class Download extends React.Component {
 
                     <br />
                     {this.state.successful && <Success message="Successfully downloaded, check your download folder" />}
+                    {this.state.imageReady && !this.state.ephemeral && (
+                        <div className={'image-modal' + (this.state.imageZoomed ? ' image-zoomed' : '')}
+                             onContextMenu={function(e) { e.preventDefault() }}
+                             onDragStart={function(e) { e.preventDefault() }}>
+                            <div className="image-container">
+                                <img src={this.state.imageData} alt="" id="inline-image" draggable="false" />
+                                <div className="image-overlay" onClick={this.handleImageZoom}></div>
+                            </div>
+                        </div>
+                    )}
+                    {this.state.imageReady && this.state.ephemeral > 0 && !this.state.modalOpen && (
+                        <div className="text-center mb-3">
+                            <button className="btn btn-primary" id="view-image" onClick={this.handleViewImage}>
+                                View Image
+                            </button>
+                        </div>
+                    )}
                     <Alert error={this.state.error} />
 
                     <div className="text-center col-sm-12">
@@ -193,16 +283,35 @@ export default class Download extends React.Component {
                     </div>
                 </div>
                 <Modal isOpen={this.state.modalOpen}>
-                    <div className="card">
-                        <div className="card-body">
-                            <p className="r-modal">
-                                {this.state.modalContent}
-                            </p>
+                    {this.state.modalContent && (
+                        <div className="card">
+                            <div className="card-body">
+                                <p className="r-modal">
+                                    {this.state.modalContent}
+                                </p>
+                            </div>
                         </div>
-                    </div>
-                    <button className="col-sm-1 btn btn-primary" onClick={this.closeModal}>
-                        Close
-                    </button>
+                    )}
+                    {this.state.imageData && this.state.ephemeral > 0 && (
+                        <div className={'image-modal' + (this.state.imageZoomed ? ' image-zoomed' : '')}
+                             onContextMenu={function(e) { e.preventDefault() }}
+                             onDragStart={function(e) { e.preventDefault() }}>
+                            <div className="image-container">
+                                <img src={this.state.imageData} alt="" id="modal-image" draggable="false" />
+                                <div className="image-overlay" onClick={this.handleImageZoom}></div>
+                            </div>
+                            {this.state.countdown > 0 && (
+                                <div className="countdown" id="countdown-timer">
+                                    Closing in {this.state.countdown}s
+                                </div>
+                            )}
+                        </div>
+                    )}
+                    {this.state.modalContent && (
+                        <button className="col-sm-1 btn btn-primary mt-2" onClick={this.closeModal}>
+                            Close
+                        </button>
+                    )}
                 </Modal>
             </div >
         )
