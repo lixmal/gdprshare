@@ -1,8 +1,6 @@
 module github.com/lixmal/gdprshare
 
-go 1.24.0
-
-toolchain go1.24.4
+go 1.25.0
 
 require (
 	github.com/gin-contrib/size v1.0.2
@@ -12,7 +10,7 @@ require (
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d
 	github.com/oschwald/geoip2-golang v1.13.0
 	github.com/stretchr/testify v1.11.1
-	golang.org/x/time v0.14.0
+	golang.org/x/time v0.15.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 )
 
