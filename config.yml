@@ -79,6 +79,9 @@ header:
 # saves receiver IP addr and user agent in database
 saveclientinfo: false
 
+# show the closing countdown on ephemeral images during download
+showcountdown: false
+
 # MaxMind GeoLite2 City database path (mmdb file)
 geoippath: ''
 

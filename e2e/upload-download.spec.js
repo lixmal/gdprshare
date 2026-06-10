@@ -386,14 +386,15 @@ test.describe('Full E2E Upload and Download Flow', () => {
     // Click View Image
     await viewImageBtn.click();
 
-    // Verify image and countdown are shown
+    // Verify image is shown
     const modalImage = downloadPage.locator('#modal-image');
     await expect(modalImage).toBeVisible({ timeout: 5000 });
 
+    // Countdown is hidden by default (showcountdown: false)
     const countdown = downloadPage.locator('#countdown-timer');
-    await expect(countdown).toBeVisible();
+    await expect(countdown).not.toBeVisible();
 
-    // Modal should auto-close after countdown expires
+    // Modal should still auto-close after the ephemeral duration expires
     await expect(modalImage).not.toBeVisible({ timeout: 10000 });
   });
 

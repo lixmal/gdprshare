@@ -16,14 +16,26 @@ import * as Clipboard from "clipboard-polyfill/dist/clipboard-polyfill.promise"
 // global namespace
 window.gdprshare = {}
 
-// TODO: get config from server
 gdprshare.config = {
     maxFileSize: 25,
     contentMaxLength: 1024,
     keyLength: 32,
     saveFiles: true,
+    showCountdown: false,
     apiPrefix: '/api/v1',
     apiUrl: '/api/v1/files',
+}
+
+gdprshare.loadConfig = async function () {
+    try {
+        const response = await window.fetch(gdprshare.config.apiPrefix + '/config')
+        if (!response.ok)
+            return
+        const serverConfig = await response.json()
+        Object.assign(gdprshare.config, serverConfig)
+    } catch (error) {
+        console.log(error)
+    }
 }
 
 gdprshare.displayErr = function (error) {
@@ -163,12 +175,15 @@ gdprshare.confirmReceipt = function (fileId) {
 }
 
 const root = ReactDOM.createRoot(rootEl)
-root.render(
-    <BrowserRouter>
-        <Routes>
-            <Route path="/" element={<Upload />} />
-            <Route path="/uploaded" element={<Uploaded />} />
-            <Route path="/d/:fileId" element={<Download />} />
-        </Routes>
-    </BrowserRouter>
-)
+
+gdprshare.loadConfig().then(function () {
+    root.render(
+        <BrowserRouter>
+            <Routes>
+                <Route path="/" element={<Upload />} />
+                <Route path="/uploaded" element={<Uploaded />} />
+                <Route path="/d/:fileId" element={<Download />} />
+            </Routes>
+        </BrowserRouter>
+    )
+})

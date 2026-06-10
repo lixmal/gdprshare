@@ -29,7 +29,8 @@ func (s *Server) getConfig(c *gin.Context) {
 	c.JSON(
 		http.StatusOK,
 		gin.H{
-			"maxFileSize": s.config.MaxUploadSize,
+			"maxFileSize":   s.config.MaxUploadSize,
+			"showCountdown": s.config.ShowCountdown,
 		},
 	)
 }

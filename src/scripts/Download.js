@@ -334,7 +334,7 @@ export default class Download extends React.Component {
                                 <img src={this.state.imageData} alt="" id="modal-image" draggable="false" />
                                 <div className="image-overlay" onClick={this.handleImageZoom}></div>
                             </div>
-                            {this.state.countdown > 0 && (
+                            {gdprshare.config.showCountdown && this.state.countdown > 0 && (
                                 <div className="countdown" id="countdown-timer">
                                     Closing in {this.state.countdown}s
                                 </div>

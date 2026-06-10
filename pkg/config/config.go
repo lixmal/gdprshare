@@ -38,6 +38,7 @@ type Config struct {
 		TLSCipherSuite string `default:"X-TLS-CipherSuite"`
 	}
 	SaveClientInfo       bool `default:"false"`
+	ShowCountdown        bool `default:"false"`
 	GeoIPPath            string
 	DisallowedUserAgents []string
 	RateLimit            struct {
