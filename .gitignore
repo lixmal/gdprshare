@@ -17,6 +17,7 @@ gdprshare
 # npm
 node_modules/
 public/scripts/bundle.js
+public/scripts/pdf-lib.js
 npm-debug.log
 disc.html
 
