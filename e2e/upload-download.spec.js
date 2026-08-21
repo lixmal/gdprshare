@@ -421,9 +421,13 @@ test.describe('Full E2E Upload and Download Flow', () => {
     const downloadPage = await context.newPage();
     await downloadPage.goto(downloadUrl, { waitUntil: 'load' });
 
-    // Should see the forbidden error
-    const errorMessage = downloadPage.locator('text=/download from this location forbidden/i');
+    // the client shows the localized message for the API's error code, not the
+    // terse wire message
+    const en = JSON.parse(
+      fs.readFileSync(path.join(__dirname, '..', 'public', 'locales', 'en.json'), 'utf8'));
+    const errorMessage = downloadPage.locator('.alert-danger');
     await expect(errorMessage).toBeVisible({ timeout: 5000 });
+    await expect(errorMessage).toContainText(en.errors.server.download_location_forbidden);
 
     fs.unlinkSync(testFilePath);
   });

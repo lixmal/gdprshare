@@ -1,0 +1,36 @@
+{
+    "download": {
+        "title": "ダウンロード",
+        "password": "パスワード",
+        "submit": "ダウンロード",
+        "success": "ダウンロードが完了しました。ダウンロードフォルダーを確認してください",
+        "viewImage": "画像を表示",
+        "uploadLink": "ファイルをアップロード",
+        "close": "閉じる",
+        "closingIn": "{{count}} 秒後に閉じます"
+    },
+    "alert": {
+        "errorLabel": "エラー:"
+    },
+    "browser": {
+        "title": "ブラウザーエラー",
+        "message": "お使いのブラウザーは必要な機能に対応していません。別のブラウザーをお試しください。"
+    },
+    "errors": {
+        "downloadCreateFailed": "ダウンロードを作成できませんでした",
+        "invalidPassword": "パスワードが正しくありません",
+        "decryptionFailed": "復号エラーです。パスワードが違いますか？",
+        "server": {
+            "file_not_found": "ファイルが見つかりません。リンクの有効期限が切れたか、ファイルが削除された可能性があります。",
+            "download_count_expired": "このファイルはダウンロード回数の上限に達しました。",
+            "file_not_yet_downloadable": "このファイルはまだ利用できません。しばらくしてからお試しください。",
+            "download_location_forbidden": "お住まいの地域からのダウンロードは許可されていません。",
+            "file_not_found_or_limit_exceeded": "ファイルが見つからないか、ダウンロード回数の上限に達しました。",
+            "file_retrieval_failed": "ファイルを取得できませんでした。もう一度お試しください。",
+            "rate_limit_exceeded": "リクエストが多すぎます。しばらく待ってからお試しください。",
+            "invalid_file_id": "このダウンロードリンクは無効です。",
+            "tls_requirements_not_met": "接続が必要なセキュリティレベルを満たしていません。",
+            "invalid_request": "リクエストが無効です。"
+        }
+    }
+}

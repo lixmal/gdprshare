@@ -1,0 +1,36 @@
+{
+    "download": {
+        "title": "下载",
+        "password": "密码",
+        "submit": "下载",
+        "success": "下载成功，请查看您的下载文件夹",
+        "viewImage": "查看图片",
+        "uploadLink": "上传文件",
+        "close": "关闭",
+        "closingIn": "{{count}} 秒后关闭"
+    },
+    "alert": {
+        "errorLabel": "错误："
+    },
+    "browser": {
+        "title": "浏览器错误",
+        "message": "您的浏览器不支持所需功能。请尝试使用其他浏览器。"
+    },
+    "errors": {
+        "downloadCreateFailed": "无法创建下载",
+        "invalidPassword": "密码无效",
+        "decryptionFailed": "解密错误。密码是否有误？",
+        "server": {
+            "file_not_found": "找不到文件。链接可能已过期，或文件已被删除。",
+            "download_count_expired": "该文件已达到下载次数上限。",
+            "file_not_yet_downloadable": "该文件尚不可用。请稍后再试。",
+            "download_location_forbidden": "不允许从您所在的位置下载。",
+            "file_not_found_or_limit_exceeded": "找不到文件，或已达到下载次数上限。",
+            "file_retrieval_failed": "无法获取文件。请重试。",
+            "rate_limit_exceeded": "请求过于频繁。请稍候再试。",
+            "invalid_file_id": "此下载链接无效。",
+            "tls_requirements_not_met": "您的连接未达到所需的安全级别。",
+            "invalid_request": "请求无效。"
+        }
+    }
+}

@@ -159,6 +159,25 @@ jobs:
       - name: Check binary runs
         run: ./gdprshare -version
 
+  locale-check:
+    name: Locale Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check every language covers all strings
+        run: npm run check:locales
+
   dependency-review:
     name: Dependency Review
     runs-on: ubuntu-latest
@@ -173,7 +192,7 @@ jobs:
   all-tests-passed:
     name: All Tests Passed
     runs-on: ubuntu-latest
-    needs: [backend-tests, frontend-unit-tests, e2e-tests, build-check]
+    needs: [backend-tests, frontend-unit-tests, e2e-tests, build-check, locale-check]
     if: always()
     steps:
       - name: Check all jobs
@@ -192,6 +211,10 @@ jobs:
           fi
           if [ "${{ needs.build-check.result }}" != "success" ]; then
             echo "Build check failed"
+            exit 1
+          fi
+          if [ "${{ needs.locale-check.result }}" != "success" ]; then
+            echo "Locale coverage check failed"
             exit 1
           fi
           echo "✅ All tests passed!"

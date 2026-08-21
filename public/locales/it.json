@@ -1,0 +1,36 @@
+{
+    "download": {
+        "title": "Download",
+        "password": "Password",
+        "submit": "Scarica",
+        "success": "Download completato, controlla la cartella dei download",
+        "viewImage": "Visualizza immagine",
+        "uploadLink": "Carica un file",
+        "close": "Chiudi",
+        "closingIn": "Chiusura tra {{count}} s"
+    },
+    "alert": {
+        "errorLabel": "Errore:"
+    },
+    "browser": {
+        "title": "ERRORE DEL BROWSER",
+        "message": "Il tuo browser non supporta le funzioni richieste. Prova con un altro browser."
+    },
+    "errors": {
+        "downloadCreateFailed": "Impossibile creare il download",
+        "invalidPassword": "Password non valida",
+        "decryptionFailed": "Errore di decifratura. Password errata?",
+        "server": {
+            "file_not_found": "File non trovato. Il link potrebbe essere scaduto o il file è stato eliminato.",
+            "download_count_expired": "Questo file ha raggiunto il limite di download.",
+            "file_not_yet_downloadable": "Questo file non è ancora disponibile. Riprova più tardi.",
+            "download_location_forbidden": "I download non sono consentiti dalla tua posizione.",
+            "file_not_found_or_limit_exceeded": "File non trovato o limite di download raggiunto.",
+            "file_retrieval_failed": "Non è stato possibile recuperare il file. Riprova.",
+            "rate_limit_exceeded": "Troppe richieste. Attendi un momento e riprova.",
+            "invalid_file_id": "Questo link per il download non è valido.",
+            "tls_requirements_not_met": "La tua connessione non soddisfa il livello di sicurezza richiesto.",
+            "invalid_request": "La richiesta non era valida."
+        }
+    }
+}

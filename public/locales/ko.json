@@ -1,0 +1,36 @@
+{
+    "download": {
+        "title": "다운로드",
+        "password": "비밀번호",
+        "submit": "다운로드",
+        "success": "다운로드가 완료되었습니다. 다운로드 폴더를 확인하세요",
+        "viewImage": "이미지 보기",
+        "uploadLink": "파일 업로드",
+        "close": "닫기",
+        "closingIn": "{{count}}초 후 닫힘"
+    },
+    "alert": {
+        "errorLabel": "오류:"
+    },
+    "browser": {
+        "title": "브라우저 오류",
+        "message": "브라우저가 필요한 기능을 지원하지 않습니다. 다른 브라우저를 사용해 주세요."
+    },
+    "errors": {
+        "downloadCreateFailed": "다운로드를 생성하지 못했습니다",
+        "invalidPassword": "잘못된 비밀번호입니다",
+        "decryptionFailed": "복호화 오류입니다. 비밀번호가 잘못되었나요?",
+        "server": {
+            "file_not_found": "파일을 찾을 수 없습니다. 링크가 만료되었거나 파일이 삭제되었을 수 있습니다.",
+            "download_count_expired": "이 파일은 다운로드 횟수 제한에 도달했습니다.",
+            "file_not_yet_downloadable": "이 파일은 아직 사용할 수 없습니다. 나중에 다시 시도해 주세요.",
+            "download_location_forbidden": "현재 위치에서는 다운로드가 허용되지 않습니다.",
+            "file_not_found_or_limit_exceeded": "파일을 찾을 수 없거나 다운로드 횟수 제한에 도달했습니다.",
+            "file_retrieval_failed": "파일을 가져오지 못했습니다. 다시 시도해 주세요.",
+            "rate_limit_exceeded": "요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.",
+            "invalid_file_id": "이 다운로드 링크는 유효하지 않습니다.",
+            "tls_requirements_not_met": "연결이 요구되는 보안 수준을 충족하지 않습니다.",
+            "invalid_request": "잘못된 요청입니다."
+        }
+    }
+}

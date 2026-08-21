@@ -4,8 +4,9 @@ import Classnames from 'classnames'
 import Alert from './Alert'
 import Success from './Success'
 import Modal from 'react-modal'
+import { withTranslation } from 'react-i18next'
 
-export default class Download extends React.Component {
+class Download extends React.Component {
     constructor() {
         super()
         this.handleDownload = this.handleDownload.bind(this)
@@ -204,7 +205,7 @@ export default class Download extends React.Component {
                 } catch (error) {
                     return gdprshare.asTextErr.call(this, response, error)
                 }
-                return gdprshare.displayErr.call(this, fetchData.message)
+                return gdprshare.displayErr.call(this, gdprshare.serverErrorText(fetchData))
             }
 
             let type = response.headers.get('X-Type')
@@ -256,7 +257,7 @@ export default class Download extends React.Component {
                 }
                 else {
                     this.setState({
-                        error: "Failed to create download",
+                        error: this.props.t('errors.downloadCreateFailed'),
                         mask: false,
                     })
                 }
@@ -267,16 +268,18 @@ export default class Download extends React.Component {
     }
 
     render() {
+        const t = this.props.t
+
         var form = (
             <form className="app-inner" onSubmit={this.handleDownload}>
                 <div className="form-group row">
-                    <label htmlFor="password" className="col-sm-3 col-form-label">Password</label>
+                    <label htmlFor="password" className="col-sm-3 col-form-label">{t('download.password')}</label>
                     <div className="col-sm-9">
-                        <input className="form-control" id="password" type="password" ref="password" placeholder="Password" maxLength="255" autoFocus required />
+                        <input className="form-control" id="password" type="password" ref="password" placeholder={t('download.password')} maxLength="255" autoFocus required />
                     </div>
                 </div>
                 <div className="text-center col-sm-12">
-                    <input type="submit" className="btn btn-primary" value="Download" />
+                    <input type="submit" className="btn btn-primary" value={t('download.submit')} />
                 </div>
             </form>
         )
@@ -288,11 +291,11 @@ export default class Download extends React.Component {
         return (
             <div className="container-fluid col-sm-4">
                 <div className={this.classes()}>
-                    <h4 className="text-center">Download</h4>
+                    <h4 className="text-center">{t('download.title')}</h4>
                     {this.state.disableForm ? null : form}
 
                     <br />
-                    {this.state.successful && <Success message="Successfully downloaded, check your download folder" />}
+                    {this.state.successful && <Success message={t('download.success')} />}
                     {this.state.imageReady && !this.state.ephemeral && (
                         <div className={imageModalClass}
                              onContextMenu={function(e) { e.preventDefault() }}
@@ -306,14 +309,14 @@ export default class Download extends React.Component {
                     {this.state.imageReady && this.state.ephemeral > 0 && !this.state.modalOpen && (
                         <div className="text-center mb-3">
                             <button className="btn btn-primary" id="view-image" onClick={this.handleViewImage}>
-                                View Image
+                                {t('download.viewImage')}
                             </button>
                         </div>
                     )}
                     <Alert error={this.state.error} />
 
                     <div className="text-center col-sm-12">
-                        <Link to="/">Upload a file</Link>
+                        <Link to="/">{t('download.uploadLink')}</Link>
                     </div>
                 </div>
                 <Modal isOpen={this.state.modalOpen}>
@@ -336,14 +339,14 @@ export default class Download extends React.Component {
                             </div>
                             {gdprshare.config.showCountdown && this.state.countdown > 0 && (
                                 <div className="countdown" id="countdown-timer">
-                                    Closing in {this.state.countdown}s
+                                    {t('download.closingIn', { count: this.state.countdown })}
                                 </div>
                             )}
                         </div>
                     )}
                     {this.state.modalContent && (
                         <button className="col-sm-1 btn btn-primary mt-2" onClick={this.closeModal}>
-                            Close
+                            {t('download.close')}
                         </button>
                     )}
                 </Modal>
@@ -351,3 +354,5 @@ export default class Download extends React.Component {
         )
     }
 }
+
+export default withTranslation()(Download)

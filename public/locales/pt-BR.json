@@ -1,0 +1,36 @@
+{
+    "download": {
+        "title": "Download",
+        "password": "Senha",
+        "submit": "Baixar",
+        "success": "Download concluído, verifique sua pasta de downloads",
+        "viewImage": "Ver imagem",
+        "uploadLink": "Enviar um arquivo",
+        "close": "Fechar",
+        "closingIn": "Fechando em {{count}} s"
+    },
+    "alert": {
+        "errorLabel": "Erro:"
+    },
+    "browser": {
+        "title": "ERRO DO NAVEGADOR",
+        "message": "Seu navegador não oferece suporte às funções necessárias. Tente outro navegador."
+    },
+    "errors": {
+        "downloadCreateFailed": "Não foi possível criar o download",
+        "invalidPassword": "Senha inválida",
+        "decryptionFailed": "Erro de descriptografia. Senha incorreta?",
+        "server": {
+            "file_not_found": "Arquivo não encontrado. O link pode ter expirado ou o arquivo foi excluído.",
+            "download_count_expired": "Este arquivo atingiu o limite de downloads.",
+            "file_not_yet_downloadable": "Este arquivo ainda não está disponível. Tente novamente mais tarde.",
+            "download_location_forbidden": "Downloads não são permitidos a partir da sua localização.",
+            "file_not_found_or_limit_exceeded": "Arquivo não encontrado ou limite de downloads atingido.",
+            "file_retrieval_failed": "Não foi possível obter o arquivo. Tente novamente.",
+            "rate_limit_exceeded": "Muitas solicitações. Aguarde um momento e tente novamente.",
+            "invalid_file_id": "Este link de download não é válido.",
+            "tls_requirements_not_met": "Sua conexão não atende ao nível de segurança exigido.",
+            "invalid_request": "A solicitação não era válida."
+        }
+    }
+}

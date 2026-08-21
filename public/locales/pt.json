@@ -1,0 +1,36 @@
+{
+    "download": {
+        "title": "Transferência",
+        "password": "Palavra-passe",
+        "submit": "Transferir",
+        "success": "Transferência concluída, verifique a sua pasta de transferências",
+        "viewImage": "Ver imagem",
+        "uploadLink": "Carregar um ficheiro",
+        "close": "Fechar",
+        "closingIn": "A fechar em {{count}} s"
+    },
+    "alert": {
+        "errorLabel": "Erro:"
+    },
+    "browser": {
+        "title": "ERRO DO NAVEGADOR",
+        "message": "O seu navegador não suporta as funções necessárias. Experimente outro navegador."
+    },
+    "errors": {
+        "downloadCreateFailed": "Não foi possível criar a transferência",
+        "invalidPassword": "Palavra-passe inválida",
+        "decryptionFailed": "Erro de desencriptação. Palavra-passe incorreta?",
+        "server": {
+            "file_not_found": "Ficheiro não encontrado. A ligação pode ter expirado ou o ficheiro foi eliminado.",
+            "download_count_expired": "Este ficheiro atingiu o limite de transferências.",
+            "file_not_yet_downloadable": "Este ficheiro ainda não está disponível. Tente novamente mais tarde.",
+            "download_location_forbidden": "As transferências não são permitidas a partir da sua localização.",
+            "file_not_found_or_limit_exceeded": "Ficheiro não encontrado ou limite de transferências atingido.",
+            "file_retrieval_failed": "Não foi possível obter o ficheiro. Tente novamente.",
+            "rate_limit_exceeded": "Demasiados pedidos. Aguarde um momento e tente novamente.",
+            "invalid_file_id": "Esta ligação de transferência não é válida.",
+            "tls_requirements_not_met": "A sua ligação não cumpre o nível de segurança exigido.",
+            "invalid_request": "O pedido não era válido."
+        }
+    }
+}

@@ -1,0 +1,36 @@
+{
+    "download": {
+        "title": "Download",
+        "password": "Passwort",
+        "submit": "Herunterladen",
+        "success": "Erfolgreich heruntergeladen, prüfen Sie Ihren Download-Ordner",
+        "viewImage": "Bild anzeigen",
+        "uploadLink": "Datei hochladen",
+        "close": "Schließen",
+        "closingIn": "Schließt in {{count}} s"
+    },
+    "alert": {
+        "errorLabel": "Fehler:"
+    },
+    "browser": {
+        "title": "BROWSER-FEHLER",
+        "message": "Ihr Browser unterstützt die erforderlichen Funktionen nicht. Bitte verwenden Sie einen anderen Browser."
+    },
+    "errors": {
+        "downloadCreateFailed": "Download konnte nicht erstellt werden",
+        "invalidPassword": "Ungültiges Passwort",
+        "decryptionFailed": "Entschlüsselungsfehler. Falsches Passwort?",
+        "server": {
+            "file_not_found": "Datei nicht gefunden. Der Link ist möglicherweise abgelaufen oder die Datei wurde gelöscht.",
+            "download_count_expired": "Diese Datei hat ihr Download-Limit erreicht.",
+            "file_not_yet_downloadable": "Diese Datei ist noch nicht verfügbar. Bitte versuchen Sie es später erneut.",
+            "download_location_forbidden": "Downloads sind von Ihrem Standort aus nicht erlaubt.",
+            "file_not_found_or_limit_exceeded": "Datei nicht gefunden oder Download-Limit erreicht.",
+            "file_retrieval_failed": "Die Datei konnte nicht abgerufen werden. Bitte versuchen Sie es erneut.",
+            "rate_limit_exceeded": "Zu viele Anfragen. Bitte warten Sie einen Moment und versuchen Sie es erneut.",
+            "invalid_file_id": "Dieser Download-Link ist ungültig.",
+            "tls_requirements_not_met": "Ihre Verbindung erfüllt nicht die erforderliche Sicherheitsstufe.",
+            "invalid_request": "Die Anfrage war ungültig."
+        }
+    }
+}

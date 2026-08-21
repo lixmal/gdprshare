@@ -11,7 +11,8 @@
         "test:e2e:ui": "playwright test --ui",
         "test:e2e:headed": "playwright test --headed --reporter=list",
         "dev": "browserify -t browserify-css -t [ babelify --presets [ @babel/preset-env @babel/preset-react ] ] src/scripts/app.js -o public/scripts/bundle.js; sed -i 's/node_modules\\/bootstrap\\/dist\\///g' public/scripts/bundle.js",
-        "build": "NODE_ENV=production browserify -t browserify-css -t [ babelify --presets [ @babel/preset-env @babel/preset-react ] ] -p [ uglifyify --no-sourcemap ] src/scripts/app.js | terser --compress --mangle > public/scripts/bundle.js; sed -i 's/node_modules\\/bootstrap\\/dist\\///g' public/scripts/bundle.js"
+        "build": "NODE_ENV=production browserify -t browserify-css -t [ babelify --presets [ @babel/preset-env @babel/preset-react ] ] -p [ uglifyify --no-sourcemap ] src/scripts/app.js | terser --compress --mangle > public/scripts/bundle.js; sed -i 's/node_modules\\/bootstrap\\/dist\\///g' public/scripts/bundle.js",
+        "check:locales": "node scripts/check-locales.js"
     },
     "repository": {
         "type": "git",
@@ -50,9 +51,11 @@
         "bootstrap": "^5.3.8",
         "classnames": "^2.5.1",
         "clipboard-polyfill": "^2.8.6",
+        "i18next": "^26.4.0",
         "qrcode.react": "^4.2.0",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
+        "react-i18next": "^17.0.12",
         "react-modal": "^3.16.3",
         "react-router-dom": "^6.30.3",
         "react-tooltip": "^5.30.0"

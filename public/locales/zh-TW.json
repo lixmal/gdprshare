@@ -1,0 +1,36 @@
+{
+    "download": {
+        "title": "下載",
+        "password": "密碼",
+        "submit": "下載",
+        "success": "下載成功，請查看您的下載資料夾",
+        "viewImage": "檢視圖片",
+        "uploadLink": "上傳檔案",
+        "close": "關閉",
+        "closingIn": "{{count}} 秒後關閉"
+    },
+    "alert": {
+        "errorLabel": "錯誤："
+    },
+    "browser": {
+        "title": "瀏覽器錯誤",
+        "message": "您的瀏覽器不支援所需功能。請改用其他瀏覽器。"
+    },
+    "errors": {
+        "downloadCreateFailed": "無法建立下載",
+        "invalidPassword": "密碼無效",
+        "decryptionFailed": "解密錯誤。密碼是否有誤？",
+        "server": {
+            "file_not_found": "找不到檔案。連結可能已過期，或檔案已被刪除。",
+            "download_count_expired": "此檔案已達下載次數上限。",
+            "file_not_yet_downloadable": "此檔案尚無法使用。請稍後再試。",
+            "download_location_forbidden": "不允許從您所在的位置下載。",
+            "file_not_found_or_limit_exceeded": "找不到檔案，或已達下載次數上限。",
+            "file_retrieval_failed": "無法取得檔案。請重試。",
+            "rate_limit_exceeded": "請求過於頻繁。請稍候再試。",
+            "invalid_file_id": "此下載連結無效。",
+            "tls_requirements_not_met": "您的連線未達所需的安全等級。",
+            "invalid_request": "請求無效。"
+        }
+    }
+}

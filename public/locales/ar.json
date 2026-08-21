@@ -1,0 +1,36 @@
+{
+    "download": {
+        "title": "التنزيل",
+        "password": "كلمة المرور",
+        "submit": "تنزيل",
+        "success": "تم التنزيل بنجاح، تحقق من مجلد التنزيلات",
+        "viewImage": "عرض الصورة",
+        "uploadLink": "رفع ملف",
+        "close": "إغلاق",
+        "closingIn": "الإغلاق خلال {{count}} ثانية"
+    },
+    "alert": {
+        "errorLabel": "خطأ:"
+    },
+    "browser": {
+        "title": "خطأ في المتصفح",
+        "message": "متصفحك لا يدعم الوظائف المطلوبة. يرجى تجربة متصفح آخر."
+    },
+    "errors": {
+        "downloadCreateFailed": "تعذّر إنشاء التنزيل",
+        "invalidPassword": "كلمة مرور غير صالحة",
+        "decryptionFailed": "خطأ في فك التشفير. هل كلمة المرور خاطئة؟",
+        "server": {
+            "file_not_found": "الملف غير موجود. ربما انتهت صلاحية الرابط أو تم حذف الملف.",
+            "download_count_expired": "بلغ هذا الملف الحد الأقصى لعدد التنزيلات.",
+            "file_not_yet_downloadable": "هذا الملف غير متاح بعد. يرجى المحاولة مرة أخرى لاحقًا.",
+            "download_location_forbidden": "التنزيل غير مسموح به من موقعك.",
+            "file_not_found_or_limit_exceeded": "الملف غير موجود أو تم بلوغ الحد الأقصى للتنزيلات.",
+            "file_retrieval_failed": "تعذّر جلب الملف. يرجى المحاولة مرة أخرى.",
+            "rate_limit_exceeded": "طلبات كثيرة جدًا. يرجى الانتظار قليلاً والمحاولة مرة أخرى.",
+            "invalid_file_id": "رابط التنزيل هذا غير صالح.",
+            "tls_requirements_not_met": "اتصالك لا يستوفي مستوى الأمان المطلوب.",
+            "invalid_request": "الطلب غير صالح."
+        }
+    }
+}

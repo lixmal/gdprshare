@@ -18,6 +18,7 @@ It does so by:
 * automatically deleting files after a period of time
 * automatically deleting files after file was downloaded a specified amount of times
 * conviently notifies sender on each download
+* localized download page in 20 languages, selected from the browser's language preferences. API errors carry a stable code so the recipient reads them in their own language
 
 See also [GDPR Art. 5 (2.)](https://gdpr-info.eu/art-5-gdpr/) and [GDPR Art. 24 (1.)](https://gdpr-info.eu/art-24-gdpr/) for the accountability aspects.
 

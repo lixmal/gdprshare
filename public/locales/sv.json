@@ -1,0 +1,36 @@
+{
+    "download": {
+        "title": "Nedladdning",
+        "password": "Lösenord",
+        "submit": "Ladda ner",
+        "success": "Nedladdningen lyckades, kontrollera din nedladdningsmapp",
+        "viewImage": "Visa bild",
+        "uploadLink": "Ladda upp en fil",
+        "close": "Stäng",
+        "closingIn": "Stänger om {{count}} s"
+    },
+    "alert": {
+        "errorLabel": "Fel:"
+    },
+    "browser": {
+        "title": "WEBBLÄSARFEL",
+        "message": "Din webbläsare stöder inte de funktioner som krävs. Prova en annan webbläsare."
+    },
+    "errors": {
+        "downloadCreateFailed": "Det gick inte att skapa nedladdningen",
+        "invalidPassword": "Ogiltigt lösenord",
+        "decryptionFailed": "Dekrypteringsfel. Fel lösenord?",
+        "server": {
+            "file_not_found": "Filen hittades inte. Länken kan ha upphört att gälla eller så har filen tagits bort.",
+            "download_count_expired": "Den här filen har nått sin nedladdningsgräns.",
+            "file_not_yet_downloadable": "Den här filen är inte tillgänglig ännu. Försök igen senare.",
+            "download_location_forbidden": "Nedladdningar är inte tillåtna från din plats.",
+            "file_not_found_or_limit_exceeded": "Filen hittades inte eller så har nedladdningsgränsen nåtts.",
+            "file_retrieval_failed": "Filen kunde inte hämtas. Försök igen.",
+            "rate_limit_exceeded": "För många förfrågningar. Vänta en stund och försök igen.",
+            "invalid_file_id": "Den här nedladdningslänken är ogiltig.",
+            "tls_requirements_not_met": "Din anslutning uppfyller inte den säkerhetsnivå som krävs.",
+            "invalid_request": "Begäran var ogiltig."
+        }
+    }
+}

@@ -1,0 +1,36 @@
+{
+    "download": {
+        "title": "Descarga",
+        "password": "Contraseña",
+        "submit": "Descargar",
+        "success": "Descarga completada, revisa tu carpeta de descargas",
+        "viewImage": "Ver imagen",
+        "uploadLink": "Subir un archivo",
+        "close": "Cerrar",
+        "closingIn": "Se cierra en {{count}} s"
+    },
+    "alert": {
+        "errorLabel": "Error:"
+    },
+    "browser": {
+        "title": "ERROR DEL NAVEGADOR",
+        "message": "Tu navegador no admite las funciones necesarias. Prueba con otro navegador."
+    },
+    "errors": {
+        "downloadCreateFailed": "No se pudo crear la descarga",
+        "invalidPassword": "Contraseña no válida",
+        "decryptionFailed": "Error de descifrado. ¿Contraseña incorrecta?",
+        "server": {
+            "file_not_found": "Archivo no encontrado. Es posible que el enlace haya caducado o que el archivo se haya eliminado.",
+            "download_count_expired": "Este archivo ha alcanzado su límite de descargas.",
+            "file_not_yet_downloadable": "Este archivo aún no está disponible. Inténtalo de nuevo más tarde.",
+            "download_location_forbidden": "No se permiten descargas desde tu ubicación.",
+            "file_not_found_or_limit_exceeded": "Archivo no encontrado o límite de descargas alcanzado.",
+            "file_retrieval_failed": "No se pudo recuperar el archivo. Inténtalo de nuevo.",
+            "rate_limit_exceeded": "Demasiadas solicitudes. Espera un momento e inténtalo de nuevo.",
+            "invalid_file_id": "Este enlace de descarga no es válido.",
+            "tls_requirements_not_met": "Tu conexión no cumple el nivel de seguridad requerido.",
+            "invalid_request": "La solicitud no era válida."
+        }
+    }
+}

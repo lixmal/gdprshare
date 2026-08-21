@@ -1,0 +1,36 @@
+{
+    "download": {
+        "title": "Téléchargement",
+        "password": "Mot de passe",
+        "submit": "Télécharger",
+        "success": "Téléchargement réussi, vérifiez votre dossier de téléchargements",
+        "viewImage": "Afficher l'image",
+        "uploadLink": "Envoyer un fichier",
+        "close": "Fermer",
+        "closingIn": "Fermeture dans {{count}} s"
+    },
+    "alert": {
+        "errorLabel": "Erreur :"
+    },
+    "browser": {
+        "title": "ERREUR DE NAVIGATEUR",
+        "message": "Votre navigateur ne prend pas en charge les fonctions requises. Veuillez essayer un autre navigateur."
+    },
+    "errors": {
+        "downloadCreateFailed": "Impossible de créer le téléchargement",
+        "invalidPassword": "Mot de passe invalide",
+        "decryptionFailed": "Erreur de déchiffrement. Mot de passe incorrect ?",
+        "server": {
+            "file_not_found": "Fichier introuvable. Le lien a peut-être expiré ou le fichier a été supprimé.",
+            "download_count_expired": "Ce fichier a atteint sa limite de téléchargements.",
+            "file_not_yet_downloadable": "Ce fichier n'est pas encore disponible. Veuillez réessayer plus tard.",
+            "download_location_forbidden": "Les téléchargements ne sont pas autorisés depuis votre région.",
+            "file_not_found_or_limit_exceeded": "Fichier introuvable ou limite de téléchargements atteinte.",
+            "file_retrieval_failed": "Le fichier n'a pas pu être récupéré. Veuillez réessayer.",
+            "rate_limit_exceeded": "Trop de requêtes. Veuillez patienter un instant et réessayer.",
+            "invalid_file_id": "Ce lien de téléchargement n'est pas valide.",
+            "tls_requirements_not_met": "Votre connexion ne répond pas au niveau de sécurité requis.",
+            "invalid_request": "La requête n'était pas valide."
+        }
+    }
+}
