@@ -7,7 +7,11 @@
         "viewImage": "عرض الصورة",
         "uploadLink": "رفع ملف",
         "close": "إغلاق",
-        "closingIn": "الإغلاق خلال {{count}} ثانية"
+        "closingIn": "الإغلاق خلال {{count}} ثانية",
+        "status": {
+            "downloading": "جارٍ التنزيل…",
+            "decrypting": "جارٍ فك التشفير…"
+        }
     },
     "alert": {
         "errorLabel": "خطأ:"

@@ -7,7 +7,11 @@
         "viewImage": "查看图片",
         "uploadLink": "上传文件",
         "close": "关闭",
-        "closingIn": "{{count}} 秒后关闭"
+        "closingIn": "{{count}} 秒后关闭",
+        "status": {
+            "downloading": "正在下载…",
+            "decrypting": "正在解密…"
+        }
     },
     "alert": {
         "errorLabel": "错误："

@@ -7,7 +7,11 @@
         "viewImage": "ดูรูปภาพ",
         "uploadLink": "อัปโหลดไฟล์",
         "close": "ปิด",
-        "closingIn": "จะปิดใน {{count}} วินาที"
+        "closingIn": "จะปิดใน {{count}} วินาที",
+        "status": {
+            "downloading": "กำลังดาวน์โหลด…",
+            "decrypting": "กำลังถอดรหัส…"
+        }
     },
     "alert": {
         "errorLabel": "ข้อผิดพลาด:"

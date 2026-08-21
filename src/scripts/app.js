@@ -27,15 +27,26 @@ gdprshare.config = {
     apiUrl: '/api/v1/files',
 }
 
+// A config request that never answers must not leave the visitor staring at a
+// blank page, the defaults above are good enough to render with.
+gdprshare.configTimeoutMs = 5000
+
 gdprshare.loadConfig = async function () {
+    const controller = new AbortController()
+    const timer = setTimeout(function () { controller.abort() }, gdprshare.configTimeoutMs)
+
     try {
-        const response = await window.fetch(gdprshare.config.apiPrefix + '/config')
+        const response = await window.fetch(gdprshare.config.apiPrefix + '/config', {
+            signal: controller.signal,
+        })
         if (!response.ok)
             return
         const serverConfig = await response.json()
         Object.assign(gdprshare.config, serverConfig)
     } catch (error) {
-        console.log(error)
+        console.log('load config:', error)
+    } finally {
+        clearTimeout(timer)
     }
 }
 
@@ -46,6 +57,7 @@ gdprshare.displayErr = function (error) {
     this.setState({
         error: error.toString(),
         mask: false,
+        phase: null,
     })
 }
 

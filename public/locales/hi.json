@@ -7,7 +7,11 @@
         "viewImage": "छवि देखें",
         "uploadLink": "फ़ाइल अपलोड करें",
         "close": "बंद करें",
-        "closingIn": "{{count}} सेकंड में बंद हो रहा है"
+        "closingIn": "{{count}} सेकंड में बंद हो रहा है",
+        "status": {
+            "downloading": "डाउनलोड हो रहा है…",
+            "decrypting": "डिक्रिप्ट हो रहा है…"
+        }
     },
     "alert": {
         "errorLabel": "त्रुटि:"

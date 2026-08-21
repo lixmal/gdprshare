@@ -7,7 +7,11 @@
         "viewImage": "Visa bild",
         "uploadLink": "Ladda upp en fil",
         "close": "Stäng",
-        "closingIn": "Stänger om {{count}} s"
+        "closingIn": "Stänger om {{count}} s",
+        "status": {
+            "downloading": "Laddar ner…",
+            "decrypting": "Dekrypterar…"
+        }
     },
     "alert": {
         "errorLabel": "Fel:"

@@ -7,7 +7,11 @@
         "viewImage": "Afbeelding bekijken",
         "uploadLink": "Een bestand uploaden",
         "close": "Sluiten",
-        "closingIn": "Sluit over {{count}} s"
+        "closingIn": "Sluit over {{count}} s",
+        "status": {
+            "downloading": "Downloaden…",
+            "decrypting": "Ontsleutelen…"
+        }
     },
     "alert": {
         "errorLabel": "Fout:"

@@ -7,7 +7,11 @@
         "viewImage": "Resmi görüntüle",
         "uploadLink": "Dosya yükle",
         "close": "Kapat",
-        "closingIn": "{{count}} sn içinde kapanıyor"
+        "closingIn": "{{count}} sn içinde kapanıyor",
+        "status": {
+            "downloading": "İndiriliyor…",
+            "decrypting": "Şifre çözülüyor…"
+        }
     },
     "alert": {
         "errorLabel": "Hata:"

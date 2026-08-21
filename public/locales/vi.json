@@ -7,7 +7,11 @@
         "viewImage": "Xem ảnh",
         "uploadLink": "Tải tệp lên",
         "close": "Đóng",
-        "closingIn": "Đóng sau {{count}} giây"
+        "closingIn": "Đóng sau {{count}} giây",
+        "status": {
+            "downloading": "Đang tải xuống…",
+            "decrypting": "Đang giải mã…"
+        }
     },
     "alert": {
         "errorLabel": "Lỗi:"
