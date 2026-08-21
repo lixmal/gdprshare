@@ -1,8 +1,6 @@
 module github.com/lixmal/gdprshare
 
-go 1.24.0
-
-toolchain go1.24.4
+go 1.27.0
 
 require (
 	github.com/gin-contrib/size v1.0.2
