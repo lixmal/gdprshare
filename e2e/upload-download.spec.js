@@ -1,6 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const fs = require('fs');
 const path = require('path');
+const { PDFDocument, PDFName } = require('pdf-lib');
 
 test.describe('Full E2E Upload and Download Flow', () => {
   test.beforeEach(async ({ page }) => {
@@ -513,5 +514,205 @@ test.describe('Full E2E Upload and Download Flow', () => {
     // Verify it's still a valid PNG (starts with PNG signature)
     const pngSignature = [137, 80, 78, 71, 13, 10, 26, 10];
     expect(imageInfo.bytes).toEqual(pngSignature);
+  });
+  async function makePdfWithMetadata(filePath) {
+    const doc = await PDFDocument.create();
+    doc.addPage().drawText('page content');
+    doc.setTitle('Secret Project Plan');
+    doc.setAuthor('Jane Doe');
+    doc.setProducer('SomeEditor 1.2');
+
+    const xmp = doc.context.stream(
+      '<x:xmpmeta xmlns:x="adobe:ns:meta/"><dc:creator>Jane Doe</dc:creator></x:xmpmeta>',
+      { Type: 'Metadata', Subtype: 'XML' },
+    );
+    doc.catalog.set(PDFName.of('Metadata'), doc.context.register(xmp));
+
+    fs.writeFileSync(filePath, await doc.save());
+  }
+
+  // Uploads the file, follows the link and returns the decrypted bytes.
+  async function uploadAndDownload(page, context, filePath, { strip }) {
+    await page.locator('input#content').setInputFiles(filePath);
+    if (strip)
+      await page.locator('input#strip').check();
+
+    await page.locator('input#count').fill('2');
+    await page.locator('select#geo-restriction').selectOption('none');
+    await page.locator('input[type="submit"][value="Upload"]').click();
+
+    await page.waitForURL(/\/uploaded/);
+    const downloadUrl = await page.locator('input#link-key').inputValue();
+
+    const downloadPage = await context.newPage();
+    const downloadPromise = downloadPage.waitForEvent('download', { timeout: 15000 });
+    await downloadPage.goto(downloadUrl, { waitUntil: 'load' });
+    const download = await downloadPromise;
+
+    const saved = await download.path();
+    const bytes = fs.readFileSync(saved);
+    await downloadPage.close();
+
+    return bytes;
+  }
+
+  test('should strip pdf metadata when the option is checked', async ({ page, context }) => {
+    const pdfPath = path.join(__dirname, 'test-strip.pdf');
+    await makePdfWithMetadata(pdfPath);
+
+    const bytes = await uploadAndDownload(page, context, pdfPath, { strip: true });
+
+    // stripped pdfs are saved uncompressed, so nothing can hide in an object stream
+    const raw = bytes.toString('latin1');
+    expect(raw).toContain('%PDF-');
+    expect(raw).not.toContain('Jane Doe');
+    expect(raw).not.toContain('Secret Project Plan');
+    expect(raw).not.toContain('SomeEditor');
+    expect(raw).not.toContain('xmpmeta');
+
+    const doc = await PDFDocument.load(bytes, { updateMetadata: false });
+    expect(doc.getPageCount()).toBe(1);
+    expect(doc.getTitle()).toBeUndefined();
+    expect(doc.getAuthor()).toBeUndefined();
+
+    fs.unlinkSync(pdfPath);
+  });
+
+  test('should keep pdf metadata when the option is left unchecked', async ({ page, context }) => {
+    const pdfPath = path.join(__dirname, 'test-nostrip.pdf');
+    await makePdfWithMetadata(pdfPath);
+
+    const bytes = await uploadAndDownload(page, context, pdfPath, { strip: false });
+
+    // opt-in: without the checkbox the file is uploaded untouched. The values live
+    // in a compressed object stream, so read them back through a pdf parser.
+    const doc = await PDFDocument.load(bytes, { updateMetadata: false });
+    expect(doc.getTitle()).toBe('Secret Project Plan');
+    expect(doc.getAuthor()).toBe('Jane Doe');
+    expect(doc.getProducer()).toBe('SomeEditor 1.2');
+
+    fs.unlinkSync(pdfPath);
+  });
+
+  test('should abort the upload when metadata cannot be stripped', async ({ page }) => {
+    const docPath = path.join(__dirname, 'test-strip.docx');
+    fs.writeFileSync(docPath, 'not a format we can strip');
+
+    await page.locator('input#content').setInputFiles(docPath);
+    await page.locator('input#strip').check();
+    await page.locator('select#geo-restriction').selectOption('none');
+    await page.locator('input[type="submit"][value="Upload"]').click();
+
+    // the upload must fail loudly instead of sending the file with its metadata
+    await expect(page.locator('text=/could not strip metadata/i')).toBeVisible({ timeout: 10000 });
+    expect(page.url()).not.toMatch(/\/uploaded/);
+
+    fs.unlinkSync(docPath);
+  });
+
+  test('should only offer the strip option for the file type', async ({ page }) => {
+    await expect(page.locator('input#strip')).toBeVisible();
+
+    await page.locator('select#type').selectOption('image');
+    await expect(page.locator('input#strip')).toHaveCount(0);
+
+    await page.locator('select#type').selectOption('text');
+    await expect(page.locator('input#strip')).toHaveCount(0);
+  });
+  // Two frame 1x1 GIF with a comment block, an XMP application extension and
+  // the NETSCAPE looping block.
+  function makeGifWithMetadata(filePath) {
+    const text = (v) => Array.from(v).map((c) => c.charCodeAt(0));
+    const subBlock = (v) => [v.length].concat(text(v));
+
+    const frame = [
+      0x21, 0xf9, 0x04, 0x00, 0x32, 0x00, 0x00, 0x00,
+      0x2c, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00,
+      0x02, 0x02, 0x44, 0x01, 0x00,
+    ];
+
+    const bytes = [].concat(
+      text('GIF89a'),
+      [0x01, 0x00, 0x01, 0x00, 0x80, 0x00, 0x00],
+      [0x00, 0x00, 0x00, 0xff, 0xff, 0xff],
+      [0x21, 0xff], subBlock('NETSCAPE2.0'), [0x03, 0x01, 0x00, 0x00, 0x00],
+      [0x21, 0xfe], subBlock('Shot by Jane Doe'), [0x00],
+      [0x21, 0xff], subBlock('XMP DataXMP'), subBlock('<dc:creator>Jane Doe</dc:creator>'), [0x00],
+      frame,
+      frame,
+      [0x3b],
+    );
+
+    fs.writeFileSync(filePath, Buffer.from(bytes));
+  }
+
+  test('should strip gif metadata without destroying the animation', async ({ page, context }) => {
+    const gifPath = path.join(__dirname, 'test-anim.gif');
+    makeGifWithMetadata(gifPath);
+
+    // the image type always strips
+    await page.locator('select#type').selectOption('image');
+    await page.locator('input#image-content').setInputFiles(gifPath);
+    await page.locator('input#count').fill('2');
+    await page.locator('select#geo-restriction').selectOption('none');
+    await page.locator('input[type="submit"][value="Upload"]').click();
+
+    await page.waitForURL(/\/uploaded/);
+    const downloadUrl = await page.locator('input#link-key').inputValue();
+
+    const downloadPage = await context.newPage();
+    await downloadPage.goto(downloadUrl, { waitUntil: 'load' });
+    await expect(downloadPage.locator('#inline-image')).toBeVisible({ timeout: 10000 });
+
+    const result = await downloadPage.evaluate(async () => {
+      const img = document.querySelector('#inline-image');
+      const buffer = await (await fetch(img.src)).arrayBuffer();
+      let raw = '';
+      const view = new Uint8Array(buffer);
+      for (let i = 0; i < view.length; i++) raw += String.fromCharCode(view[i]);
+      return {
+        raw,
+        // a real browser decoder accepted the rewritten block structure
+        width: img.naturalWidth,
+        height: img.naturalHeight,
+      };
+    });
+
+    expect(result.raw.startsWith('GIF89a')).toBe(true);
+    expect(result.raw).not.toContain('Jane Doe');
+    expect(result.raw).not.toContain('XMP Data');
+    // animation intact: looping block plus both frames still present
+    expect(result.raw).toContain('NETSCAPE2.0');
+    expect(result.raw.split('\x21\xf9\x04\x00\x32').length - 1).toBe(2);
+    expect(result.width).toBe(1);
+    expect(result.height).toBe(1);
+
+    await downloadPage.close();
+    fs.unlinkSync(gifPath);
+  });
+
+  test('should load the pdf bundle only when a pdf is stripped', async ({ page }) => {
+    const requested = [];
+    page.on('request', (req) => {
+      if (req.url().includes('pdf-lib.js')) requested.push(req.url());
+    });
+
+    await page.reload();
+    await page.locator('select#geo-restriction').selectOption('none');
+
+    // not part of the initial page load
+    expect(requested).toHaveLength(0);
+
+    const pdfPath = path.join(__dirname, 'test-lazy.pdf');
+    await makePdfWithMetadata(pdfPath);
+
+    await page.locator('input#content').setInputFiles(pdfPath);
+    await page.locator('input#strip').check();
+    await page.locator('input[type="submit"][value="Upload"]').click();
+
+    await page.waitForURL(/\/uploaded/);
+    expect(requested.length).toBeGreaterThan(0);
+
+    fs.unlinkSync(pdfPath);
   });
 });
