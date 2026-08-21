@@ -4,6 +4,7 @@ import Octicon, {Clippy, CloudUpload, Trashcan} from '@primer/octicons-react'
 import Alert from './Alert'
 import { Tooltip } from 'react-tooltip'
 import { withRouter } from './withRouter'
+import { stripMetadata, loadPdfLib } from './strip'
 
 class Upload extends React.Component {
     constructor() {
@@ -20,6 +21,7 @@ class Upload extends React.Component {
         this.handleDragOff = this.handleDragOff.bind(this)
         this.handleTypeChange = this.handleTypeChange.bind(this)
         this.handleEphemeralChange = this.handleEphemeralChange.bind(this)
+        this.handleStripChange = this.handleStripChange.bind(this)
         this.uploadFile = this.uploadFile.bind(this)
         this.updateValidity = this.updateValidity.bind(this)
         this.handleGeoRestrictionChange = this.handleGeoRestrictionChange.bind(this)
@@ -43,6 +45,7 @@ class Upload extends React.Component {
             customCountriesUsed: false,
             delay: '0',
             ephemeral: '0',
+            strip: false,
         }
     }
 
@@ -244,49 +247,6 @@ class Upload extends React.Component {
     }
 
 
-    stripImageMetadata(file) {
-        if (file.type === 'image/gif') {
-            return Promise.resolve(file)
-        }
-
-        return new Promise(function (resolve, reject) {
-            var img = new Image()
-            var url = (window.URL || window.webkitURL).createObjectURL(file)
-
-            img.onload = function () {
-                (window.URL || window.webkitURL).revokeObjectURL(url)
-
-                var canvas = document.createElement('canvas')
-                canvas.width = img.naturalWidth
-                canvas.height = img.naturalHeight
-
-                var ctx = canvas.getContext('2d')
-                ctx.drawImage(img, 0, 0)
-
-                var mimeType = file.type
-                if (mimeType !== 'image/png' && mimeType !== 'image/webp') {
-                    mimeType = 'image/jpeg'
-                }
-                var quality = mimeType === 'image/jpeg' ? 0.92 : undefined
-
-                canvas.toBlob(function (blob) {
-                    if (!blob) {
-                        reject(new Error('canvas toBlob failed'))
-                        return
-                    }
-                    resolve(new File([blob], file.name, { type: mimeType }))
-                }, mimeType, quality)
-            }
-
-            img.onerror = function () {
-                (window.URL || window.webkitURL).revokeObjectURL(url)
-                reject(new Error('failed to load image'))
-            }
-
-            img.src = url
-        })
-    }
-
     async handleUpload(event) {
         event.preventDefault()
         if (this.state.mask)
@@ -306,15 +266,20 @@ class Upload extends React.Component {
             // using first few chars as filename for recognizability
             // TODO: sanitize for usage in file names
             file = new File([text], text.slice(0, 21) + '.txt', {type: 'text/plain'})
-        } else if (this.state.type === 'image') {
-            file = this.refs.image.files[0]
-            try {
-                file = await this.stripImageMetadata(file)
-            } catch (err) {
-                console.log('metadata strip failed, using original:', err)
-            }
         } else {
-            file = this.refs.file.files[0]
+            file = this.state.type === 'image' ? this.refs.image.files[0] : this.refs.file.files[0]
+
+            // images are always stripped, other files only on request
+            if (this.state.type === 'image' || this.state.strip) {
+                try {
+                    file = await stripMetadata(file)
+                } catch (err) {
+                    // never fall back to the original: the upload would leak
+                    // the metadata the user asked to have removed
+                    gdprshare.displayErr.call(this, 'Could not strip metadata: ' + err.message)
+                    return
+                }
+            }
         }
 
         try {
@@ -436,7 +401,23 @@ class Upload extends React.Component {
         this.setState({
             type: event.target.value,
             ephemeral: '0',
+            strip: false,
         })
+    }
+
+    handleStripChange(event) {
+        const strip = event.target.checked
+        this.setState({
+            strip: strip,
+        })
+
+        // fetch the pdf bundle now so the upload does not have to wait for it,
+        // failures are reported when stripping actually runs
+        if (strip && this.refs.file && this.refs.file.files[0] &&
+            this.refs.file.files[0].type === 'application/pdf')
+            loadPdfLib().catch(function (err) {
+                console.log('preloading pdf support:', err)
+            })
     }
 
     handleEphemeralChange(event) {
@@ -797,6 +778,29 @@ class Upload extends React.Component {
                                             </select>
                                         </div>
                                     </div>
+
+                                    {this.state.type === 'file' && (
+                                        <div className="mb-3 row">
+                                            <label htmlFor="strip" className="col-sm-3 col-form-label col-form-label-sm">
+                                                Metadata
+                                            </label>
+                                            <div className="col-sm-9">
+                                                <div className="form-check">
+                                                    <input className="form-check-input" type="checkbox" id="strip"
+                                                           checked={this.state.strip}
+                                                           onChange={this.handleStripChange}
+                                                           aria-describedby="stripHelp"/>
+                                                    <label className="form-check-label col-form-label-sm" htmlFor="strip">
+                                                        Strip metadata
+                                                    </label>
+                                                </div>
+                                                <small id="stripHelp" className="form-text text-muted">Removes EXIF and
+                                                    GPS data from images, and title, author and XMP data from PDFs.
+                                                    Images other than GIFs are re-encoded, so quality may drop. Other
+                                                    file types are rejected. Always on for the image type.</small>
+                                            </div>
+                                        </div>
+                                    )}
 
                                     {this.state.type === 'image' && (
                                         <div className="mb-3 row">

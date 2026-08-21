@@ -18,6 +18,7 @@ It does so by:
 * automatically deleting files after a period of time
 * automatically deleting files after file was downloaded a specified amount of times
 * conviently notifies sender on each download
+* stripping metadata in the browser before upload: EXIF and GPS data from images (always for the image type, opt-in for the file type), comment and XMP blocks from GIFs without touching the animation, document info and XMP data from PDFs
 
 See also [GDPR Art. 5 (2.)](https://gdpr-info.eu/art-5-gdpr/) and [GDPR Art. 24 (1.)](https://gdpr-info.eu/art-24-gdpr/) for the accountability aspects.
 
