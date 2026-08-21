@@ -42,12 +42,7 @@ func (s *Server) uploadFile(c *gin.Context) {
 		if c.Writer.Status() == http.StatusRequestEntityTooLarge {
 			return
 		}
-		c.JSON(
-			http.StatusBadRequest,
-			gin.H{
-				"message": err.Error(),
-			},
-		)
+		apiError(c, http.StatusBadRequest, ErrCodeInvalidUpload, err.Error())
 		return
 	}
 
@@ -65,12 +60,7 @@ func (s *Server) uploadFile(c *gin.Context) {
 	name, err := uuid.NewV4()
 	if err != nil {
 		log.Printf("Failed to create uuid: %s\n", err)
-		c.JSON(
-			http.StatusInternalServerError,
-			gin.H{
-				"message": "failed to generate temp filename",
-			},
-		)
+		apiError(c, http.StatusInternalServerError, ErrCodeTempFilename, "failed to generate temp filename")
 		return
 	}
 	namestr := name.String()
@@ -78,36 +68,21 @@ func (s *Server) uploadFile(c *gin.Context) {
 	fileId, err := misc.GenToken(s.config.IDLength)
 	if err != nil {
 		log.Printf("Failed to generate file ID: %s\n", err)
-		c.JSON(
-			http.StatusInternalServerError,
-			gin.H{
-				"message": "failed to generate file ID",
-			},
-		)
+		apiError(c, http.StatusInternalServerError, ErrCodeFileIDFailed, "failed to generate file ID")
 		return
 	}
 
 	ownerToken, err := misc.GenToken(OwnerTokenLen)
 	if err != nil {
 		log.Printf("Failed to generate file ID: %s\n", err)
-		c.JSON(
-			http.StatusInternalServerError,
-			gin.H{
-				"message": "failed to generate owner token",
-			},
-		)
+		apiError(c, http.StatusInternalServerError, ErrCodeOwnerTokenFailed, "failed to generate owner token")
 		return
 	}
 
 	tx := s.db.Begin()
 	if err = tx.Error; err != nil {
 		log.Printf("Failed to begin transaction: %s\n", err)
-		c.JSON(
-			http.StatusInternalServerError,
-			gin.H{
-				"message": "failed to start transaction",
-			},
-		)
+		apiError(c, http.StatusInternalServerError, ErrCodeTransactionStart, "failed to start transaction")
 		return
 	}
 
@@ -121,12 +96,7 @@ func (s *Server) uploadFile(c *gin.Context) {
 			log.Printf("Failed to rollback: %s\n", err)
 		}
 		if !c.IsAborted() {
-			c.JSON(
-				http.StatusForbidden,
-				gin.H{
-					"message": "TLS requirements not met",
-				},
-			)
+			apiError(c, http.StatusForbidden, ErrCodeTLSRequirements, "TLS requirements not met")
 		}
 		return
 	}
@@ -136,12 +106,7 @@ func (s *Server) uploadFile(c *gin.Context) {
 		if err = tx.Rollback().Error; err != nil {
 			log.Printf("Failed to rollback: %s\n", err)
 		}
-		c.JSON(
-			http.StatusInternalServerError,
-			gin.H{
-				"message": "failed to store file in database",
-			},
-		)
+		apiError(c, http.StatusInternalServerError, ErrCodeStoreFailed, "failed to store file in database")
 		return
 	}
 
@@ -151,12 +116,7 @@ func (s *Server) uploadFile(c *gin.Context) {
 		if err = tx.Rollback().Error; err != nil {
 			log.Printf("Failed to rollback: %s\n", err)
 		}
-		c.JSON(
-			http.StatusInternalServerError,
-			gin.H{
-				"message": "failed to save file",
-			},
-		)
+		apiError(c, http.StatusInternalServerError, ErrCodeSaveFailed, "failed to save file")
 		return
 	}
 
@@ -166,12 +126,7 @@ func (s *Server) uploadFile(c *gin.Context) {
 		if err = os.Remove(path); err != nil {
 			log.Printf("Failed to remove file %s: %s\n", path, err)
 		}
-		c.JSON(
-			http.StatusInternalServerError,
-			gin.H{
-				"message": "failed to store file in database",
-			},
-		)
+		apiError(c, http.StatusInternalServerError, ErrCodeStoreFailed, "failed to store file in database")
 		return
 	}
 
@@ -190,12 +145,7 @@ func (s *Server) validateFiles(c *gin.Context) {
 	var files []OwnedFile
 	if err := c.ShouldBindJSON(&files); err != nil {
 		// TODO: get FieldError and return relevant part only
-		c.JSON(
-			http.StatusBadRequest,
-			gin.H{
-				"message": err.Error(),
-			},
-		)
+		apiError(c, http.StatusBadRequest, ErrCodeInvalidRequest, err.Error())
 		return
 	}
 
@@ -243,12 +193,7 @@ func (s *Server) downloadFile(c *gin.Context) {
 	path := filepath.Join(s.config.StorePath, storedFile.Name)
 
 	if storedFile.Count < 1 {
-		c.JSON(
-			http.StatusNotFound,
-			gin.H{
-				"message": "download count expired",
-			},
-		)
+		apiError(c, http.StatusNotFound, ErrCodeCountExpired, "download count expired")
 		return
 	}
 
@@ -259,12 +204,7 @@ func (s *Server) downloadFile(c *gin.Context) {
 			log.Printf("File with id %s is a directory\n", fileId)
 		}
 
-		c.JSON(
-			http.StatusNotFound,
-			gin.H{
-				"message": "file not found",
-			},
-		)
+		apiError(c, http.StatusNotFound, ErrCodeFileNotFound, "file not found")
 		return
 	}
 
@@ -276,19 +216,10 @@ func (s *Server) downloadFile(c *gin.Context) {
 	allowed := s.isDownloadAllowed(storedFile, client) && !s.isUserAgentDisallowed(client.UserAgent)
 
 	if time.Now().Before(storedFile.CreatedAt.Add(time.Duration(storedFile.Delay) * time.Minute)) {
-		c.JSON(
-			http.StatusForbidden, gin.H{
-				"message": "file not yet downloadable",
-			},
-		)
+		apiError(c, http.StatusForbidden, ErrCodeNotYetDownloadble, "file not yet downloadable")
 	} else if !allowed {
 		log.Printf("Download from %s forbidden, user agent: %s\n", client.Addr, client.UserAgent)
-		c.JSON(
-			http.StatusForbidden,
-			gin.H{
-				"message": "download from this location forbidden",
-			},
-		)
+		apiError(c, http.StatusForbidden, ErrCodeLocationForbidden, "download from this location forbidden")
 	} else {
 		storedFile.DstClients = append(
 			storedFile.DstClients,
@@ -421,35 +352,20 @@ func (s *Server) deleteFile(c *gin.Context) {
 	var o OwnerToken
 	if err := c.ShouldBind(&o); err != nil {
 		// TODO: get FieldError and return relevant part only
-		c.JSON(
-			http.StatusBadRequest,
-			gin.H{
-				"message": err.Error(),
-			},
-		)
+		apiError(c, http.StatusBadRequest, ErrCodeInvalidRequest, err.Error())
 		return
 	}
 
 	var storedFile database.StoredFile
 	if err := s.db.Where(&database.StoredFile{FileId: fileId}).Find(&storedFile).Error; err != nil {
 		log.Printf("Failed to find file with id %s in database: %s\n", fileId, err)
-		c.JSON(
-			http.StatusNotFound,
-			gin.H{
-				"message": "file not found",
-			},
-		)
+		apiError(c, http.StatusNotFound, ErrCodeFileNotFound, "file not found")
 		return
 	}
 
 	// check if owner token matches the stored one
 	if subtle.ConstantTimeCompare([]byte(o.OwnerToken), []byte(storedFile.OwnerToken)) != 1 {
-		c.JSON(
-			http.StatusUnauthorized,
-			gin.H{
-				"message": "owner token doesn't match",
-			},
-		)
+		apiError(c, http.StatusUnauthorized, ErrCodeOwnerTokenMismatch, "owner token doesn't match")
 		return
 	}
 
@@ -457,12 +373,7 @@ func (s *Server) deleteFile(c *gin.Context) {
 		for _, err := range errs {
 			log.Printf("%s\n", err)
 		}
-		c.JSON(
-			http.StatusInternalServerError,
-			gin.H{
-				"message": "file deletion failed",
-			},
-		)
+		apiError(c, http.StatusInternalServerError, ErrCodeDeleteFailed, "file deletion failed")
 		return
 	}
 
@@ -478,12 +389,7 @@ func (s *Server) setStats(c *gin.Context) {
 	var stats database.Stats
 	if err := c.ShouldBind(&stats); err != nil {
 		// TODO: get FieldError and return relevant part only
-		c.JSON(
-			http.StatusBadRequest,
-			gin.H{
-				"message": err.Error(),
-			},
-		)
+		apiError(c, http.StatusBadRequest, ErrCodeInvalidRequest, err.Error())
 		return
 	}
 
@@ -495,12 +401,7 @@ func (s *Server) setStats(c *gin.Context) {
 	}
 	if err := s.db.Save(&stats).Error; err != nil {
 		log.Printf("Failed to store stats: %s\n", err)
-		c.JSON(
-			http.StatusInternalServerError,
-			gin.H{
-				"message": "failed to store stats",
-			},
-		)
+		apiError(c, http.StatusInternalServerError, ErrCodeStatsFailed, "failed to store stats")
 		return
 	}
 
@@ -540,12 +441,7 @@ func (s *Server) getClientInfo(c *gin.Context) *database.Client {
 	}
 
 	if err := s.validateTLS(tlsversion, tlscipher); err != nil {
-		c.JSON(
-			http.StatusForbidden,
-			gin.H{
-				"message": "TLS requirements not met",
-			},
-		)
+		apiError(c, http.StatusForbidden, ErrCodeTLSRequirements, "TLS requirements not met")
 		c.Abort()
 		return nil
 	}
@@ -623,35 +519,20 @@ func (s *Server) getStoredFile(fileId string, c *gin.Context) (*database.StoredF
 	var storedFile database.StoredFile
 
 	if err := s.db.Where(&database.StoredFile{FileId: fileId}).Find(&storedFile).Error; err != nil {
-		c.JSON(
-			http.StatusNotFound,
-			gin.H{
-				"message": "file not found or download limit exceeded",
-			},
-		)
+		apiError(c, http.StatusNotFound, ErrCodeFileGone, "file not found or download limit exceeded")
 		return nil, fmt.Errorf("find file in database: %w", err)
 	}
 
 	var srcclient database.Client
 	if err := s.db.Model(&storedFile).Related(&srcclient).Error; err != nil {
-		c.JSON(
-			http.StatusNotFound,
-			gin.H{
-				"message": "file retrieval error",
-			},
-		)
+		apiError(c, http.StatusNotFound, ErrCodeRetrievalFailed, "file retrieval error")
 		return nil, fmt.Errorf("access src client: %w", err)
 	}
 	storedFile.SrcClient = &srcclient
 
 	var dstclients []*database.DstClient
 	if err := s.db.Model(&storedFile).Related(&dstclients).Error; err != nil {
-		c.JSON(
-			http.StatusNotFound,
-			gin.H{
-				"message": "file retrieval error",
-			},
-		)
+		apiError(c, http.StatusNotFound, ErrCodeRetrievalFailed, "file retrieval error")
 		return nil, fmt.Errorf("access dst clients: %w", err)
 	}
 	storedFile.DstClients = dstclients
@@ -663,12 +544,7 @@ func bindFileID(c *gin.Context) (string, error) {
 	var f FileId
 	// TODO: get FieldError and return relevant part only
 	if err := c.ShouldBindUri(&f); err != nil {
-		c.JSON(
-			http.StatusBadRequest,
-			gin.H{
-				"message": err.Error(),
-			},
-		)
+		apiError(c, http.StatusBadRequest, ErrCodeInvalidFileID, err.Error())
 		return "", err
 	}
 	return f.FileId, nil

@@ -67,10 +67,7 @@ func (rl *rateLimiter) middleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		limiter := rl.getVisitor(c.ClientIP())
 		if !limiter.Allow() {
-			c.JSON(http.StatusTooManyRequests, gin.H{
-				"message": "rate limit exceeded",
-			})
-			c.Abort()
+			apiErrorAborted(c, http.StatusTooManyRequests, ErrCodeRateLimited, "rate limit exceeded")
 			return
 		}
 		c.Next()

@@ -1,0 +1,36 @@
+{
+    "download": {
+        "title": "İndirme",
+        "password": "Parola",
+        "submit": "İndir",
+        "success": "İndirme başarılı, indirilenler klasörünüzü kontrol edin",
+        "viewImage": "Resmi görüntüle",
+        "uploadLink": "Dosya yükle",
+        "close": "Kapat",
+        "closingIn": "{{count}} sn içinde kapanıyor"
+    },
+    "alert": {
+        "errorLabel": "Hata:"
+    },
+    "browser": {
+        "title": "TARAYICI HATASI",
+        "message": "Tarayıcınız gerekli işlevleri desteklemiyor. Lütfen farklı bir tarayıcı deneyin."
+    },
+    "errors": {
+        "downloadCreateFailed": "İndirme oluşturulamadı",
+        "invalidPassword": "Geçersiz parola",
+        "decryptionFailed": "Şifre çözme hatası. Parola yanlış mı?",
+        "server": {
+            "file_not_found": "Dosya bulunamadı. Bağlantının süresi dolmuş veya dosya silinmiş olabilir.",
+            "download_count_expired": "Bu dosya indirme sınırına ulaştı.",
+            "file_not_yet_downloadable": "Bu dosya henüz kullanılabilir değil. Lütfen daha sonra tekrar deneyin.",
+            "download_location_forbidden": "Bulunduğunuz konumdan indirmeye izin verilmiyor.",
+            "file_not_found_or_limit_exceeded": "Dosya bulunamadı veya indirme sınırına ulaşıldı.",
+            "file_retrieval_failed": "Dosya alınamadı. Lütfen tekrar deneyin.",
+            "rate_limit_exceeded": "Çok fazla istek. Lütfen biraz bekleyip tekrar deneyin.",
+            "invalid_file_id": "Bu indirme bağlantısı geçerli değil.",
+            "tls_requirements_not_met": "Bağlantınız gerekli güvenlik düzeyini karşılamıyor.",
+            "invalid_request": "İstek geçerli değildi."
+        }
+    }
+}

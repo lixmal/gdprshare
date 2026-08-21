@@ -1,0 +1,36 @@
+{
+    "download": {
+        "title": "Unduh",
+        "password": "Kata sandi",
+        "submit": "Unduh",
+        "success": "Berhasil diunduh, periksa folder unduhan Anda",
+        "viewImage": "Lihat gambar",
+        "uploadLink": "Unggah berkas",
+        "close": "Tutup",
+        "closingIn": "Menutup dalam {{count}} dtk"
+    },
+    "alert": {
+        "errorLabel": "Kesalahan:"
+    },
+    "browser": {
+        "title": "KESALAHAN PERAMBAN",
+        "message": "Peramban Anda tidak mendukung fungsi yang diperlukan. Silakan coba peramban lain."
+    },
+    "errors": {
+        "downloadCreateFailed": "Gagal membuat unduhan",
+        "invalidPassword": "Kata sandi tidak valid",
+        "decryptionFailed": "Kesalahan dekripsi. Kata sandi salah?",
+        "server": {
+            "file_not_found": "Berkas tidak ditemukan. Tautan mungkin telah kedaluwarsa atau berkas telah dihapus.",
+            "download_count_expired": "Berkas ini telah mencapai batas unduhan.",
+            "file_not_yet_downloadable": "Berkas ini belum tersedia. Silakan coba lagi nanti.",
+            "download_location_forbidden": "Unduhan tidak diizinkan dari lokasi Anda.",
+            "file_not_found_or_limit_exceeded": "Berkas tidak ditemukan atau batas unduhan telah tercapai.",
+            "file_retrieval_failed": "Berkas tidak dapat diambil. Silakan coba lagi.",
+            "rate_limit_exceeded": "Terlalu banyak permintaan. Tunggu sebentar dan coba lagi.",
+            "invalid_file_id": "Tautan unduhan ini tidak valid.",
+            "tls_requirements_not_met": "Koneksi Anda tidak memenuhi tingkat keamanan yang diperlukan.",
+            "invalid_request": "Permintaan tidak valid."
+        }
+    }
+}

@@ -1,0 +1,36 @@
+{
+    "download": {
+        "title": "Downloaden",
+        "password": "Wachtwoord",
+        "submit": "Downloaden",
+        "success": "Download voltooid, controleer je downloadmap",
+        "viewImage": "Afbeelding bekijken",
+        "uploadLink": "Een bestand uploaden",
+        "close": "Sluiten",
+        "closingIn": "Sluit over {{count}} s"
+    },
+    "alert": {
+        "errorLabel": "Fout:"
+    },
+    "browser": {
+        "title": "BROWSERFOUT",
+        "message": "Je browser ondersteunt de vereiste functies niet. Probeer een andere browser."
+    },
+    "errors": {
+        "downloadCreateFailed": "Download kon niet worden gemaakt",
+        "invalidPassword": "Ongeldig wachtwoord",
+        "decryptionFailed": "Ontsleutelingsfout. Verkeerd wachtwoord?",
+        "server": {
+            "file_not_found": "Bestand niet gevonden. De link is mogelijk verlopen of het bestand is verwijderd.",
+            "download_count_expired": "Dit bestand heeft de downloadlimiet bereikt.",
+            "file_not_yet_downloadable": "Dit bestand is nog niet beschikbaar. Probeer het later opnieuw.",
+            "download_location_forbidden": "Downloads zijn niet toegestaan vanaf jouw locatie.",
+            "file_not_found_or_limit_exceeded": "Bestand niet gevonden of downloadlimiet bereikt.",
+            "file_retrieval_failed": "Het bestand kon niet worden opgehaald. Probeer het opnieuw.",
+            "rate_limit_exceeded": "Te veel verzoeken. Wacht even en probeer het opnieuw.",
+            "invalid_file_id": "Deze downloadlink is niet geldig.",
+            "tls_requirements_not_met": "Je verbinding voldoet niet aan het vereiste beveiligingsniveau.",
+            "invalid_request": "Het verzoek was niet geldig."
+        }
+    }
+}

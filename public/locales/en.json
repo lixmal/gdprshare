@@ -1,0 +1,36 @@
+{
+    "download": {
+        "title": "Download",
+        "password": "Password",
+        "submit": "Download",
+        "success": "Successfully downloaded, check your download folder",
+        "viewImage": "View Image",
+        "uploadLink": "Upload a file",
+        "close": "Close",
+        "closingIn": "Closing in {{count}}s"
+    },
+    "alert": {
+        "errorLabel": "Error:"
+    },
+    "browser": {
+        "title": "BROWSER ERROR",
+        "message": "Your browser doesn't support required operations. Please try a different browser."
+    },
+    "errors": {
+        "downloadCreateFailed": "Failed to create download",
+        "invalidPassword": "Invalid password",
+        "decryptionFailed": "Decryption error. Wrong password?",
+        "server": {
+            "file_not_found": "File not found. The link may have expired or the file was deleted.",
+            "download_count_expired": "This file has reached its download limit.",
+            "file_not_yet_downloadable": "This file is not available yet. Please try again later.",
+            "download_location_forbidden": "Downloads are not allowed from your location.",
+            "file_not_found_or_limit_exceeded": "File not found, or its download limit has been reached.",
+            "file_retrieval_failed": "The file could not be retrieved. Please try again.",
+            "rate_limit_exceeded": "Too many requests. Please wait a moment and try again.",
+            "invalid_file_id": "This download link is not valid.",
+            "tls_requirements_not_met": "Your connection does not meet the required security level.",
+            "invalid_request": "The request was not valid."
+        }
+    }
+}

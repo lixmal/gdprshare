@@ -1,0 +1,36 @@
+{
+    "download": {
+        "title": "Tải xuống",
+        "password": "Mật khẩu",
+        "submit": "Tải xuống",
+        "success": "Tải xuống thành công, hãy kiểm tra thư mục tải xuống của bạn",
+        "viewImage": "Xem ảnh",
+        "uploadLink": "Tải tệp lên",
+        "close": "Đóng",
+        "closingIn": "Đóng sau {{count}} giây"
+    },
+    "alert": {
+        "errorLabel": "Lỗi:"
+    },
+    "browser": {
+        "title": "LỖI TRÌNH DUYỆT",
+        "message": "Trình duyệt của bạn không hỗ trợ các chức năng cần thiết. Vui lòng thử trình duyệt khác."
+    },
+    "errors": {
+        "downloadCreateFailed": "Không thể tạo bản tải xuống",
+        "invalidPassword": "Mật khẩu không hợp lệ",
+        "decryptionFailed": "Lỗi giải mã. Mật khẩu có sai không?",
+        "server": {
+            "file_not_found": "Không tìm thấy tệp. Liên kết có thể đã hết hạn hoặc tệp đã bị xóa.",
+            "download_count_expired": "Tệp này đã đạt giới hạn lượt tải xuống.",
+            "file_not_yet_downloadable": "Tệp này chưa khả dụng. Vui lòng thử lại sau.",
+            "download_location_forbidden": "Không cho phép tải xuống từ vị trí của bạn.",
+            "file_not_found_or_limit_exceeded": "Không tìm thấy tệp hoặc đã đạt giới hạn lượt tải xuống.",
+            "file_retrieval_failed": "Không thể lấy tệp. Vui lòng thử lại.",
+            "rate_limit_exceeded": "Quá nhiều yêu cầu. Vui lòng đợi một lát và thử lại.",
+            "invalid_file_id": "Liên kết tải xuống này không hợp lệ.",
+            "tls_requirements_not_met": "Kết nối của bạn không đáp ứng mức bảo mật yêu cầu.",
+            "invalid_request": "Yêu cầu không hợp lệ."
+        }
+    }
+}

@@ -1,0 +1,36 @@
+{
+    "download": {
+        "title": "Pobieranie",
+        "password": "Hasło",
+        "submit": "Pobierz",
+        "success": "Pobrano pomyślnie, sprawdź folder pobranych plików",
+        "viewImage": "Zobacz obraz",
+        "uploadLink": "Prześlij plik",
+        "close": "Zamknij",
+        "closingIn": "Zamknięcie za {{count}} s"
+    },
+    "alert": {
+        "errorLabel": "Błąd:"
+    },
+    "browser": {
+        "title": "BŁĄD PRZEGLĄDARKI",
+        "message": "Twoja przeglądarka nie obsługuje wymaganych funkcji. Spróbuj użyć innej przeglądarki."
+    },
+    "errors": {
+        "downloadCreateFailed": "Nie udało się utworzyć pobierania",
+        "invalidPassword": "Nieprawidłowe hasło",
+        "decryptionFailed": "Błąd odszyfrowywania. Nieprawidłowe hasło?",
+        "server": {
+            "file_not_found": "Nie znaleziono pliku. Link mógł wygasnąć lub plik został usunięty.",
+            "download_count_expired": "Ten plik osiągnął limit pobrań.",
+            "file_not_yet_downloadable": "Ten plik nie jest jeszcze dostępny. Spróbuj ponownie później.",
+            "download_location_forbidden": "Pobieranie z Twojej lokalizacji jest niedozwolone.",
+            "file_not_found_or_limit_exceeded": "Nie znaleziono pliku lub osiągnięto limit pobrań.",
+            "file_retrieval_failed": "Nie udało się pobrać pliku. Spróbuj ponownie.",
+            "rate_limit_exceeded": "Zbyt wiele żądań. Odczekaj chwilę i spróbuj ponownie.",
+            "invalid_file_id": "Ten link do pobierania jest nieprawidłowy.",
+            "tls_requirements_not_met": "Twoje połączenie nie spełnia wymaganego poziomu bezpieczeństwa.",
+            "invalid_request": "Żądanie było nieprawidłowe."
+        }
+    }
+}

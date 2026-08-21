@@ -10,6 +10,7 @@ import Uploaded from './Uploaded'
 import Download from './Download'
 
 import './Polyfills'
+import i18n, { initI18n, serverErrorText } from './i18n'
 import { Tooltip } from 'react-tooltip'
 import * as Clipboard from "clipboard-polyfill/dist/clipboard-polyfill.promise"
 
@@ -37,6 +38,8 @@ gdprshare.loadConfig = async function () {
         console.log(error)
     }
 }
+
+gdprshare.serverErrorText = serverErrorText
 
 gdprshare.displayErr = function (error) {
     console.log(error)
@@ -98,9 +101,9 @@ gdprshare.decrypt = async function (data, key) {
         return await window.crypto.subtle.decrypt(gcmParams, cryptoKey, cipherText)
     } catch (error) {
         if (error instanceof DOMException)
-            error = "Invalid password"
+            error = i18n.t('errors.invalidPassword')
         else if (error.name === 'OperationError')
-            error = 'Decryption error. Wrong password?'
+            error = i18n.t('errors.decryptionFailed')
 
         throw error
     }
@@ -176,7 +179,7 @@ gdprshare.confirmReceipt = function (fileId) {
 
 const root = ReactDOM.createRoot(rootEl)
 
-gdprshare.loadConfig().then(function () {
+Promise.all([gdprshare.loadConfig(), initI18n()]).then(function () {
     root.render(
         <BrowserRouter>
             <Routes>
