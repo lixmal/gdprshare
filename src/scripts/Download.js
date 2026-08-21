@@ -6,7 +6,8 @@ import Success from './Success'
 import Modal from 'react-modal'
 import { withTranslation } from 'react-i18next'
 
-class Download extends React.Component {
+// exported unwrapped for tests, the app uses the translated default export
+export class Download extends React.Component {
     constructor() {
         super()
         this.handleDownload = this.handleDownload.bind(this)
@@ -29,6 +30,8 @@ class Download extends React.Component {
             imageHidden: false,
             ephemeral: 0,
             countdown: 0,
+            phase: null,
+            progress: null,
         }
         this.countdownTimer = null
     }
@@ -175,6 +178,44 @@ class Download extends React.Component {
         return true
     }
 
+    // Reads the response body in chunks so the visitor sees the transfer move.
+    // Falls back to a plain buffer read when the browser has no streaming
+    // support, in which case there is nothing to report but the phase.
+    async readWithProgress(response) {
+        const total = parseInt(response.headers.get('Content-Length') || '0', 10)
+
+        if (!response.body || !response.body.getReader)
+            return response.arrayBuffer()
+
+        const reader = response.body.getReader()
+        const chunks = []
+        var received = 0
+
+        for (;;) {
+            const step = await reader.read()
+            if (step.done)
+                break
+
+            chunks.push(step.value)
+            received += step.value.length
+
+            // without a Content-Length there is no percentage to show, the
+            // phase label stays indeterminate
+            this.setState({
+                progress: total > 0 ? Math.min(100, Math.round((received / total) * 100)) : null,
+            })
+        }
+
+        const body = new Uint8Array(received)
+        var offset = 0
+        chunks.forEach(function (chunk) {
+            body.set(chunk, offset)
+            offset += chunk.length
+        })
+
+        return body.buffer
+    }
+
     async handleDownload(event, key) {
         if (event)
             event.preventDefault()
@@ -188,7 +229,9 @@ class Download extends React.Component {
 
         this.setState({
             error: null,
-            mask: true
+            mask: true,
+            phase: 'downloading',
+            progress: null,
         })
 
         let fileId = window.location.pathname.split('/').pop()
@@ -213,7 +256,10 @@ class Download extends React.Component {
 
             var filename = Buffer.from(response.headers.get('X-Filename'), 'base64')
 
-            const file = await response.arrayBuffer()
+            const file = await this.readWithProgress(response)
+
+            this.setState({ phase: 'decrypting', progress: null })
+
             // decryption of file
             const fileClearText = await gdprshare.decrypt(file, key)
             if (type === 'text') {
@@ -221,6 +267,7 @@ class Download extends React.Component {
                     modalContent: new TextDecoder().decode(fileClearText),
                     modalOpen: true,
                     mask: false,
+                    phase: null,
                     disableForm: true,
                 })
 
@@ -236,6 +283,7 @@ class Download extends React.Component {
                     imageReady: true,
                     ephemeral: ephemeral,
                     mask: false,
+                    phase: null,
                     disableForm: true,
                 })
 
@@ -251,6 +299,7 @@ class Download extends React.Component {
                         // no second download allowed
                         successful: true,
                         mask: false,
+                        phase: null,
                         disableForm: true,
                     })
                     gdprshare.confirmReceipt(fileId)
@@ -259,6 +308,7 @@ class Download extends React.Component {
                     this.setState({
                         error: this.props.t('errors.downloadCreateFailed'),
                         mask: false,
+                        phase: null,
                     })
                 }
             }
@@ -284,6 +334,27 @@ class Download extends React.Component {
             </form>
         )
 
+        // shown over the loading mask so the visitor knows the wait is doing
+        // something, and roughly how much of it is left
+        var status = this.state.mask && this.state.phase ? (
+            <div className="download-status" role="status" aria-live="polite">
+                <div className="download-status-text">
+                    {t('download.status.' + this.state.phase)}
+                </div>
+                {this.state.progress !== null && (
+                    <div className="download-progress"
+                         role="progressbar"
+                         aria-valuenow={this.state.progress}
+                         aria-valuemin="0"
+                         aria-valuemax="100">
+                        <div className="download-progress-bar" id="download-progress-bar"
+                             style={{ width: this.state.progress + '%' }}></div>
+                        <span className="download-progress-value">{this.state.progress}%</span>
+                    </div>
+                )}
+            </div>
+        ) : null
+
         var imageModalClass = 'image-modal'
             + (this.state.imageZoomed ? ' image-zoomed' : '')
             + (this.state.imageHidden ? ' image-hidden' : '')
@@ -291,6 +362,7 @@ class Download extends React.Component {
         return (
             <div className="container-fluid col-sm-4">
                 <div className={this.classes()}>
+                    {status}
                     <h4 className="text-center">{t('download.title')}</h4>
                     {this.state.disableForm ? null : form}
 

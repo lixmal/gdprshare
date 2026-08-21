@@ -40,6 +40,11 @@ const localeUrl = '/assets/locales/'
 
 const fallbackLocale = 'en'
 
+// A locale file that never answers must not hold the page hostage. English is
+// already loaded, so giving up quickly costs the visitor nothing but a
+// translation.
+const localeTimeoutMs = 5000
+
 // Regional tags the browser may report that should land on a specific file
 // rather than on the bare language. Chinese and Portuguese differ enough
 // between regions to be worth keeping apart.
@@ -111,11 +116,20 @@ function applyDocumentLocale(locale) {
 }
 
 async function fetchLocale(locale) {
-    const response = await window.fetch(localeUrl + locale + '.json')
-    if (!response.ok)
-        throw new Error('locale request returned ' + response.status)
+    const controller = new AbortController()
+    const timer = setTimeout(function () { controller.abort() }, localeTimeoutMs)
 
-    return response.json()
+    try {
+        const response = await window.fetch(localeUrl + locale + '.json', {
+            signal: controller.signal,
+        })
+        if (!response.ok)
+            throw new Error('locale request returned ' + response.status)
+
+        return await response.json()
+    } finally {
+        clearTimeout(timer)
+    }
 }
 
 // Looks up the message for a server error response. Falls back to the English

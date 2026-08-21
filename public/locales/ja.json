@@ -7,7 +7,11 @@
         "viewImage": "画像を表示",
         "uploadLink": "ファイルをアップロード",
         "close": "閉じる",
-        "closingIn": "{{count}} 秒後に閉じます"
+        "closingIn": "{{count}} 秒後に閉じます",
+        "status": {
+            "downloading": "ダウンロード中…",
+            "decrypting": "復号中…"
+        }
     },
     "alert": {
         "errorLabel": "エラー:"

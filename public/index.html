@@ -13,12 +13,42 @@
         <meta name="twitter:description" content="An encrypted file has been shared with you. Click to decrypt and download." />
         <link rel="icon" type="image/png" href="/assets/img/favicon.png">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/react-tooltip@5/dist/react-tooltip.min.css" />
+        <style>
+            /* inline so it paints before any stylesheet or script arrives */
+            .boot-loader {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 60vh;
+            }
+            .boot-spinner {
+                width: 42px;
+                height: 42px;
+                border: 4px solid rgba(127, 127, 127, 0.25);
+                border-top-color: rgba(127, 127, 127, 0.9);
+                border-radius: 50%;
+                animation: boot-spin 1s linear infinite;
+            }
+            @keyframes boot-spin {
+                to { transform: rotate(360deg); }
+            }
+            @media (prefers-reduced-motion: reduce) {
+                .boot-spinner { animation-duration: 3s; }
+            }
+        </style>
     </head>
     <body ontouchstart>
         <noscript>
             <h4>Your browser doesn't support JavaScript or it is disabled. Please enable JavaScript.</h4>
         </noscript>
-        <div id="app-content"></div>
+        <div id="app-content">
+            <!-- Shown until the bundle has parsed and React takes over. Purely
+                 visual, so it needs no translation and reads the same to
+                 everyone. Replaced by the app on first render. -->
+            <div class="boot-loader" role="status" aria-label="Loading">
+                <div class="boot-spinner"></div>
+            </div>
+        </div>
         <script type="text/javascript" src="/assets/scripts/bundle.js"></script>
     </body>
 </html>

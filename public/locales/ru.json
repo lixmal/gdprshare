@@ -7,7 +7,11 @@
         "viewImage": "Посмотреть изображение",
         "uploadLink": "Загрузить файл",
         "close": "Закрыть",
-        "closingIn": "Закрытие через {{count}} с"
+        "closingIn": "Закрытие через {{count}} с",
+        "status": {
+            "downloading": "Скачивание…",
+            "decrypting": "Расшифровка…"
+        }
     },
     "alert": {
         "errorLabel": "Ошибка:"

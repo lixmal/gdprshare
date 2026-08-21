@@ -7,7 +7,11 @@
         "viewImage": "Переглянути зображення",
         "uploadLink": "Завантажити файл",
         "close": "Закрити",
-        "closingIn": "Закриття через {{count}} с"
+        "closingIn": "Закриття через {{count}} с",
+        "status": {
+            "downloading": "Завантаження…",
+            "decrypting": "Розшифрування…"
+        }
     },
     "alert": {
         "errorLabel": "Помилка:"

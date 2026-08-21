@@ -7,7 +7,11 @@
         "viewImage": "Afficher l'image",
         "uploadLink": "Envoyer un fichier",
         "close": "Fermer",
-        "closingIn": "Fermeture dans {{count}} s"
+        "closingIn": "Fermeture dans {{count}} s",
+        "status": {
+            "downloading": "Téléchargement en cours…",
+            "decrypting": "Déchiffrement en cours…"
+        }
     },
     "alert": {
         "errorLabel": "Erreur :"

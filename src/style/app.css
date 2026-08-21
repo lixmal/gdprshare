@@ -359,3 +359,49 @@
 }
 
 @import url('node_modules/bootstrap/dist/css/bootstrap.min.css');
+
+.download-status {
+    position: absolute;
+    /* clears the spinner drawn by .loading-mask::after */
+    top: calc(50% + 24px);
+    left: 0;
+    right: 0;
+    z-index: 101;
+    text-align: center;
+    color: #fff;
+    text-shadow: 0 0 3px rgba(0, 0, 0, 0.7);
+}
+
+.download-status-text {
+    font-size: 0.95rem;
+    margin-bottom: 6px;
+}
+
+.download-progress {
+    position: relative;
+    width: 60%;
+    max-width: 240px;
+    height: 16px;
+    margin: 0 auto;
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.download-progress-bar {
+    height: 100%;
+    background-color: rgb(255, 255, 255);
+    border-radius: 8px;
+    transition: width 0.2s linear;
+}
+
+.download-progress-value {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    line-height: 16px;
+    font-size: 0.7rem;
+    color: rgb(33, 37, 41);
+    text-shadow: none;
+}

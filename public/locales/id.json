@@ -7,7 +7,11 @@
         "viewImage": "Lihat gambar",
         "uploadLink": "Unggah berkas",
         "close": "Tutup",
-        "closingIn": "Menutup dalam {{count}} dtk"
+        "closingIn": "Menutup dalam {{count}} dtk",
+        "status": {
+            "downloading": "Mengunduh…",
+            "decrypting": "Mendekripsi…"
+        }
     },
     "alert": {
         "errorLabel": "Kesalahan:"

@@ -7,7 +7,11 @@
         "viewImage": "Zobacz obraz",
         "uploadLink": "Prześlij plik",
         "close": "Zamknij",
-        "closingIn": "Zamknięcie za {{count}} s"
+        "closingIn": "Zamknięcie za {{count}} s",
+        "status": {
+            "downloading": "Pobieranie…",
+            "decrypting": "Odszyfrowywanie…"
+        }
     },
     "alert": {
         "errorLabel": "Błąd:"
