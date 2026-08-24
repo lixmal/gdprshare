@@ -42,7 +42,8 @@
             "rate_limit_exceeded": "Zbyt wiele żądań. Odczekaj chwilę i spróbuj ponownie.",
             "invalid_file_id": "Ten link do pobierania jest nieprawidłowy.",
             "tls_requirements_not_met": "Twoje połączenie nie spełnia wymaganego poziomu bezpieczeństwa.",
-            "invalid_request": "Żądanie było nieprawidłowe."
+            "invalid_request": "Żądanie było nieprawidłowe.",
+            "user_agent_blocked": "Przeglądarka użyta do pobrania nie jest tu dozwolona."
         }
     },
     "common": {
@@ -134,6 +135,7 @@
         "recordNoAddress": "adres nie jest zapisywany",
         "recordFailed": "Nie udało się odczytać rejestru pobrań: {{message}}",
         "recordGone": "Tej wysyłki nie ma już na serwerze, a razem z nią zniknął jej rejestr.",
+        "recordRefused": "Odrzucone",
         "moreDays": "Więcej dni",
         "moreDownloads": "Więcej pobrań",
         "left": "(zostało {{count}})",
@@ -161,8 +163,8 @@
         "keptFile": "Przesłany plik i nazwa pliku, zaszyfrowane: przetwarzane, żeby odbiorca mógł je pobrać. Usuwane najpóźniej po {{days}} dniach albo po wyczerpaniu limitu pobrań (ograniczenie przechowywania, art. 5 (1) e).",
         "keptPassword": "Hasło do odszyfrowania: nieprzetwarzane. Zostaje w linku i nigdy nie dociera na ten serwer, więc zapisanej kopii nie da się tu odczytać (szyfrowanie, art. 32 (1) a).",
         "keptEmail": "Adres do powiadomień, dobrowolny: przetwarzany, aby informować nadawcę o próbach pobrania jego własnej wysyłki.",
-        "keptClient": "Adres IP, user agent i szczegóły TLS każdego pobrania: przetwarzane, żeby nadawca mógł wykazać, że transfer był zaszyfrowany i gdzie trafił (rozliczalność, art. 5 (2), art. 24 (1)).",
-        "keptClientNone": "Adresy IP, user agenty i szczegóły TLS pobrań: nieprzetwarzane na tym serwerze.",
+        "keptClient": "Adres IP, user agent i szczegóły TLS każdej próby pobrania: przetwarzane, żeby nadawca mógł wykazać, że transfer był zaszyfrowany, gdzie trafił i co zostało odrzucone (rozliczalność, art. 5 (2), art. 24 (1)).",
+        "keptClientNone": "Adresy IP, user agenty i szczegóły TLS prób pobrania: nieprzetwarzane na tym serwerze.",
         "keptLocation": "Kraj pobierającego adresu IP: ustalany na podstawie bazy na tym serwerze, bez udziału osób trzecich.",
         "operator": "Administrator danych i każde dalsze przetwarzanie: osoba prowadząca ten serwer.",
         "law": "Powołania na artykuły dotyczą RODO (rozporządzenie (UE) 2016/679).",

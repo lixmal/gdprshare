@@ -1034,6 +1034,15 @@ textarea.form-control {
     font-size: 11.5px;
 }
 
+.chip-refused {
+    height: 20px;
+    padding: 0 8px;
+    border-color: var(--warn-border);
+    background: var(--warn-soft);
+    color: var(--warn);
+    font-size: 11px;
+}
+
 .record-time {
     font-family: var(--mono);
     color: var(--text);

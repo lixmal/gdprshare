@@ -221,12 +221,23 @@ func (s *Server) downloadFile(c *gin.Context) {
 		return
 	}
 
-	allowed := s.isDownloadAllowed(storedFile, client) && !s.isUserAgentDisallowed(client.UserAgent)
+	// The blocklist reads the header itself: with client info turned off the
+	// stored user agent is "none", which would quietly disable the check.
+	blockedAgent := s.isUserAgentDisallowed(sanitizeUserAgent(c.Request.Header.Get("User-Agent")))
+	allowed := s.isDownloadAllowed(storedFile, client) && !blockedAgent
 
 	if time.Now().Before(storedFile.CreatedAt.Add(time.Duration(storedFile.Delay) * time.Minute)) {
+		s.recordAttempt(storedFile, client, ErrCodeNotYetDownloadble)
 		apiError(c, http.StatusForbidden, ErrCodeNotYetDownloadble, "file not yet downloadable")
 	} else if !allowed {
 		log.Printf("Download from %s forbidden, user agent: %s\n", client.Addr, client.UserAgent)
+
+		reason := ErrCodeLocationForbidden
+		if blockedAgent {
+			reason = ErrCodeUserAgentBlocked
+		}
+		s.recordAttempt(storedFile, client, reason)
+
 		apiError(c, http.StatusForbidden, ErrCodeLocationForbidden, "download from this location forbidden")
 	} else {
 		storedFile.DstClients = append(
@@ -685,6 +696,8 @@ func (s *Server) downloadRecords(c *gin.Context) {
 	for _, client := range clients {
 		records = append(records, DownloadRecord{
 			Time:       client.CreatedAt,
+			Denied:     client.Denied,
+			Reason:     client.Reason,
 			Address:    client.Addr,
 			UserAgent:  client.UserAgent,
 			TLSVersion: tlsVersionName(client.TLSVersion),
@@ -699,6 +712,32 @@ func (s *Server) downloadRecords(c *gin.Context) {
 			"downloads": records,
 		},
 	)
+}
+
+// recordAttempt keeps a refused download with the share it was aimed at, so its
+// owner sees the attempt and the reason. Capped: a blocked link can be hit as
+// often as someone likes, and the share must not grow without end.
+func (s *Server) recordAttempt(storedFile *database.StoredFile, client *database.DstClient, reason ErrorCode) {
+	var denied int
+	if err := s.db.Model(&database.DstClient{}).
+		Where("stored_file_id = ? AND denied = ?", storedFile.ID, true).
+		Count(&denied).Error; err != nil {
+		log.Printf("Failed to count refused attempts for id %s: %s\n", storedFile.FileId, err)
+		return
+	}
+
+	if denied >= MaxDeniedRecords {
+		return
+	}
+
+	attempt := *client
+	attempt.StoredFileId = storedFile.ID
+	attempt.Denied = true
+	attempt.Reason = string(reason)
+
+	if err := s.db.Create(&attempt).Error; err != nil {
+		log.Printf("Failed to record a refused attempt for id %s: %s\n", storedFile.FileId, err)
+	}
 }
 
 // The stored values come either from the TLS connection, as decimal numbers, or

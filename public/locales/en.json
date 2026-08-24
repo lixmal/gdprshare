@@ -42,7 +42,8 @@
             "rate_limit_exceeded": "Too many requests. Please wait a moment and try again.",
             "invalid_file_id": "This download link is not valid.",
             "tls_requirements_not_met": "Your connection does not meet the required security level.",
-            "invalid_request": "The request was not valid."
+            "invalid_request": "The request was not valid.",
+            "user_agent_blocked": "The browser used for the download is not allowed here."
         }
     },
     "common": {
@@ -134,6 +135,7 @@
         "recordNoAddress": "address not stored",
         "recordFailed": "Could not read the download record: {{message}}",
         "recordGone": "This share is gone from the server, and its record with it.",
+        "recordRefused": "Refused",
         "moreDays": "More days",
         "moreDownloads": "More downloads",
         "left": "({{count}} left)",
@@ -161,8 +163,8 @@
         "keptFile": "Uploaded file and file name, encrypted: processed so the recipient can download them. Erased after {{days}} days at the latest, or once the download limit is reached (storage limitation, Art. 5 (1) e).",
         "keptPassword": "Decryption password: not processed. It stays in the link and never reaches this server, so the stored copy cannot be read here (encryption, Art. 32 (1) a).",
         "keptEmail": "Notification address, optional: processed to inform the sender of download attempts on their own share.",
-        "keptClient": "IP address, user agent and TLS details of each download: processed so the sender can demonstrate that the transfer was encrypted and where it went (accountability, Art. 5 (2), Art. 24 (1)).",
-        "keptClientNone": "IP addresses, user agents and TLS details of downloads: not processed on this server.",
+        "keptClient": "IP address, user agent and TLS details of each download attempt: processed so the sender can demonstrate that the transfer was encrypted, where it went, and what was refused (accountability, Art. 5 (2), Art. 24 (1)).",
+        "keptClientNone": "IP addresses, user agents and TLS details of download attempts: not processed on this server.",
         "keptLocation": "Country of the downloading IP address: determined against a database on this server, without involving a third party.",
         "operator": "Controller, and any processing beyond this: the operator of this server.",
         "law": "Article references are to the GDPR (Regulation (EU) 2016/679).",

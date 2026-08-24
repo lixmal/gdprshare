@@ -39,6 +39,9 @@ const (
 	ErrCodeProlongLimit  ErrorCode = "prolong_limit_exceeded"
 	ErrCodeProlongFailed ErrorCode = "file_prolong_failed"
 
+	// recorded as the reason of a refused attempt, never sent as an API error
+	ErrCodeUserAgentBlocked ErrorCode = "user_agent_blocked"
+
 	// shared
 	ErrCodeTLSRequirements ErrorCode = "tls_requirements_not_met"
 	ErrCodeRateLimited     ErrorCode = "rate_limit_exceeded"

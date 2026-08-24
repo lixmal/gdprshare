@@ -738,3 +738,131 @@ func TestTLSNamesAreReadable(t *testing.T) {
 	assert.Equal(t, "TLSv1.3", tlsVersionName("TLSv1.3"))
 	assert.Equal(t, "", tlsCipherName(""))
 }
+
+// TestRefusedAttemptsAreRecorded keeps every attempt with the share it was
+// aimed at, with the reason it did not go through.
+func TestRefusedAttemptsAreRecorded(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	fileId, ownerToken := uploadTestFile(t, srv, map[string]string{
+		"allowed-countries": "DE",
+		"count":             "3",
+	})
+
+	// the server cannot place the client without a GeoIP database, and a
+	// restriction then refuses rather than waving the download through
+	downloadW := httptest.NewRecorder()
+	srv.Handler.ServeHTTP(downloadW, httptest.NewRequest(http.MethodGet, "/api/v1/files/"+fileId, nil))
+	require.Equal(t, http.StatusForbidden, downloadW.Code)
+
+	w := downloadRecords(t, srv, fileId, ownerToken)
+	require.Equal(t, http.StatusOK, w.Code)
+
+	var resp struct {
+		Downloads []DownloadRecord `json:"downloads"`
+	}
+	require.NoError(t, json.NewDecoder(w.Body).Decode(&resp))
+	require.Len(t, resp.Downloads, 1)
+	assert.True(t, resp.Downloads[0].Denied)
+	assert.Equal(t, string(ErrCodeLocationForbidden), resp.Downloads[0].Reason)
+
+	// and the refusal costs the recipient no download
+	var storedFile database.StoredFile
+	require.NoError(t, srv.db.Where(&database.StoredFile{FileId: fileId}).Find(&storedFile).Error)
+	assert.Equal(t, uint(3), storedFile.Count)
+}
+
+// TestRefusedAttemptNamesTheUserAgent tells a blocked browser apart from a
+// blocked country, which the API answer cannot do.
+func TestRefusedAttemptNamesTheUserAgent(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	srv.config.DisallowedUserAgents = []string{"CrawlerBot"}
+	fileId, ownerToken := uploadTestFile(t, srv, nil)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/files/"+fileId, nil)
+	req.Header.Set("User-Agent", "CrawlerBot/2.0")
+	downloadW := httptest.NewRecorder()
+	srv.Handler.ServeHTTP(downloadW, req)
+	require.Equal(t, http.StatusForbidden, downloadW.Code)
+
+	w := downloadRecords(t, srv, fileId, ownerToken)
+	var resp struct {
+		Downloads []DownloadRecord `json:"downloads"`
+	}
+	require.NoError(t, json.NewDecoder(w.Body).Decode(&resp))
+	require.Len(t, resp.Downloads, 1)
+	assert.Equal(t, string(ErrCodeUserAgentBlocked), resp.Downloads[0].Reason)
+}
+
+// TestRefusedAttemptsAreCapped stops a blocked link from growing without end
+func TestRefusedAttemptsAreCapped(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	fileId, ownerToken := uploadTestFile(t, srv, map[string]string{"allowed-countries": "DE"})
+
+	for i := 0; i < MaxDeniedRecords+5; i++ {
+		w := httptest.NewRecorder()
+		srv.Handler.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/api/v1/files/"+fileId, nil))
+		require.Equal(t, http.StatusForbidden, w.Code)
+	}
+
+	w := downloadRecords(t, srv, fileId, ownerToken)
+	var resp struct {
+		Downloads []DownloadRecord `json:"downloads"`
+	}
+	require.NoError(t, json.NewDecoder(w.Body).Decode(&resp))
+	assert.Len(t, resp.Downloads, MaxDeniedRecords)
+}
+
+// TestDelayedDownloadIsRecorded covers the attempt that came too early
+func TestDelayedDownloadIsRecorded(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	fileId, ownerToken := uploadTestFile(t, srv, map[string]string{"delay": "10"})
+
+	downloadW := httptest.NewRecorder()
+	srv.Handler.ServeHTTP(downloadW, httptest.NewRequest(http.MethodGet, "/api/v1/files/"+fileId, nil))
+	require.Equal(t, http.StatusForbidden, downloadW.Code)
+
+	w := downloadRecords(t, srv, fileId, ownerToken)
+	var resp struct {
+		Downloads []DownloadRecord `json:"downloads"`
+	}
+	require.NoError(t, json.NewDecoder(w.Body).Decode(&resp))
+	require.Len(t, resp.Downloads, 1)
+	assert.Equal(t, string(ErrCodeNotYetDownloadble), resp.Downloads[0].Reason)
+}
+
+// TestUserAgentBlockWorksWithoutClientInfo keeps the blocklist working on a
+// server that stores nothing about its visitors: the check reads the header
+// rather than the record.
+func TestUserAgentBlockWorksWithoutClientInfo(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	require.False(t, srv.config.SaveClientInfo, "this server keeps no client info")
+	srv.config.DisallowedUserAgents = []string{"CrawlerBot"}
+
+	fileId, ownerToken := uploadTestFile(t, srv, nil)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/files/"+fileId, nil)
+	req.Header.Set("User-Agent", "CrawlerBot/2.0")
+	w := httptest.NewRecorder()
+	srv.Handler.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusForbidden, w.Code)
+
+	// and the attempt is recorded without naming the browser it came from
+	records := downloadRecords(t, srv, fileId, ownerToken)
+	var resp struct {
+		Downloads []DownloadRecord `json:"downloads"`
+	}
+	require.NoError(t, json.NewDecoder(records.Body).Decode(&resp))
+	require.Len(t, resp.Downloads, 1)
+	assert.Equal(t, string(ErrCodeUserAgentBlocked), resp.Downloads[0].Reason)
+	assert.Equal(t, "none", resp.Downloads[0].UserAgent)
+}

@@ -221,11 +221,52 @@ test.describe('Download record', () => {
     // this server stores no client info, so the person stays out of it
     await expect(page.locator('.record-line').first()).toContainText(en.files.recordNoAddress);
 
+    // a refused attempt is kept too, with the reason it did not go through
+    const blocked = await request.get(`/api/v1/files/${fileId}`, {
+      headers: { 'User-Agent': 'CrawlerBot/2.0' },
+    });
+    expect(blocked.status()).toBe(200);
+
     // and the record needs the owner token
     const denied = await request.post(`/api/v1/files/${fileId}/downloads`, {
       form: { ownerToken: 'not-the-owner-token' },
     });
     expect(denied.status()).toBe(401);
+
+    fs.unlinkSync(testFilePath);
+  });
+});
+
+test.describe('Refused attempts', () => {
+  // A share keeps what was tried on it, not only what went through.
+  test('appear in the record with their reason', async ({ page, request }) => {
+    await page.goto('/');
+
+    const testFilePath = path.join(__dirname, 'test-refused.txt');
+    fs.writeFileSync(testFilePath, 'refused attempt');
+    await page.locator('input#content').setInputFiles(testFilePath);
+    await openOptions(page);
+    // the server cannot place anyone without a GeoIP database, so a country
+    // restriction refuses every download
+    await page.locator('select#geo-restriction').selectOption('eea');
+    await page.locator('input[type="submit"]').click();
+    await page.waitForURL(/\/uploaded/);
+
+    const link = await page.locator('input#link-key').inputValue();
+    const fileId = link.split('/d/')[1].split('#')[0];
+
+    const refused = await request.get(`/api/v1/files/${fileId}`);
+    expect(refused.status()).toBe(403);
+
+    const en = JSON.parse(
+      fs.readFileSync(path.join(__dirname, '..', 'public', 'locales', 'en.json'), 'utf8'));
+
+    await page.goto('/');
+    await page.locator('button#record').click();
+
+    const line = page.locator('.record-line').first();
+    await expect(line.locator('.chip-refused')).toHaveText(en.files.recordRefused);
+    await expect(line).toContainText(en.errors.server.download_location_forbidden);
 
     fs.unlinkSync(testFilePath);
   });

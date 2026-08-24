@@ -42,7 +42,8 @@
             "rate_limit_exceeded": "För många förfrågningar. Vänta en stund och försök igen.",
             "invalid_file_id": "Den här nedladdningslänken är ogiltig.",
             "tls_requirements_not_met": "Din anslutning uppfyller inte den säkerhetsnivå som krävs.",
-            "invalid_request": "Begäran var ogiltig."
+            "invalid_request": "Begäran var ogiltig.",
+            "user_agent_blocked": "Webbläsaren som användes för nedladdningen är inte tillåten här."
         }
     },
     "common": {
@@ -134,6 +135,7 @@
         "recordNoAddress": "adressen sparas inte",
         "recordFailed": "Kunde inte läsa nedladdningsloggen: {{message}}",
         "recordGone": "Den här delningen finns inte kvar på servern, och inte heller dess logg.",
+        "recordRefused": "Nekad",
         "moreDays": "Fler dagar",
         "moreDownloads": "Fler nedladdningar",
         "left": "({{count}} kvar)",
@@ -161,8 +163,8 @@
         "keptFile": "Uppladdad fil och filnamn, krypterade: behandlas så att mottagaren kan hämta dem. Raderas senast efter {{days}} dagar, eller när nedladdningsgränsen är nådd (lagringsminimering, art. 5 (1) e).",
         "keptPassword": "Lösenord för dekryptering: behandlas inte. Det stannar i länken och når aldrig den här servern, så den lagrade kopian går inte att läsa här (kryptering, art. 32 (1) a).",
         "keptEmail": "Adress för aviseringar, frivillig: behandlas för att informera avsändaren om nedladdningsförsök på den egna delningen.",
-        "keptClient": "IP-adress, user agent och TLS-uppgifter för varje nedladdning: behandlas så att avsändaren kan visa att överföringen var krypterad och vart den gick (ansvarsskyldighet, art. 5 (2), art. 24 (1)).",
-        "keptClientNone": "IP-adresser, user agents och TLS-uppgifter för nedladdningar: behandlas inte på den här servern.",
+        "keptClient": "IP-adress, user agent och TLS-uppgifter för varje nedladdningsförsök: behandlas så att avsändaren kan visa att överföringen var krypterad, vart den gick och vad som nekades (ansvarsskyldighet, art. 5 (2), art. 24 (1)).",
+        "keptClientNone": "IP-adresser, user agents och TLS-uppgifter för nedladdningsförsök: behandlas inte på den här servern.",
         "keptLocation": "Land för den hämtande IP-adressen: bestäms med en databas på den här servern, utan tredje part.",
         "operator": "Personuppgiftsansvarig och all behandling utöver detta: den som driver servern.",
         "law": "Artikelhänvisningarna gäller GDPR (förordning (EU) 2016/679).",

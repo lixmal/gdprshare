@@ -42,7 +42,8 @@
             "rate_limit_exceeded": "Terlalu banyak permintaan. Tunggu sebentar dan coba lagi.",
             "invalid_file_id": "Tautan unduhan ini tidak valid.",
             "tls_requirements_not_met": "Koneksi Anda tidak memenuhi tingkat keamanan yang diperlukan.",
-            "invalid_request": "Permintaan tidak valid."
+            "invalid_request": "Permintaan tidak valid.",
+            "user_agent_blocked": "Peramban yang dipakai untuk mengunduh tidak diizinkan di sini."
         }
     },
     "common": {
@@ -134,6 +135,7 @@
         "recordNoAddress": "alamat tidak disimpan",
         "recordFailed": "Tidak bisa membaca catatan unduhan: {{message}}",
         "recordGone": "Kiriman ini sudah tidak ada di server, begitu juga catatannya.",
+        "recordRefused": "Ditolak",
         "moreDays": "Tambah hari",
         "moreDownloads": "Tambah unduhan",
         "left": "(tersisa {{count}})",
@@ -161,8 +163,8 @@
         "keptFile": "Berkas yang diunggah dan namanya, terenkripsi: diproses supaya penerima bisa mengunduhnya. Dihapus paling lama setelah {{days}} hari, atau begitu batas unduhan tercapai (pembatasan penyimpanan, pasal 5 (1) e).",
         "keptPassword": "Kata sandi dekripsi: tidak diproses. Tetap ada di tautan dan tidak pernah sampai ke server ini, jadi salinan yang tersimpan tidak bisa dibaca di sini (enkripsi, pasal 32 (1) a).",
         "keptEmail": "Alamat pemberitahuan, opsional: diproses untuk mengabari pengirim tentang percobaan unduh pada kirimannya sendiri.",
-        "keptClient": "Alamat IP, user agent, dan rincian TLS setiap unduhan: diproses supaya pengirim bisa membuktikan bahwa pengirimannya terenkripsi dan ke mana perginya (akuntabilitas, pasal 5 (2), pasal 24 (1)).",
-        "keptClientNone": "Alamat IP, user agent, dan rincian TLS unduhan: tidak diproses di server ini.",
+        "keptClient": "Alamat IP, user agent, dan rincian TLS setiap percobaan unduh: diproses supaya pengirim bisa membuktikan bahwa pengirimannya terenkripsi, ke mana perginya, dan apa yang ditolak (akuntabilitas, pasal 5 (2), pasal 24 (1)).",
+        "keptClientNone": "Alamat IP, user agent, dan rincian TLS percobaan unduh: tidak diproses di server ini.",
         "keptLocation": "Negara alamat IP yang mengunduh: ditentukan dengan basis data di server ini, tanpa pihak ketiga.",
         "operator": "Pengendali data dan pemrosesan lain di luar ini: pihak yang menjalankan server ini.",
         "law": "Pasal yang dikutip berasal dari GDPR (Peraturan (UE) 2016/679).",

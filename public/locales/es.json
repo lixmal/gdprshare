@@ -42,7 +42,8 @@
             "rate_limit_exceeded": "Demasiadas solicitudes. Espera un momento e inténtalo de nuevo.",
             "invalid_file_id": "Este enlace de descarga no es válido.",
             "tls_requirements_not_met": "Tu conexión no cumple el nivel de seguridad requerido.",
-            "invalid_request": "La solicitud no era válida."
+            "invalid_request": "La solicitud no era válida.",
+            "user_agent_blocked": "El navegador usado para la descarga no está permitido aquí."
         }
     },
     "common": {
@@ -134,6 +135,7 @@
         "recordNoAddress": "dirección no guardada",
         "recordFailed": "No se pudo leer el registro de descargas: {{message}}",
         "recordGone": "Este envío ya no está en el servidor, y su registro tampoco.",
+        "recordRefused": "Rechazado",
         "moreDays": "Más días",
         "moreDownloads": "Más descargas",
         "left": "({{count}} restantes)",
@@ -161,8 +163,8 @@
         "keptFile": "Archivo subido y nombre del archivo, cifrados: se tratan para que quien lo recibe pueda descargarlos. Se borran como máximo a los {{days}} días, o al alcanzarse el límite de descargas (limitación del plazo de conservación, art. 5 (1) e).",
         "keptPassword": "Contraseña de descifrado: no se trata. Se queda en el enlace y nunca llega a este servidor, así que la copia guardada no se puede leer aquí (cifrado, art. 32 (1) a).",
         "keptEmail": "Dirección de avisos, opcional: se trata para informar a quien envía de los intentos de descarga de su propio envío.",
-        "keptClient": "Dirección IP, agente de usuario y datos TLS de cada descarga: se tratan para que quien envía pueda demostrar que la transferencia iba cifrada y a dónde fue (responsabilidad proactiva, art. 5 (2), art. 24 (1)).",
-        "keptClientNone": "Direcciones IP, agentes de usuario y datos TLS de las descargas: no se tratan en este servidor.",
+        "keptClient": "Dirección IP, agente de usuario y datos TLS de cada intento de descarga: se tratan para que quien envía pueda demostrar que la transferencia iba cifrada, a dónde fue y qué se rechazó (responsabilidad proactiva, art. 5 (2), art. 24 (1)).",
+        "keptClientNone": "Direcciones IP, agentes de usuario y datos TLS de los intentos de descarga: no se tratan en este servidor.",
         "keptLocation": "País de la dirección IP que descarga: se determina con una base de datos de este servidor, sin terceros.",
         "operator": "Responsable del tratamiento y cualquier tratamiento adicional: quien administra este servidor.",
         "law": "Los artículos citados son del RGPD (Reglamento (UE) 2016/679).",

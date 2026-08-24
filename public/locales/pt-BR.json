@@ -42,7 +42,8 @@
             "rate_limit_exceeded": "Muitas solicitações. Aguarde um momento e tente novamente.",
             "invalid_file_id": "Este link de download não é válido.",
             "tls_requirements_not_met": "Sua conexão não atende ao nível de segurança exigido.",
-            "invalid_request": "A solicitação não era válida."
+            "invalid_request": "A solicitação não era válida.",
+            "user_agent_blocked": "O navegador usado para o download não é permitido aqui."
         }
     },
     "common": {
@@ -134,6 +135,7 @@
         "recordNoAddress": "endereço não guardado",
         "recordFailed": "Não foi possível ler o registro de downloads: {{message}}",
         "recordGone": "Este envio não está mais no servidor, e o registro dele também não.",
+        "recordRefused": "Recusado",
         "moreDays": "Mais dias",
         "moreDownloads": "Mais downloads",
         "left": "({{count}} restantes)",
@@ -161,8 +163,8 @@
         "keptFile": "Arquivo enviado e nome do arquivo, criptografados: tratados para que o destinatário possa baixá-los. Apagados no máximo após {{days}} dias, ou ao alcançar o limite de downloads (limitação do armazenamento, art. 5 (1) e).",
         "keptPassword": "Senha de descriptografia: não tratada. Fica no link e nunca chega a este servidor, então a cópia guardada não pode ser lida aqui (criptografia, art. 32 (1) a).",
         "keptEmail": "Endereço para avisos, opcional: tratado para informar quem envia sobre as tentativas de download do próprio envio.",
-        "keptClient": "Endereço IP, agente de usuário e detalhes de TLS de cada download: tratados para que quem envia possa demonstrar que a transferência foi criptografada e para onde foi (responsabilização, art. 5 (2), art. 24 (1)).",
-        "keptClientNone": "Endereços IP, agentes de usuário e detalhes de TLS dos downloads: não tratados neste servidor.",
+        "keptClient": "Endereço IP, agente de usuário e detalhes de TLS de cada tentativa de download: tratados para que quem envia possa demonstrar que a transferência foi criptografada, para onde foi e o que foi recusado (responsabilização, art. 5 (2), art. 24 (1)).",
+        "keptClientNone": "Endereços IP, agentes de usuário e detalhes de TLS das tentativas de download: não tratados neste servidor.",
         "keptLocation": "País do endereço IP que baixa: determinado com um banco de dados neste servidor, sem terceiros.",
         "operator": "Controlador e qualquer tratamento além deste: quem administra este servidor.",
         "law": "Os artigos citados são do GDPR (Regulamento (UE) 2016/679).",

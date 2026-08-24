@@ -446,12 +446,23 @@ class Upload extends React.Component {
                         record.userAgent,
                     ].filter(function (part) { return part && part !== 'none' })
 
+                    // a refusal says why: the reason is an error code the
+                    // locales already carry
+                    var reason = record.denied
+                        ? gdprshare.serverErrorText({code: record.reason, message: record.reason})
+                        : null
+
                     return (
                         <div className="record-line" key={index}>
                             <span className="record-time">
                                 {gdprshare.formatDateTime(record.time)}
                             </span>
-                            <span className="record-detail long-text">{parts.join(' · ')}</span>
+                            {record.denied && (
+                                <span className="chip chip-refused">{t('files.recordRefused')}</span>
+                            )}
+                            <span className="record-detail long-text">
+                                {parts.concat(reason ? [reason] : []).join(' · ')}
+                            </span>
                         </div>
                     )
                 })}

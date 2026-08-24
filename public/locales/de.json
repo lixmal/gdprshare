@@ -42,7 +42,8 @@
             "rate_limit_exceeded": "Zu viele Anfragen. Bitte warten Sie einen Moment und versuchen Sie es erneut.",
             "invalid_file_id": "Dieser Download-Link ist ungültig.",
             "tls_requirements_not_met": "Ihre Verbindung erfüllt nicht die erforderliche Sicherheitsstufe.",
-            "invalid_request": "Die Anfrage war ungültig."
+            "invalid_request": "Die Anfrage war ungültig.",
+            "user_agent_blocked": "Der für den Download verwendete Browser ist hier nicht erlaubt."
         }
     },
     "common": {
@@ -134,6 +135,7 @@
         "recordNoAddress": "Adresse nicht gespeichert",
         "recordFailed": "Das Downloadprotokoll konnte nicht gelesen werden: {{message}}",
         "recordGone": "Diese Freigabe ist nicht mehr auf dem Server, und ihr Protokoll mit ihr.",
+        "recordRefused": "Abgelehnt",
         "moreDays": "Mehr Tage",
         "moreDownloads": "Mehr Downloads",
         "left": "({{count}} übrig)",
@@ -161,8 +163,8 @@
         "keptFile": "Hochgeladene Datei und Dateiname, verschlüsselt: verarbeitet, damit der Empfänger sie herunterladen kann. Spätestens nach {{days}} Tagen gelöscht, oder sobald das Downloadlimit erreicht ist (Speicherbegrenzung, Art. 5 (1) e).",
         "keptPassword": "Passwort zur Entschlüsselung: nicht verarbeitet. Es bleibt im Link und erreicht diesen Server nie, deshalb ist die gespeicherte Kopie hier nicht lesbar (Verschlüsselung, Art. 32 (1) a).",
         "keptEmail": "Adresse für Benachrichtigungen, freiwillig: verarbeitet, um den Absender über Downloadversuche auf seine eigene Freigabe zu informieren.",
-        "keptClient": "IP-Adresse, User-Agent und TLS-Details jedes Downloads: verarbeitet, damit der Absender nachweisen kann, dass die Übertragung verschlüsselt war und wohin sie ging (Rechenschaftspflicht, Art. 5 (2), Art. 24 (1)).",
-        "keptClientNone": "IP-Adressen, User-Agents und TLS-Details von Downloads: auf diesem Server nicht verarbeitet.",
+        "keptClient": "IP-Adresse, User-Agent und TLS-Details jedes Downloadversuchs: verarbeitet, damit der Absender nachweisen kann, dass die Übertragung verschlüsselt war, wohin sie ging und was abgelehnt wurde (Rechenschaftspflicht, Art. 5 (2), Art. 24 (1)).",
+        "keptClientNone": "IP-Adressen, User-Agents und TLS-Details von Downloadversuchen: auf diesem Server nicht verarbeitet.",
         "keptLocation": "Land der herunterladenden IP-Adresse: anhand einer Datenbank auf diesem Server bestimmt, ohne Dritte einzubeziehen.",
         "operator": "Verantwortlicher und jede weitere Verarbeitung: der Betreiber dieses Servers.",
         "law": "Artikelverweise beziehen sich auf die DSGVO (Verordnung (EU) 2016/679).",

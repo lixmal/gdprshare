@@ -42,7 +42,8 @@
             "rate_limit_exceeded": "Troppe richieste. Attendi un momento e riprova.",
             "invalid_file_id": "Questo link per il download non è valido.",
             "tls_requirements_not_met": "La tua connessione non soddisfa il livello di sicurezza richiesto.",
-            "invalid_request": "La richiesta non era valida."
+            "invalid_request": "La richiesta non era valida.",
+            "user_agent_blocked": "Il browser usato per il download non è ammesso qui."
         }
     },
     "common": {
@@ -134,6 +135,7 @@
         "recordNoAddress": "indirizzo non conservato",
         "recordFailed": "Non è stato possibile leggere il registro dei download: {{message}}",
         "recordGone": "Questo invio non è più sul server, e nemmeno il suo registro.",
+        "recordRefused": "Rifiutato",
         "moreDays": "Più giorni",
         "moreDownloads": "Più download",
         "left": "({{count}} rimasti)",
@@ -161,8 +163,8 @@
         "keptFile": "File caricato e nome del file, cifrati: trattati perché il destinatario possa scaricarli. Cancellati al più tardi dopo {{days}} giorni, o al raggiungimento del limite di download (limitazione della conservazione, art. 5 (1) e).",
         "keptPassword": "Password di decifratura: non trattata. Resta nel link e non raggiunge mai questo server, quindi la copia conservata non è leggibile qui (cifratura, art. 32 (1) a).",
         "keptEmail": "Indirizzo per gli avvisi, facoltativo: trattato per informare il mittente dei tentativi di download del proprio invio.",
-        "keptClient": "Indirizzo IP, user agent e dettagli TLS di ogni download: trattati perché il mittente possa dimostrare che il trasferimento era cifrato e dove è andato (responsabilizzazione, art. 5 (2), art. 24 (1)).",
-        "keptClientNone": "Indirizzi IP, user agent e dettagli TLS dei download: non trattati su questo server.",
+        "keptClient": "Indirizzo IP, user agent e dettagli TLS di ogni tentativo di download: trattati perché il mittente possa dimostrare che il trasferimento era cifrato, dove è andato e cosa è stato rifiutato (responsabilizzazione, art. 5 (2), art. 24 (1)).",
+        "keptClientNone": "Indirizzi IP, user agent e dettagli TLS dei tentativi di download: non trattati su questo server.",
         "keptLocation": "Paese dell’indirizzo IP che scarica: determinato con un database presente su questo server, senza terzi.",
         "operator": "Titolare del trattamento e ogni ulteriore trattamento: chi gestisce questo server.",
         "law": "Gli articoli citati sono quelli del GDPR (regolamento (UE) 2016/679).",

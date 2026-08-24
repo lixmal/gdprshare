@@ -65,6 +65,9 @@ as it is.
 * the sender is notified on each download attempt
 * the notification carries the TLS version and ciphers of both sides, which is
   the evidence half of the accountability duty
+* the same record is readable in the app: one line per attempt, refusals
+  included, with the reason a refused one did not go through. It lives as long
+  as the share does and goes with it
 
 ### What the visitor is told
 

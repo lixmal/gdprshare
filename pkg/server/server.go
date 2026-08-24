@@ -21,6 +21,11 @@ const (
 	// them, so an owner can't extend a file beyond what an upload allows.
 	MaxExpiryDays    = 14
 	MaxDownloadCount = 15
+
+	// A blocked link can be hit as often as someone likes, so a share keeps
+	// only this many refusals. Downloads that went through are bounded by the
+	// download count and need no cap.
+	MaxDeniedRecords = 50
 )
 
 type StoredFileInfo struct {
@@ -52,6 +57,8 @@ type ProlongRequest struct {
 // rather than a new kind of record.
 type DownloadRecord struct {
 	Time       time.Time `json:"time"`
+	Denied     bool      `json:"denied"`
+	Reason     string    `json:"reason"`
 	Address    string    `json:"address"`
 	UserAgent  string    `json:"userAgent"`
 	TLSVersion string    `json:"tlsVersion"`

@@ -42,7 +42,8 @@
             "rate_limit_exceeded": "Çok fazla istek. Lütfen biraz bekleyip tekrar deneyin.",
             "invalid_file_id": "Bu indirme bağlantısı geçerli değil.",
             "tls_requirements_not_met": "Bağlantınız gerekli güvenlik düzeyini karşılamıyor.",
-            "invalid_request": "İstek geçerli değildi."
+            "invalid_request": "İstek geçerli değildi.",
+            "user_agent_blocked": "İndirme için kullanılan tarayıcıya burada izin verilmiyor."
         }
     },
     "common": {
@@ -134,6 +135,7 @@
         "recordNoAddress": "adres saklanmıyor",
         "recordFailed": "İndirme kaydı okunamadı: {{message}}",
         "recordGone": "Bu paylaşım artık sunucuda yok, kaydı da onunla birlikte gitti.",
+        "recordRefused": "Reddedildi",
         "moreDays": "Daha fazla gün",
         "moreDownloads": "Daha fazla indirme",
         "left": "({{count}} kaldı)",
@@ -161,8 +163,8 @@
         "keptFile": "Yüklenen dosya ve dosya adı, şifreli: alıcı indirebilsin diye işlenir. En geç {{days}} gün sonra ya da indirme sınırına ulaşıldığında silinir (saklamanın sınırlanması, madde 5 (1) e).",
         "keptPassword": "Şifre çözme parolası: işlenmez. Bağlantıda kalır ve bu sunucuya hiç ulaşmaz, bu yüzden saklanan kopya burada okunamaz (şifreleme, madde 32 (1) a).",
         "keptEmail": "Bildirim adresi, isteğe bağlı: gönderene kendi paylaşımındaki indirme denemelerini bildirmek için işlenir.",
-        "keptClient": "Her indirmenin IP adresi, tarayıcı bilgisi ve TLS ayrıntıları: gönderen aktarımın şifreli olduğunu ve nereye gittiğini kanıtlayabilsin diye işlenir (hesap verebilirlik, madde 5 (2), madde 24 (1)).",
-        "keptClientNone": "İndirmelerin IP adresleri, tarayıcı bilgileri ve TLS ayrıntıları: bu sunucuda işlenmez.",
+        "keptClient": "Her indirme denemesinin IP adresi, tarayıcı bilgisi ve TLS ayrıntıları: gönderen aktarımın şifreli olduğunu, nereye gittiğini ve neyin reddedildiğini kanıtlayabilsin diye işlenir (hesap verebilirlik, madde 5 (2), madde 24 (1)).",
+        "keptClientNone": "İndirme denemelerinin IP adresleri, tarayıcı bilgileri ve TLS ayrıntıları: bu sunucuda işlenmez.",
         "keptLocation": "İndiren IP adresinin ülkesi: bu sunucudaki bir veritabanıyla belirlenir, üçüncü taraf olmadan.",
         "operator": "Veri sorumlusu ve bunun ötesindeki her işleme: bu sunucuyu işleten kişi.",
         "law": "Anılan maddeler GDPR (AB) 2016/679 sayılı tüzüğe aittir.",

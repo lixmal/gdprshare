@@ -15,7 +15,13 @@ type Client struct {
 	UserAgent      string
 	TLSVersion     string
 	TLSCipherSuite string
-	Location       *geoip.Location `gorm:"-"`
+	// Set when the download was refused. The share keeps the attempt so its
+	// owner can see that someone tried and why it did not go through.
+	Denied bool
+	// The error code the attempt was answered with, empty for a download that
+	// went through.
+	Reason   string
+	Location *geoip.Location `gorm:"-"`
 }
 
 type DstClient Client

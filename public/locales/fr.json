@@ -42,7 +42,8 @@
             "rate_limit_exceeded": "Trop de requêtes. Veuillez patienter un instant et réessayer.",
             "invalid_file_id": "Ce lien de téléchargement n'est pas valide.",
             "tls_requirements_not_met": "Votre connexion ne répond pas au niveau de sécurité requis.",
-            "invalid_request": "La requête n'était pas valide."
+            "invalid_request": "La requête n'était pas valide.",
+            "user_agent_blocked": "Le navigateur utilisé pour le téléchargement n’est pas autorisé ici."
         }
     },
     "common": {
@@ -134,6 +135,7 @@
         "recordNoAddress": "adresse non conservée",
         "recordFailed": "Impossible de lire le journal des téléchargements : {{message}}",
         "recordGone": "Ce partage n’est plus sur le serveur, et son journal non plus.",
+        "recordRefused": "Refusé",
         "moreDays": "Plus de jours",
         "moreDownloads": "Plus de téléchargements",
         "left": "({{count}} restants)",
@@ -161,8 +163,8 @@
         "keptFile": "Fichier téléversé et nom de fichier, chiffrés : traités pour que le destinataire puisse les télécharger. Effacés au plus tard après {{days}} jours, ou dès que la limite de téléchargements est atteinte (limitation de la conservation, art. 5 (1) e).",
         "keptPassword": "Mot de passe de déchiffrement : non traité. Il reste dans le lien et n’atteint jamais ce serveur, donc la copie stockée est illisible ici (chiffrement, art. 32 (1) a).",
         "keptEmail": "Adresse de notification, facultative : traitée pour informer l’expéditeur des tentatives de téléchargement de son propre partage.",
-        "keptClient": "Adresse IP, agent utilisateur et détails TLS de chaque téléchargement : traités pour que l’expéditeur puisse démontrer que le transfert était chiffré et où il est allé (responsabilité, art. 5 (2), art. 24 (1)).",
-        "keptClientNone": "Adresses IP, agents utilisateurs et détails TLS des téléchargements : non traités sur ce serveur.",
+        "keptClient": "Adresse IP, agent utilisateur et détails TLS de chaque tentative de téléchargement : traités pour que l’expéditeur puisse démontrer que le transfert était chiffré, où il est allé et ce qui a été refusé (responsabilité, art. 5 (2), art. 24 (1)).",
+        "keptClientNone": "Adresses IP, agents utilisateurs et détails TLS des tentatives de téléchargement : non traités sur ce serveur.",
         "keptLocation": "Pays de l’adresse IP qui télécharge : déterminé avec une base de données présente sur ce serveur, sans tiers.",
         "operator": "Responsable du traitement et tout traitement au-delà : l’exploitant de ce serveur.",
         "law": "Les articles cités sont ceux du RGPD (règlement (UE) 2016/679).",

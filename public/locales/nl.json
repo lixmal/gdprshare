@@ -42,7 +42,8 @@
             "rate_limit_exceeded": "Te veel verzoeken. Wacht even en probeer het opnieuw.",
             "invalid_file_id": "Deze downloadlink is niet geldig.",
             "tls_requirements_not_met": "Je verbinding voldoet niet aan het vereiste beveiligingsniveau.",
-            "invalid_request": "Het verzoek was niet geldig."
+            "invalid_request": "Het verzoek was niet geldig.",
+            "user_agent_blocked": "De browser die voor de download werd gebruikt, is hier niet toegestaan."
         }
     },
     "common": {
@@ -134,6 +135,7 @@
         "recordNoAddress": "adres niet opgeslagen",
         "recordFailed": "Kon het downloadoverzicht niet lezen: {{message}}",
         "recordGone": "Deze deling staat niet meer op de server, en het overzicht ervan ook niet.",
+        "recordRefused": "Geweigerd",
         "moreDays": "Meer dagen",
         "moreDownloads": "Meer downloads",
         "left": "({{count}} over)",
@@ -161,8 +163,8 @@
         "keptFile": "Geüpload bestand en bestandsnaam, versleuteld: verwerkt zodat de ontvanger ze kan downloaden. Uiterlijk na {{days}} dagen gewist, of zodra de downloadlimiet bereikt is (opslagbeperking, art. 5 (1) e).",
         "keptPassword": "Wachtwoord voor ontsleuteling: niet verwerkt. Het blijft in de link en bereikt deze server nooit, dus de opgeslagen kopie is hier niet te lezen (versleuteling, art. 32 (1) a).",
         "keptEmail": "Adres voor meldingen, optioneel: verwerkt om de afzender over downloadpogingen op zijn eigen deling te informeren.",
-        "keptClient": "IP-adres, user agent en TLS-gegevens van elke download: verwerkt zodat de afzender kan aantonen dat de overdracht versleuteld was en waar hij heen ging (verantwoordingsplicht, art. 5 (2), art. 24 (1)).",
-        "keptClientNone": "IP-adressen, user agents en TLS-gegevens van downloads: op deze server niet verwerkt.",
+        "keptClient": "IP-adres, user agent en TLS-gegevens van elke downloadpoging: verwerkt zodat de afzender kan aantonen dat de overdracht versleuteld was, waar hij heen ging en wat geweigerd werd (verantwoordingsplicht, art. 5 (2), art. 24 (1)).",
+        "keptClientNone": "IP-adressen, user agents en TLS-gegevens van downloadpogingen: op deze server niet verwerkt.",
         "keptLocation": "Land van het downloadende IP-adres: bepaald met een database op deze server, zonder derde partij.",
         "operator": "Verwerkingsverantwoordelijke en elke verdere verwerking: de beheerder van deze server.",
         "law": "Artikelverwijzingen gaan over de AVG (Verordening (EU) 2016/679).",
