@@ -96,7 +96,7 @@
         "delayHint": "Berapa lama sampai tautannya berfungsi",
         "delayNone": "Tanpa tunda",
         "email": "Kabari lewat email",
-        "emailPlaceholder": "kamu@contoh.id (opsional)",
+        "emailPlaceholder": "kamu@example.org (opsional)",
         "emailHint": "Satu email setiap kali ada yang membuka tautannya",
         "strip": "Buang data tersembunyi",
         "stripHint": "Lokasi, kamera, dan penulis dibuang lebih dulu. Gambar selain GIF dikodekan ulang, jenis berkas lain ditolak.",

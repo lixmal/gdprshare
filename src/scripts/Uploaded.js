@@ -21,6 +21,10 @@ class Uploaded extends React.Component {
         }
     }
 
+    componentWillUnmount() {
+        window.clearTimeout(this.copyTimer)
+    }
+
     shareHandler(event) {
         this.setState({
             error: null
@@ -110,17 +114,19 @@ class Uploaded extends React.Component {
                                        ref="link-key" readOnly value={link}
                                        aria-describedby="link-key-help" />
                                 <button id="link-copy" onClick={this.copyHandler} type="button"
-                                        className="btn btn-icon" data-for="copy-tip" data-tip
+                                        className="btn btn-icon" data-tooltip-id="copy-tip"
                                         aria-label={t('common.copyLink')}>
                                     <Copy size="15" />
                                 </button>
                                 <button id="link-qr" onClick={this.qrHandler} type="button"
-                                        className="btn btn-icon" data-tip data-for="qrcode-tip"
+                                        className="btn btn-icon" data-tooltip-id="tip"
+                                        data-tooltip-content={t('uploaded.qr')}
                                         aria-label={t('uploaded.qr')}>
                                     <Qr size="15" />
                                 </button>
                                 <button id="link-share" onClick={this.shareHandler} type="button"
-                                        className="btn btn-icon" data-tip data-for="share-tip"
+                                        className="btn btn-icon" data-tooltip-id="tip"
+                                        data-tooltip-content={t('uploaded.share')}
                                         aria-label={t('uploaded.share')}>
                                     <Share size="15" />
                                 </button>
@@ -151,9 +157,9 @@ class Uploaded extends React.Component {
                     <Link to="/">{t('uploaded.another')}</Link>
                 </div>
 
-                <Tooltip id="copy-tip" openOnClick={false} render={() => this.state.copy} delayHide={1000} />
-                <Tooltip id="qrcode-tip" variant="info" place="bottom" content={t('uploaded.qr')} />
-                <Tooltip id="share-tip" variant="info" place="bottom" content={t('uploaded.share')} />
+                <Tooltip id="tip" place="bottom" />
+                <Tooltip id="copy-tip" place="bottom" delayHide={800}
+                         render={() => this.state.copy || t('common.copyLink')} />
             </div>
         )
     }

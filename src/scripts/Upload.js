@@ -68,6 +68,10 @@ class Upload extends React.Component {
         }
     }
 
+    componentWillUnmount() {
+        window.clearTimeout(this.copyTimer)
+    }
+
     async componentDidMount() {
         this.updateValidity()
         try {
@@ -673,7 +677,7 @@ class Upload extends React.Component {
             this.setState(updates)
             return
         }
-        var filtered = this.state.countryList.filter(function (c) {
+        var filtered = this.localizedCountries().filter(function (c) {
             return c.name.toLowerCase().indexOf(search) !== -1
         })
         var removeCodes = filtered.map(function (c) { return c.code })
@@ -767,6 +771,25 @@ class Upload extends React.Component {
         var keys = {5: 's5', 10: 's10', 30: 's30', 60: 'm1', 120: 'm2', 300: 'm5'}
         var key = keys[parseInt(seconds, 10)]
         return key ? this.props.t('duration.' + key) : String(seconds)
+    }
+
+    // the API's English names, replaced by what the browser calls each country
+    localizedCountries() {
+        return this.state.countryList.map(function (c) {
+            return {code: c.code, name: gdprshare.regionName(c.code, c.name)}
+        })
+    }
+
+    // The copy button's tooltip doubles as the feedback for the copy itself, so
+    // it falls back to the label when there is nothing to report.
+    tooltips() {
+        return (
+            <React.Fragment>
+                <Tooltip id="tip" place="bottom" />
+                <Tooltip id="copy-tip" place="bottom" delayHide={800}
+                         render={() => this.state.copy || this.props.t('common.copyLink')} />
+            </React.Fragment>
+        )
     }
 
     prolongClasses(fileId) {
@@ -894,19 +917,21 @@ class Upload extends React.Component {
                     <div className="file-actions">
                         <button id="copy" className="btn btn-icon" type="button"
                                 onClick={function (e) { gdprshare.copyText.call(this, e.currentTarget, saved.location) }.bind(this)}
-                                data-for="copy-tip" data-tip aria-label={t('common.copyLink')}>
+                                data-tooltip-id="copy-tip" aria-label={t('common.copyLink')}>
                             <Copy size="15" />
                         </button>
                         <button id="prolong" className={this.prolongClasses(fileId)} type="button"
                                 onClick={function () { this.handleProlongToggle(fileId) }.bind(this)}
-                                disabled={!canProlong} data-tip data-for="prolong-tip"
+                                disabled={!canProlong}
+                                data-tooltip-id="tip" data-tooltip-content={t('files.prolong')}
                                 aria-expanded={this.state.prolongFor === fileId}
                                 aria-label={t('files.prolong')}>
                             <MoreTime size="15" />
                         </button>
                         <button id="delete" className="btn btn-icon" type="button"
                                 onClick={function (e) { this.handleDelete(fileId, e) }.bind(this)}
-                                data-tip data-for="delete-tip" aria-label={t('files.delete')}>
+                                data-tooltip-id="tip" data-tooltip-content={t('files.delete')}
+                                aria-label={t('files.delete')}>
                             <Trash size="15" />
                         </button>
                     </div>
@@ -974,6 +999,7 @@ class Upload extends React.Component {
                         </span>
                     </div>
                     <button type="button" className="btn btn-icon" onClick={this.handleClearFile}
+                            data-tooltip-id="tip" data-tooltip-content={t('upload.removeFile')}
                             aria-label={t('upload.removeFile')}>
                         <X size="14" />
                     </button>
@@ -997,16 +1023,17 @@ class Upload extends React.Component {
 
     options() {
         const t = this.props.t
-        var countries = this.state.countryList
+        var search = this.state.countrySearch.toLowerCase()
+        var countries = this.localizedCountries()
             .filter(function (c) {
-                if (!this.state.countrySearch) return true
-                return c.name.toLowerCase().indexOf(this.state.countrySearch.toLowerCase()) !== -1
-            }.bind(this))
+                if (!search) return true
+                return c.name.toLowerCase().indexOf(search) !== -1
+            })
             .sort(function (a, b) {
                 var yours = this.state.yourCountry
                 if (a.code === yours) return -1
                 if (b.code === yours) return 1
-                return 0
+                return a.name.localeCompare(b.name, this.props.i18n.language)
             }.bind(this))
 
         return (
@@ -1188,7 +1215,7 @@ class Upload extends React.Component {
             return (
                 <div className="container-fluid">
                     {uploadCard}
-                    <Tooltip id="copy-tip" openOnClick={false} render={() => this.state.copy} delayHide={1000} />
+                    {this.tooltips()}
                 </div>
             )
 
@@ -1205,6 +1232,7 @@ class Upload extends React.Component {
                                 <span className="chip mono">{savedFiles.length}</span>
                                 <div style={{flexGrow: 1}}></div>
                                 <button type="button" className="btn btn-icon" onClick={this.updateValidity}
+                                        data-tooltip-id="tip" data-tooltip-content={t('files.refresh')}
                                         aria-label={t('files.refresh')}>
                                     <Refresh size="15" />
                                 </button>
@@ -1215,7 +1243,7 @@ class Upload extends React.Component {
                         </div>
                     </div>
                 </div>
-                <Tooltip id="copy-tip" openOnClick={false} render={() => this.state.copy} delayHide={1000} />
+                {this.tooltips()}
             </div>
         )
     }

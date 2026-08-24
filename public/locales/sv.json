@@ -96,7 +96,7 @@
         "delayHint": "Hur länge innan länken börjar fungera",
         "delayNone": "Ingen fördröjning",
         "email": "Meddela via e-post",
-        "emailPlaceholder": "du@exempel.se (valfritt)",
+        "emailPlaceholder": "du@example.org (valfritt)",
         "emailHint": "Ett mejl varje gång någon öppnar länken",
         "strip": "Ta bort dolda data",
         "stripHint": "Plats, kamera och upphovsman tas bort först. Bilder utom GIF kodas om, andra filtyper nekas.",

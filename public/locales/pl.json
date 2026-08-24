@@ -96,7 +96,7 @@
         "delayHint": "Ile czasu, aż link zacznie działać",
         "delayNone": "Bez opóźnienia",
         "email": "Powiadom e-mailem",
-        "emailPlaceholder": "ty@przyklad.pl (opcjonalnie)",
+        "emailPlaceholder": "ty@example.org (opcjonalnie)",
         "emailHint": "Jeden e-mail za każdym otwarciem linku",
         "strip": "Usuń ukryte dane",
         "stripHint": "Miejsce, aparat i autor są usuwane najpierw. Zdjęcia poza GIF-ami są przekodowywane, inne typy plików odrzucane.",

@@ -136,6 +136,34 @@ gdprshare.decrypt = async function (data, key) {
     }
 }
 
+// The API sends country codes with English names. The browser already knows
+// every country in the visitor's language, so the names are looked up here
+// rather than translated 249 times in every locale file. Servers or browsers
+// without the data fall back to the name the API sent.
+var regionNames = {}
+
+gdprshare.regionName = function (code, fallback) {
+    var language = i18n.language
+
+    if (!(language in regionNames)) {
+        try {
+            regionNames[language] = new Intl.DisplayNames([language], {type: 'region'})
+        } catch (e) {
+            console.log('region names:', e)
+            regionNames[language] = null
+        }
+    }
+
+    if (!regionNames[language])
+        return fallback
+
+    try {
+        return regionNames[language].of(code) || fallback
+    } catch (e) {
+        return fallback
+    }
+}
+
 // Dates follow the language the interface is in, so a German page does not
 // print American dates.
 gdprshare.formatDate = function (date) {
@@ -205,6 +233,12 @@ gdprshare.showTooltip = function (btn, message) {
     this.setState({
         copy: message,
     })
+
+    // the tooltip is the button's label the rest of the time
+    window.clearTimeout(this.copyTimer)
+    this.copyTimer = window.setTimeout(function () {
+        this.setState({ copy: null })
+    }.bind(this), 1500)
 }
 
 gdprshare.confirmReceipt = function (fileId) {

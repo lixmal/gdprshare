@@ -96,7 +96,7 @@
         "delayHint": "リンクが使えるようになるまでの時間",
         "delayNone": "待ち時間なし",
         "email": "メールで通知",
-        "emailPlaceholder": "you@example.jp（任意）",
+        "emailPlaceholder": "you@example.org（任意）",
         "emailHint": "誰かがリンクを開くたびにメールが届きます",
         "strip": "隠れたデータを消す",
         "stripHint": "位置情報・カメラ・作成者の情報を先に取り除きます。GIF 以外の画像は再エンコードされ、他の形式は受け付けません。",

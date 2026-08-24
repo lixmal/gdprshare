@@ -96,7 +96,7 @@
         "delayHint": "링크가 열리기까지 걸리는 시간",
         "delayNone": "지연 없음",
         "email": "이메일로 알리기",
-        "emailPlaceholder": "you@example.kr (선택)",
+        "emailPlaceholder": "you@example.org (선택)",
         "emailHint": "누군가 링크를 열 때마다 이메일 한 통",
         "strip": "숨은 정보 지우기",
         "stripHint": "위치, 카메라, 작성자 정보를 먼저 없앱니다. GIF 말고는 다시 인코딩하고, 다른 형식은 받지 않습니다.",

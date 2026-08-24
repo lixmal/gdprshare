@@ -102,3 +102,45 @@ test.describe('Busy state', () => {
     fs.unlinkSync(testFilePath);
   });
 });
+
+test.describe('Dark theme', () => {
+  // Bootstrap paints .card white and the file rows keep that class, so a
+  // missing override showed up as white boxes inside the dark panel. Nothing in
+  // the DOM says that is wrong, only the computed colours do.
+  test('paints the uploads list from the dark tokens', async ({ page }) => {
+    await page.goto('/');
+    await page.evaluate(() => window.localStorage.setItem('theme', 'dark'));
+
+    const testFilePath = path.join(__dirname, 'test-dark.txt');
+    fs.writeFileSync(testFilePath, 'dark theme check');
+    await page.locator('input#content').setInputFiles(testFilePath);
+    await openOptions(page);
+    await page.locator('select#geo-restriction').selectOption('none');
+    await page.locator('input[type="submit"]').click();
+    await page.waitForURL(/\/uploaded/);
+    await page.goto('/');
+
+    const row = page.locator('.file-item').first();
+    await expect(row).toBeVisible();
+
+    const colours = await page.evaluate(() => {
+      const read = (selector, prop) =>
+        getComputedStyle(document.querySelector(selector)).getPropertyValue(prop);
+      return {
+        body: read('body', 'background-color'),
+        card: read('.files-card', 'background-color'),
+        row: read('.file-item', 'background-color'),
+        name: read('.file-name', 'color'),
+      };
+    });
+
+    // the row adds no fill of its own, and nothing is left on bootstrap's white
+    expect(colours.row).toBe('rgba(0, 0, 0, 0)');
+    expect(colours.body).toBe('rgb(14, 16, 19)');
+    expect(colours.card).toBe('rgb(21, 24, 29)');
+    // and the text on that dark fill is light
+    expect(colours.name).toBe('rgb(231, 233, 237)');
+
+    fs.unlinkSync(testFilePath);
+  });
+});

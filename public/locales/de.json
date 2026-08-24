@@ -96,7 +96,7 @@
         "delayHint": "Wie lange, bis der Link funktioniert",
         "delayNone": "Keine Verzögerung",
         "email": "Per E-Mail benachrichtigen",
-        "emailPlaceholder": "du@beispiel.de (optional)",
+        "emailPlaceholder": "du@example.org (optional)",
         "emailHint": "Eine E-Mail, sobald jemand den Link öffnet",
         "strip": "Verborgene Daten entfernen",
         "stripHint": "Ort, Kamera und Autor werden vorher entfernt. Bilder außer GIFs werden neu kodiert, andere Dateitypen abgelehnt.",

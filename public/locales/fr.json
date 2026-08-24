@@ -96,7 +96,7 @@
         "delayHint": "Le temps avant que le lien fonctionne",
         "delayNone": "Aucun délai",
         "email": "M’avertir par e-mail",
-        "emailPlaceholder": "vous@exemple.fr (facultatif)",
+        "emailPlaceholder": "vous@example.org (facultatif)",
         "emailHint": "Un e-mail chaque fois que quelqu’un ouvre le lien",
         "strip": "Retirer les données cachées",
         "stripHint": "Lieu, appareil et auteur sont retirés d’abord. Les images sauf les GIF sont réencodées, les autres types refusés.",

@@ -96,7 +96,7 @@
         "delayHint": "Quanto tempo até o link funcionar",
         "delayNone": "Sem atraso",
         "email": "Avisar-me por e-mail",
-        "emailPlaceholder": "tu@exemplo.pt (opcional)",
+        "emailPlaceholder": "voce@example.org (opcional)",
         "emailHint": "Um e-mail cada vez que alguém abre o link",
         "strip": "Remover dados ocultos",
         "stripHint": "Local, câmera e autor saem primeiro. As imagens, exceto GIFs, são recodificadas; outros tipos são recusados.",

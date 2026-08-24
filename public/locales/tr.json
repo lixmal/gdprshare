@@ -96,7 +96,7 @@
         "delayHint": "Bağlantının çalışmaya başlamasına ne kadar var",
         "delayNone": "Gecikme yok",
         "email": "E-postayla haber ver",
-        "emailPlaceholder": "sen@ornek.com (isteğe bağlı)",
+        "emailPlaceholder": "sen@example.org (isteğe bağlı)",
         "emailHint": "Bağlantı her açıldığında bir e-posta",
         "strip": "Gizli verileri kaldır",
         "stripHint": "Konum, kamera ve yazar bilgisi önce çıkarılır. GIF dışındaki resimler yeniden kodlanır, diğer dosya türleri kabul edilmez.",

@@ -96,7 +96,7 @@
         "delayHint": "Bao lâu nữa liên kết mới dùng được",
         "delayNone": "Không trì hoãn",
         "email": "Báo qua email",
-        "emailPlaceholder": "ban@vidu.vn (không bắt buộc)",
+        "emailPlaceholder": "ban@example.org (không bắt buộc)",
         "emailHint": "Một email mỗi lần có người mở liên kết",
         "strip": "Bỏ dữ liệu ẩn",
         "stripHint": "Vị trí, máy ảnh và tác giả được bỏ trước. Ảnh ngoài GIF sẽ được mã hóa lại, các loại tệp khác bị từ chối.",

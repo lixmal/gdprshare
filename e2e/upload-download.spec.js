@@ -803,3 +803,38 @@ test.describe('Upload with the options panel closed', () => {
     fs.unlinkSync(testFilePath);
   });
 });
+
+test.describe('Icon buttons', () => {
+  // The icons carry no words, so hovering has to say what they do. The markup
+  // used to carry react-tooltip v4 attributes, which v5 ignores entirely.
+  test('name themselves on hover', async ({ page }) => {
+    // the copy feedback needs the clipboard, which headless denies by default
+    await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
+
+    const testFilePath = path.join(__dirname, 'test-tooltips.txt');
+    fs.writeFileSync(testFilePath, 'tooltip check');
+
+    await page.goto('/');
+    await page.locator('input#content').setInputFiles(testFilePath);
+    await openOptions(page);
+    await page.locator('select#geo-restriction').selectOption('none');
+    await page.locator('input[type="submit"]').click();
+    await page.waitForURL(/\/uploaded/);
+
+    const en = JSON.parse(
+      fs.readFileSync(path.join(__dirname, '..', 'public', 'locales', 'en.json'), 'utf8'));
+
+    // each tooltip is addressed by id: a previous one can still be fading out
+    await page.locator('button#link-qr').hover();
+    await expect(page.locator('#tip')).toContainText(en.uploaded.qr);
+
+    await page.locator('button#link-copy').hover();
+    await expect(page.locator('#copy-tip')).toContainText(en.common.copyLink);
+
+    // and the copy button reports the copy through the same tooltip
+    await page.locator('button#link-copy').click();
+    await expect(page.locator('#copy-tip')).toContainText(en.common.copied);
+
+    fs.unlinkSync(testFilePath);
+  });
+});

@@ -96,7 +96,7 @@
         "delayHint": "連結多久之後才能用",
         "delayNone": "不延遲",
         "email": "用電子郵件通知我",
-        "emailPlaceholder": "you@example.tw（選填）",
+        "emailPlaceholder": "you@example.org（選填）",
         "emailHint": "每次有人開啟連結就寄一封信",
         "strip": "去掉隱藏資訊",
         "stripHint": "先去掉位置、相機和作者資訊。除 GIF 以外的圖片會重新編碼，其他檔案類型會被拒絕。",
