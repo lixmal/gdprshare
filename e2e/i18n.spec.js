@@ -2,6 +2,14 @@ const { test, expect } = require('@playwright/test');
 const fs = require('fs');
 const path = require('path');
 
+// The advanced options live behind "More options" since the redesign.
+async function openOptions(page) {
+  const more = page.locator('button[aria-expanded="false"]');
+  if (await more.count() > 0)
+    await more.first().click();
+}
+
+
 const locales = (file) =>
   JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'public', 'locales', file), 'utf8'));
 
@@ -20,9 +28,11 @@ async function uploadAndGetLink(page, { count = '2' } = {}) {
   fs.writeFileSync(filePath, 'localized download test');
 
   await page.locator('input#content').setInputFiles(filePath);
+  await openOptions(page);
   await page.locator('input#count').fill(count);
+  await openOptions(page);
   await page.locator('select#geo-restriction').selectOption('none');
-  await page.locator('input[type="submit"][value="Upload"]').click();
+  await page.locator('input[type="submit"]').click();
   await page.waitForURL(/\/uploaded/);
 
   const url = await page.locator('input#link-key').inputValue();
@@ -42,7 +52,7 @@ test.describe('Download page localization', () => {
     await expect(page.locator('h4')).toHaveText(de.download.title);
     await expect(page.locator('label[for="password"]')).toHaveText(de.download.password);
     await expect(page.locator('input[type="submit"]')).toHaveValue(de.download.submit);
-    await expect(page.locator('a[href="/"]')).toHaveText(de.download.uploadLink);
+    await expect(page.locator('a[href="/"]:not(.shell-mark)')).toHaveText(de.download.uploadLink);
     await expect(page.locator('html')).toHaveAttribute('lang', 'de');
     await expect(page.locator('html')).toHaveAttribute('dir', 'ltr');
 
@@ -69,7 +79,7 @@ test.describe('Download page localization', () => {
     let url = await uploadAndGetLink(twPage);
     await twPage.goto(url.split('#')[0]);
 
-    await expect(twPage.locator('a[href="/"]')).toHaveText(zhTW.download.uploadLink);
+    await expect(twPage.locator('a[href="/"]:not(.shell-mark)')).toHaveText(zhTW.download.uploadLink);
     await expect(twPage.locator('html')).toHaveAttribute('lang', 'zh-TW');
     await tw.close();
 
@@ -78,7 +88,7 @@ test.describe('Download page localization', () => {
     url = await uploadAndGetLink(cnPage);
     await cnPage.goto(url.split('#')[0]);
 
-    await expect(cnPage.locator('a[href="/"]')).toHaveText(zhCN.download.uploadLink);
+    await expect(cnPage.locator('a[href="/"]:not(.shell-mark)')).toHaveText(zhCN.download.uploadLink);
     await expect(cnPage.locator('html')).toHaveAttribute('lang', 'zh-CN');
     // the two scripts must not be serving the same text
     expect(zhTW.download.uploadLink).not.toBe(zhCN.download.uploadLink);
@@ -130,7 +140,9 @@ test.describe('Download page localization', () => {
     // no such file: the API answers with code file_not_found_or_limit_exceeded
     await page.goto('/d/thisfiledoesnotexist#AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
 
-    const alert = page.locator('.alert-danger');
+    // an exhausted or unknown link is an expected end state, so it reads as a
+    // notice rather than an error
+    const alert = page.locator('.alert-notice');
     await expect(alert).toBeVisible({ timeout: 10000 });
     await expect(alert).toContainText(de.errors.server.file_not_found_or_limit_exceeded);
     // the terse English API message must not leak through
@@ -154,7 +166,7 @@ test.describe('Download page localization', () => {
 
     // now the link is exhausted
     await page.goto(url);
-    const alert = page.locator('.alert-danger');
+    const alert = page.locator('.alert-notice');
     await expect(alert).toBeVisible({ timeout: 10000 });
     await expect(alert).toContainText(fr.errors.server.download_count_expired);
     // the terse English API message must not leak through

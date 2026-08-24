@@ -1,5 +1,5 @@
 import React from 'react'
-import Octicon, { Alert as AlertI } from '@primer/octicons-react'
+import { AlertIcon, Info } from './Icons'
 import { withTranslation } from 'react-i18next'
 
 class Alert extends React.Component {
@@ -8,15 +8,27 @@ class Alert extends React.Component {
     }
 
     render() {
-        return this.props.error ? (
-            <div className="alert alert-danger alert-dismissible col-sm-12 file-alert text-center">
-                <Octicon icon={AlertI} />
+        if (!this.props.error)
+            return null
+
+        // an expected end state, like a link that ran out, is not a failure
+        if (this.props.tone === 'notice')
+            return (
+                <div className="alert alert-notice file-alert" role="status">
+                    <Info size="15" />
+                    <span>{this.props.error}</span>
+                </div>
+            )
+
+        return (
+            <div className="alert alert-danger file-alert" role="alert">
+                <AlertIcon size="15" />
                 <span className="sr-only">
                     {this.props.t('alert.errorLabel')}
                 </span>
-                {this.props.error}
+                <span>{this.props.error}</span>
             </div>
-        ) : null
+        )
     }
 }
 

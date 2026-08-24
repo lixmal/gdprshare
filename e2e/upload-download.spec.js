@@ -3,6 +3,14 @@ const fs = require('fs');
 const path = require('path');
 const { PDFDocument, PDFName } = require('pdf-lib');
 
+// The advanced options live behind "More options" since the redesign.
+async function openOptions(page) {
+  const more = page.locator('button[aria-expanded="false"]');
+  if (await more.count() > 0)
+    await more.first().click();
+}
+
+
 test.describe('Full E2E Upload and Download Flow', () => {
   test.beforeEach(async ({ page }) => {
     await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
@@ -23,11 +31,14 @@ test.describe('Full E2E Upload and Download Flow', () => {
     await expect(fileInput).toBeVisible({ timeout: 10000 });
     await fileInput.setInputFiles(testFilePath);
 
+    await openOptions(page);
     await page.locator('input#expiry').fill('1');
+    await openOptions(page);
     await page.locator('input#count').fill('2');
+    await openOptions(page);
     await page.locator('select#geo-restriction').selectOption('none');
 
-    const uploadButton = page.locator('input[type="submit"][value="Upload"]');
+    const uploadButton = page.locator('input[type="submit"]');
     await uploadButton.click();
 
     // Wait for success message or redirect
@@ -53,11 +64,14 @@ test.describe('Full E2E Upload and Download Flow', () => {
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles(testFilePath);
 
+    await openOptions(page);
     await page.locator('input#expiry').fill('1');
+    await openOptions(page);
     await page.locator('input#count').fill('2');
+    await openOptions(page);
     await page.locator('select#geo-restriction').selectOption('none');
 
-    const uploadButton = page.locator('input[type="submit"][value="Upload"]');
+    const uploadButton = page.locator('input[type="submit"]');
     await uploadButton.click();
 
     await page.waitForURL(/\/uploaded/);
@@ -119,9 +133,10 @@ test.describe('Full E2E Upload and Download Flow', () => {
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles(testFilePath);
 
+    await openOptions(page);
     await page.locator('select#geo-restriction').selectOption('none');
 
-    const uploadButton = page.locator('input[type="submit"][value="Upload"]');
+    const uploadButton = page.locator('input[type="submit"]');
     await uploadButton.click();
 
     await page.waitForURL(/\/uploaded/);
@@ -158,10 +173,12 @@ test.describe('Full E2E Upload and Download Flow', () => {
     await expect(fileInput).toBeVisible({ timeout: 10000 });
     await fileInput.setInputFiles(testFilePath);
 
+    await openOptions(page);
     await page.locator('input#count').fill('2');
+    await openOptions(page);
     await page.locator('select#geo-restriction').selectOption('none');
 
-    const uploadButton = page.locator('input[type="submit"][value="Upload"]');
+    const uploadButton = page.locator('input[type="submit"]');
     await uploadButton.click();
 
     await page.waitForURL(/\/uploaded/);
@@ -214,16 +231,18 @@ test.describe('Full E2E Upload and Download Flow', () => {
     const testImagePath = path.join(__dirname, 'test-image.png');
 
     // Select image type (no disappear checked)
-    await page.locator('select#type').selectOption('image');
+    await page.locator('label[for="type-image"]').click();
 
     // Upload the image
     const fileInput = page.locator('input#image-content');
     await fileInput.setInputFiles(testImagePath);
 
+    await openOptions(page);
     await page.locator('input#count').fill('2');
+    await openOptions(page);
     await page.locator('select#geo-restriction').selectOption('none');
 
-    const uploadButton = page.locator('input[type="submit"][value="Upload"]');
+    const uploadButton = page.locator('input[type="submit"]');
     await uploadButton.click();
 
     await page.waitForURL(/\/uploaded/);
@@ -271,15 +290,17 @@ test.describe('Full E2E Upload and Download Flow', () => {
   test('should blur image when tab loses focus', async ({ page, context }) => {
     const testImagePath = path.join(__dirname, 'test-image.png');
 
-    await page.locator('select#type').selectOption('image');
+    await page.locator('label[for="type-image"]').click();
 
     const fileInput = page.locator('input#image-content');
     await fileInput.setInputFiles(testImagePath);
 
+    await openOptions(page);
     await page.locator('input#count').fill('2');
+    await openOptions(page);
     await page.locator('select#geo-restriction').selectOption('none');
 
-    const uploadButton = page.locator('input[type="submit"][value="Upload"]');
+    const uploadButton = page.locator('input[type="submit"]');
     await uploadButton.click();
 
     await page.waitForURL(/\/uploaded/);
@@ -356,19 +377,22 @@ test.describe('Full E2E Upload and Download Flow', () => {
     const testImagePath = path.join(__dirname, 'test-image.png');
 
     // Select image type
-    await page.locator('select#type').selectOption('image');
+    await page.locator('label[for="type-image"]').click();
 
     // Set disappear to 5 seconds (smallest preset)
+    await openOptions(page);
     await page.locator('select#ephemeral').selectOption('5');
 
     // Upload the image
     const fileInput = page.locator('input#image-content');
     await fileInput.setInputFiles(testImagePath);
 
+    await openOptions(page);
     await page.locator('input#count').fill('2');
+    await openOptions(page);
     await page.locator('select#geo-restriction').selectOption('none');
 
-    const uploadButton = page.locator('input[type="submit"][value="Upload"]');
+    const uploadButton = page.locator('input[type="submit"]');
     await uploadButton.click();
 
     await page.waitForURL(/\/uploaded/);
@@ -408,9 +432,10 @@ test.describe('Full E2E Upload and Download Flow', () => {
     await fileInput.setInputFiles(testFilePath);
 
     // Leave geo-restriction as EU/EEA (default)
+    await openOptions(page);
     await page.locator('input#count').fill('2');
 
-    const uploadButton = page.locator('input[type="submit"][value="Upload"]');
+    const uploadButton = page.locator('input[type="submit"]');
     await uploadButton.click();
 
     await page.waitForURL(/\/uploaded/);
@@ -426,7 +451,7 @@ test.describe('Full E2E Upload and Download Flow', () => {
     // terse wire message
     const en = JSON.parse(
       fs.readFileSync(path.join(__dirname, '..', 'public', 'locales', 'en.json'), 'utf8'));
-    const errorMessage = downloadPage.locator('.alert-danger');
+    const errorMessage = downloadPage.locator('.alert-notice');
     await expect(errorMessage).toBeVisible({ timeout: 5000 });
     await expect(errorMessage).toContainText(en.errors.server.download_location_forbidden);
 
@@ -443,9 +468,10 @@ test.describe('Full E2E Upload and Download Flow', () => {
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles(testFilePath);
 
+    await openOptions(page);
     await page.locator('select#geo-restriction').selectOption('none');
 
-    const uploadButton = page.locator('input[type="submit"][value="Upload"]');
+    const uploadButton = page.locator('input[type="submit"]');
     await uploadButton.click();
 
     await page.waitForURL(/\/uploaded/);
@@ -478,15 +504,17 @@ test.describe('Full E2E Upload and Download Flow', () => {
     const testImagePath = path.join(__dirname, 'test-image.png');
     const originalBytes = fs.readFileSync(testImagePath);
 
-    await page.locator('select#type').selectOption('image');
+    await page.locator('label[for="type-image"]').click();
 
     const fileInput = page.locator('input#image-content');
     await fileInput.setInputFiles(testImagePath);
 
+    await openOptions(page);
     await page.locator('input#count').fill('2');
+    await openOptions(page);
     await page.locator('select#geo-restriction').selectOption('none');
 
-    const uploadButton = page.locator('input[type="submit"][value="Upload"]');
+    const uploadButton = page.locator('input[type="submit"]');
     await uploadButton.click();
 
     await page.waitForURL(/\/uploaded/);
@@ -538,12 +566,16 @@ test.describe('Full E2E Upload and Download Flow', () => {
   // Uploads the file, follows the link and returns the decrypted bytes.
   async function uploadAndDownload(page, context, filePath, { strip }) {
     await page.locator('input#content').setInputFiles(filePath);
-    if (strip)
+    if (strip) {
+      await openOptions(page);
       await page.locator('input#strip').check();
+    }
 
+    await openOptions(page);
     await page.locator('input#count').fill('2');
+    await openOptions(page);
     await page.locator('select#geo-restriction').selectOption('none');
-    await page.locator('input[type="submit"][value="Upload"]').click();
+    await page.locator('input[type="submit"]').click();
 
     await page.waitForURL(/\/uploaded/);
     const downloadUrl = await page.locator('input#link-key').inputValue();
@@ -603,24 +635,29 @@ test.describe('Full E2E Upload and Download Flow', () => {
     fs.writeFileSync(docPath, 'not a format we can strip');
 
     await page.locator('input#content').setInputFiles(docPath);
+    await openOptions(page);
     await page.locator('input#strip').check();
+    await openOptions(page);
     await page.locator('select#geo-restriction').selectOption('none');
-    await page.locator('input[type="submit"][value="Upload"]').click();
+    await page.locator('input[type="submit"]').click();
 
     // the upload must fail loudly instead of sending the file with its metadata
-    await expect(page.locator('text=/could not strip metadata/i')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('text=/could not remove the hidden data/i')).toBeVisible({ timeout: 10000 });
     expect(page.url()).not.toMatch(/\/uploaded/);
 
     fs.unlinkSync(docPath);
   });
 
   test('should only offer the strip option for the file type', async ({ page }) => {
+    await openOptions(page);
     await expect(page.locator('input#strip')).toBeVisible();
 
-    await page.locator('select#type').selectOption('image');
+    await page.locator('label[for="type-image"]').click();
+    await openOptions(page);
     await expect(page.locator('input#strip')).toHaveCount(0);
 
-    await page.locator('select#type').selectOption('text');
+    await page.locator('label[for="type-text"]').click();
+    await openOptions(page);
     await expect(page.locator('input#strip')).toHaveCount(0);
   });
   // Two frame 1x1 GIF with a comment block, an XMP application extension and
@@ -655,11 +692,13 @@ test.describe('Full E2E Upload and Download Flow', () => {
     makeGifWithMetadata(gifPath);
 
     // the image type always strips
-    await page.locator('select#type').selectOption('image');
+    await page.locator('label[for="type-image"]').click();
     await page.locator('input#image-content').setInputFiles(gifPath);
+    await openOptions(page);
     await page.locator('input#count').fill('2');
+    await openOptions(page);
     await page.locator('select#geo-restriction').selectOption('none');
-    await page.locator('input[type="submit"][value="Upload"]').click();
+    await page.locator('input[type="submit"]').click();
 
     await page.waitForURL(/\/uploaded/);
     const downloadUrl = await page.locator('input#link-key').inputValue();
@@ -702,6 +741,7 @@ test.describe('Full E2E Upload and Download Flow', () => {
     });
 
     await page.reload();
+    await openOptions(page);
     await page.locator('select#geo-restriction').selectOption('none');
 
     // not part of the initial page load
@@ -711,12 +751,55 @@ test.describe('Full E2E Upload and Download Flow', () => {
     await makePdfWithMetadata(pdfPath);
 
     await page.locator('input#content').setInputFiles(pdfPath);
+    await openOptions(page);
     await page.locator('input#strip').check();
-    await page.locator('input[type="submit"][value="Upload"]').click();
+    await page.locator('input[type="submit"]').click();
 
     await page.waitForURL(/\/uploaded/);
     expect(requested.length).toBeGreaterThan(0);
 
     fs.unlinkSync(pdfPath);
+  });
+});
+
+test.describe('Upload with the options panel closed', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+  });
+
+  // The email field only exists while the options are open, so reading it from
+  // the DOM used to throw and leave the form stuck behind its spinner.
+  test('uploads without ever opening the advanced options', async ({ page }) => {
+    const testFilePath = path.join(__dirname, 'test-collapsed.txt');
+    fs.writeFileSync(testFilePath, 'uploaded with the options collapsed');
+
+    await page.locator('input#content').setInputFiles(testFilePath);
+    await expect(page.locator('button[aria-expanded="false"]')).toBeVisible();
+
+    await page.locator('input[type="submit"]').click();
+
+    await page.waitForURL(/\/uploaded/);
+    await expect(page.locator('input#link-key')).toHaveValue(/\/d\/.+#.+/);
+
+    fs.unlinkSync(testFilePath);
+  });
+
+  test('remembers the notification address for the next upload', async ({ page }) => {
+    await openOptions(page);
+    await page.locator('input#email').fill('sender@example.org');
+
+    const testFilePath = path.join(__dirname, 'test-email.txt');
+    fs.writeFileSync(testFilePath, 'with a notification address');
+    await page.locator('input#content').setInputFiles(testFilePath);
+    await openOptions(page);
+    await page.locator('select#geo-restriction').selectOption('none');
+    await page.locator('input[type="submit"]').click();
+    await page.waitForURL(/\/uploaded/);
+
+    await page.goto('/');
+    await openOptions(page);
+    await expect(page.locator('input#email')).toHaveValue('sender@example.org');
+
+    fs.unlinkSync(testFilePath);
   });
 });

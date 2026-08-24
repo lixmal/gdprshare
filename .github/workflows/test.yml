@@ -3,8 +3,9 @@ name: Tests
 on:
   push:
     branches: [ "master", "main" ]
+  # every pull request, whatever it targets: a stacked pull request is based on
+  # the branch below it and would otherwise go unchecked until that one merges
   pull_request:
-    branches: [ "master", "main" ]
 
 jobs:
   backend-tests:

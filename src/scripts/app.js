@@ -5,12 +5,13 @@ import ReactDOM from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
 import ErrPage from './ErrPage'
+import Shell, { storedTheme, applyTheme } from './Shell'
 import Upload from './Upload'
 import Uploaded from './Uploaded'
 import Download from './Download'
 
 import './Polyfills'
-import i18n, { initI18n, serverErrorText } from './i18n'
+import i18n, { initI18n, serverErrorText, serverErrorIsExpected } from './i18n'
 import { Tooltip } from 'react-tooltip'
 import * as Clipboard from "clipboard-polyfill/dist/clipboard-polyfill.promise"
 
@@ -52,13 +53,24 @@ gdprshare.loadConfig = async function () {
 
 gdprshare.serverErrorText = serverErrorText
 
-gdprshare.displayErr = function (error) {
+gdprshare.displayErr = function (error, tone) {
     console.log(error)
     this.setState({
         error: error.toString(),
+        errorTone: tone || 'error',
         mask: false,
         phase: null,
     })
+}
+
+// Reports a server error response, calling it a notice when it is one.
+gdprshare.displayServerErr = function (data) {
+    gdprshare.displayErr.call(
+        this,
+        serverErrorText(data),
+        serverErrorIsExpected(data) ? 'notice' : 'error',
+    )
+    this.setState({ errorCode: data && data.code })
 }
 
 gdprshare.asTextErr = async function (response, error) {
@@ -71,6 +83,8 @@ gdprshare.asTextErr = async function (response, error) {
     }
 }
 
+
+applyTheme(storedTheme())
 
 var rootEl = document.getElementById('app-content')
 
@@ -121,6 +135,35 @@ gdprshare.decrypt = async function (data, key) {
     }
 }
 
+// Dates follow the language the interface is in, so a German page does not
+// print American dates.
+gdprshare.formatDate = function (date) {
+    return new Date(date).toLocaleDateString(i18n.language)
+}
+
+gdprshare.formatDateTime = function (date) {
+    return new Date(date).toLocaleString(i18n.language)
+}
+
+gdprshare.formatSize = function (bytes) {
+    var units = ['B', 'KB', 'MB', 'GB']
+    var value = bytes
+    var unit = 0
+    while (value >= 1024 && unit < units.length - 1) {
+        value /= 1024
+        unit++
+    }
+    return (unit === 0 ? value : value.toFixed(1)) + ' ' + units[unit]
+}
+
+// keeps a stepper or a typed value inside what the server accepts
+gdprshare.clamp = function (value, min, max) {
+    var number = parseInt(value, 10)
+    if (isNaN(number))
+        return min
+    return Math.min(Math.max(number, min), max)
+}
+
 gdprshare.keyToB64 = function (key) {
     const b64 = Buffer.from(key).toString('base64')
     return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
@@ -132,40 +175,26 @@ gdprshare.keyFromB64 = function (b64) {
 }
 
 gdprshare.copyHandler = function (event) {
+    var btn = event.currentTarget
+    var input = btn.closest('.link-group').querySelector('input')
+
+    gdprshare.copyText.call(this, btn, input ? input.value : '')
+}
+
+gdprshare.copyText = function (btn, value) {
     this.setState({
         error: null
     })
-
-    var btn = event.currentTarget
     btn.blur()
-    var element = btn.parentNode.classList.contains('input-group')
-        ? btn.parentNode.querySelector('input')
-        : btn.parentNode.nextSibling
-    var value
-    if (element && element.tagName === 'INPUT') {
-        value = element.value
-    }
-    else {
-        try {
-            var files = JSON.parse(window.localStorage.getItem('savedFiles'))
-            value = files[element.textContent].location
-        }
-        catch (e) {
-            console.log(e)
-            gdprshare.showTooltip.bind(this)(btn, 'Failed to get file URL')
-            return
-        }
-    }
-
 
     var me = this
     Clipboard.writeText(value).then(
         function () {
-            gdprshare.showTooltip.bind(me)(btn, 'Copied')
+            gdprshare.showTooltip.bind(me)(btn, i18n.t('common.copied'))
         },
         function (err) {
             console.log(err)
-            gdprshare.showTooltip.bind(me)(btn, 'Failed to copy')
+            gdprshare.showTooltip.bind(me)(btn, i18n.t('common.copyFailed'))
         },
     )
 }
@@ -175,10 +204,6 @@ gdprshare.showTooltip = function (btn, message) {
     this.setState({
         copy: message,
     })
-}
-
-gdprshare.handleTipContent = function () {
-    return this.state.copy
 }
 
 gdprshare.confirmReceipt = function (fileId) {
@@ -194,11 +219,13 @@ const root = ReactDOM.createRoot(rootEl)
 Promise.all([gdprshare.loadConfig(), initI18n()]).then(function () {
     root.render(
         <BrowserRouter>
-            <Routes>
-                <Route path="/" element={<Upload />} />
-                <Route path="/uploaded" element={<Uploaded />} />
-                <Route path="/d/:fileId" element={<Download />} />
-            </Routes>
+            <Shell>
+                <Routes>
+                    <Route path="/" element={<Upload />} />
+                    <Route path="/uploaded" element={<Uploaded />} />
+                    <Route path="/d/:fileId" element={<Download />} />
+                </Routes>
+            </Shell>
         </BrowserRouter>
     )
 })

@@ -1,17 +1,18 @@
 import React from 'react'
 import Classnames from 'classnames'
-import Octicon, {Clippy, CloudUpload, Trashcan, Clock} from '@primer/octicons-react'
+import { Copy, Trash, MoreTime, Upload as UploadIcon, FileIcon, TextIcon, ImageIcon,
+         Lock, Minus, Plus, X, ChevronDown, ChevronRight, Refresh } from './Icons'
 import Alert from './Alert'
 import { Tooltip } from 'react-tooltip'
 import { withRouter } from './withRouter'
-import { stripMetadata, loadPdfLib } from './strip'
+import { withTranslation } from 'react-i18next'
+import { stripMetadata, loadPdfLib, canStrip, strippableImageTypes } from './strip'
 
 class Upload extends React.Component {
     constructor() {
         super()
 
         this.copyHandler = gdprshare.copyHandler.bind(this)
-        this.handleTipContent = gdprshare.handleTipContent.bind(this)
         this.encrypt = gdprshare.encrypt.bind(this)
         this.handleFile = this.handleFile.bind(this)
         this.handleUpload = this.handleUpload.bind(this)
@@ -32,6 +33,12 @@ class Upload extends React.Component {
         this.handleProlongToggle = this.handleProlongToggle.bind(this)
         this.handleProlongChange = this.handleProlongChange.bind(this)
         this.handleProlong = this.handleProlong.bind(this)
+        this.handleCountChange = this.handleCountChange.bind(this)
+        this.handleExpiryChange = this.handleExpiryChange.bind(this)
+        this.toggleOptions = this.toggleOptions.bind(this)
+        this.handleBrowse = this.handleBrowse.bind(this)
+        this.handleClearFile = this.handleClearFile.bind(this)
+        this.handleEmailChange = this.handleEmailChange.bind(this)
 
         this.state = {
             error: null,
@@ -52,6 +59,11 @@ class Upload extends React.Component {
             prolongFor: null,
             prolongDays: 0,
             prolongCount: 0,
+            count: 1,
+            expiry: 7,
+            email: window.localStorage.getItem('email') || '',
+            optionsOpen: false,
+            picked: null,
         }
     }
 
@@ -116,7 +128,7 @@ class Upload extends React.Component {
         }
 
         if (!response.ok) {
-            let error = 'fetching file validity failed: ' + fetchData.message
+            let error = this.props.t('files.checkFailed', {message: fetchData.message})
             // TODO: mask removal could be a race with something else
             return gdprshare.displayErr.call(this, error)
         }
@@ -158,12 +170,12 @@ class Upload extends React.Component {
             },
         )
 
-        var email = this.refs.email.value
+        var email = this.state.email
         formData.append('type', this.state.type)
         formData.append('file', file, encFilename)
         formData.append('filename', encFilename)
-        formData.append('count', this.refs.count.value)
-        formData.append('expiry', this.refs.expiry.value)
+        formData.append('count', this.state.count)
+        formData.append('expiry', this.state.expiry)
         formData.append('email', email)
         if (this.state.geoRestriction !== 'none') {
             formData.append('allowed-countries', this.state.selectedCountries.join(','))
@@ -214,7 +226,7 @@ class Upload extends React.Component {
                 fileId: fetchData.fileId,
                 ownerToken: fetchData.ownerToken,
                 location: loc + '#' + b64Key,
-                totalCount: parseInt(this.refs.count.value, 10) || 1,
+                totalCount: parseInt(this.state.count, 10) || 1,
             }
 
             try {
@@ -224,13 +236,22 @@ class Upload extends React.Component {
             }
         }
 
+        var regionLabels = {
+            none: '',
+            eea: this.props.t('upload.regionEea'),
+            'gdpr-aligned': this.props.t('upload.regionAligned'),
+            custom: this.props.t('upload.chipCountries', {count: this.state.selectedCountries.length}),
+        }
+
         this.props.router.navigate('/uploaded', {
             state: {
                 location: loc,
                 // unencrypted filename
                 filename: plainFilename,
                 key: b64Key,
-                count: this.refs.count.value,
+                count: this.state.count,
+                expiry: this.state.expiry,
+                region: regionLabels[this.state.geoRestriction],
             }
         })
     }
@@ -249,6 +270,7 @@ class Upload extends React.Component {
 
         var ref = this.state.type === 'image' ? this.refs.image : this.refs.file
         if (ref) ref.files = files
+        this.setState({picked: {name: files[0].name, size: files[0].size}})
         this.refs.submit.click()
     }
 
@@ -282,7 +304,7 @@ class Upload extends React.Component {
                 } catch (err) {
                     // never fall back to the original: the upload would leak
                     // the metadata the user asked to have removed
-                    gdprshare.displayErr.call(this, 'Could not strip metadata: ' + err.message)
+                    gdprshare.displayErr.call(this, this.props.t('upload.stripFailed', {message: err.message}))
                     return
                 }
             }
@@ -296,10 +318,19 @@ class Upload extends React.Component {
 
             var reader = new FileReader()
             reader.onload = async function (event) {
-                // encryption of file
-                const cipherText = await gdprshare.encrypt(event.target.result, key)
+                // the outer catch cannot see this callback's rejections, and a
+                // silent one would leave the form masked forever
+                try {
+                    // encryption of file
+                    const cipherText = await gdprshare.encrypt(event.target.result, key)
 
-                await this.uploadFile(key, cipherText, filename, file.name)
+                    await this.uploadFile(key, cipherText, filename, file.name)
+                } catch (error) {
+                    gdprshare.displayErr.call(this, error)
+                }
+            }.bind(this)
+            reader.onerror = function () {
+                gdprshare.displayErr.call(this, reader.error || 'could not read the file')
             }.bind(this)
             reader.readAsArrayBuffer(file)
         } catch (error) {
@@ -320,7 +351,7 @@ class Upload extends React.Component {
         }
     }
 
-    async handleDelete(event) {
+    async handleDelete(fileID, event) {
         if (this.state.mask)
             return
 
@@ -329,13 +360,10 @@ class Upload extends React.Component {
             error: null
         })
 
-        var btn = event.currentTarget
-        btn.blur()
+        event.currentTarget.blur()
 
-        let fileID
         let response
         try {
-            fileID = btn.parentNode.nextSibling.textContent
             let files = JSON.parse(window.localStorage.getItem('savedFiles'))
             let ownerToken = files[fileID].ownerToken
 
@@ -470,10 +498,11 @@ class Upload extends React.Component {
 
         if (file.size > allowedSize * 1024 * 1024) {
             this.setState({
-                error: 'File too big, maximum allowed size: ' + allowedSize + ' MiB.',
+                error: this.props.t('upload.tooBig', {size: allowedSize}),
             })
             var ref = this.state.type === 'image' ? this.refs.image : this.refs.file
             if (ref) ref.value = null
+            this.setState({picked: null})
             return false
         }
         return true
@@ -481,8 +510,59 @@ class Upload extends React.Component {
 
     handleFile(event) {
         var file = event.currentTarget.files[0]
-        if (!this.checkFileSize(file, event))
+        if (!this.checkFileSize(file, event)) {
+            this.setState({picked: null})
             return
+        }
+        // stripping is not optional for the image type, so a format it cannot
+        // handle is refused here rather than at submit time
+        if (file && this.state.type === 'image' && !canStrip(file)) {
+            event.currentTarget.value = null
+            this.setState({
+                picked: null,
+                error: this.props.t('upload.notStrippable', {
+                    type: file.type || this.props.t('upload.unknownType'),
+                }),
+            })
+            return
+        }
+        this.setState({
+            error: null,
+            picked: file ? {name: file.name, size: file.size} : null,
+        })
+    }
+
+    handleBrowse(event) {
+        // the hidden input sits inside the drop area: a click on it already
+        // opens the picker, forwarding it again would open a second dialog
+        if (event && event.target && event.target.tagName === 'INPUT')
+            return
+
+        var ref = this.state.type === 'image' ? this.refs.image : this.refs.file
+        if (ref) ref.click()
+    }
+
+    handleClearFile(event) {
+        event.stopPropagation()
+        var ref = this.state.type === 'image' ? this.refs.image : this.refs.file
+        if (ref) ref.value = null
+        this.setState({picked: null})
+    }
+
+    handleEmailChange(event) {
+        this.setState({email: event.target.value})
+    }
+
+    handleCountChange(value) {
+        this.setState({count: gdprshare.clamp(value, 1, 15)})
+    }
+
+    handleExpiryChange(value) {
+        this.setState({expiry: gdprshare.clamp(value, 1, 14)})
+    }
+
+    toggleOptions() {
+        this.setState({optionsOpen: !this.state.optionsOpen})
     }
 
     handleDragOn(event) {
@@ -506,6 +586,7 @@ class Upload extends React.Component {
             type: event.target.value,
             ephemeral: '0',
             strip: false,
+            picked: null,
         })
     }
 
@@ -603,15 +684,90 @@ class Upload extends React.Component {
         })
     }
 
+    stepper(id, value, min, max, onChange, unit) {
+        var step = function (delta) {
+            return function () { onChange(parseInt(value, 10) + delta) }
+        }
+
+        return (
+            <div className="d-flex align-items-center gap-2">
+                <div className="step">
+                    <button type="button" className="step-btn" onClick={step(-1)}
+                            disabled={value <= min} aria-label={this.props.t('files.less')}>
+                        <Minus size="14" />
+                    </button>
+                    <input className="form-control" id={id} type="number" ref={id}
+                           min={min} max={max} value={value} required
+                           onChange={function (e) { onChange(e.target.value) }} />
+                    <button type="button" className="step-btn" onClick={step(1)}
+                            disabled={value >= max} aria-label={this.props.t('files.more')}>
+                        <Plus size="14" />
+                    </button>
+                </div>
+                {unit && <span className="step-unit">{unit}</span>}
+            </div>
+        )
+    }
+
+    summaryChips() {
+        const t = this.props.t
+
+        var region = {
+            none: t('upload.chipRegionAny'),
+            eea: t('upload.regionEea'),
+            'gdpr-aligned': t('upload.regionAligned'),
+            custom: t('upload.chipCountries', {count: this.state.selectedCountries.length}),
+        }[this.state.geoRestriction]
+
+        var expires = new Date()
+        expires.setDate(expires.getDate() + parseInt(this.state.expiry, 10))
+
+        var chips = [
+            t('upload.chipDownloads', {count: this.state.count}),
+            t('upload.chipUntil', {date: gdprshare.formatDate(expires)}),
+            region,
+            this.state.delay === '0'
+                ? t('upload.delayNone')
+                : t('upload.chipStartsIn', {delay: this.delayLabel(this.state.delay)}),
+        ]
+
+        if (this.state.type === 'image' || this.state.strip)
+            chips.push(t('upload.chipMetadata'))
+        if (this.state.type === 'image' && this.state.ephemeral !== '0')
+            chips.push(t('upload.chipDisappears', {duration: this.ephemeralLabel(this.state.ephemeral)}))
+
+        return (
+            <div className="chip-row">
+                {chips.map(function (text) {
+                    return <span className="chip" key={text}>{text}</span>
+                })}
+            </div>
+        )
+    }
+
+    // both selects and the summary chips read their labels from the same keys
+    delayLabel(minutes) {
+        var keys = {1: 'm1', 5: 'm5', 15: 'm15', 30: 'm30', 60: 'h1', 120: 'h2', 1440: 'd1'}
+        var key = keys[parseInt(minutes, 10)]
+        return key ? this.props.t('duration.' + key) : String(minutes)
+    }
+
+    ephemeralLabel(seconds) {
+        var keys = {5: 's5', 10: 's10', 30: 's30', 60: 'm1', 120: 'm2', 300: 'm5'}
+        var key = keys[parseInt(seconds, 10)]
+        return key ? this.props.t('duration.' + key) : String(seconds)
+    }
+
     prolongClasses(fileId) {
         return Classnames({
             'btn': true,
-            'btn-sm': true,
-            'prolong-open': this.state.prolongFor === fileId,
+            'btn-icon': true,
+            'btn-icon-on': this.state.prolongFor === fileId,
         })
     }
 
     prolongPanel(fileId, file) {
+        const t = this.props.t
         var days = this.state.prolongDays
         var count = this.state.prolongCount
         // calendar days, same as the server adds them
@@ -620,47 +776,354 @@ class Upload extends React.Component {
 
         return (
             <div className="prolong-panel">
-                <div className="row g-1 align-items-end">
-                    <div className="col-6">
-                        <label htmlFor="prolong-days" className="col-form-label-sm prolong-label">
-                            + days (max {file.maxProlongDays})
+                <div className="row g-2">
+                    <div className="col-6 field">
+                        <label htmlFor="prolong-days" className="prolong-label">
+                            {t('files.moreDays')} <span className="hint">{t('files.left', {count: file.maxProlongDays})}</span>
                         </label>
-                        <input className="form-control form-control-sm" id="prolong-days" type="number"
-                               min="0" max={file.maxProlongDays} value={days}
-                               onChange={this.handleProlongChange}
-                               disabled={file.maxProlongDays < 1}/>
+                        {this.stepper('prolong-days', days, 0, file.maxProlongDays,
+                            function (value) {
+                                this.setState({prolongDays: gdprshare.clamp(value, 0, file.maxProlongDays)})
+                            }.bind(this))}
                     </div>
-                    <div className="col-6">
-                        <label htmlFor="prolong-count" className="col-form-label-sm prolong-label">
-                            + downloads (max {file.maxProlongCount})
+                    <div className="col-6 field">
+                        <label htmlFor="prolong-count" className="prolong-label">
+                            {t('files.moreDownloads')} <span className="hint">{t('files.left', {count: file.maxProlongCount})}</span>
                         </label>
-                        <input className="form-control form-control-sm" id="prolong-count" type="number"
-                               min="0" max={file.maxProlongCount} value={count}
-                               onChange={this.handleProlongChange}
-                               disabled={file.maxProlongCount < 1}/>
+                        {this.stepper('prolong-count', count, 0, file.maxProlongCount,
+                            function (value) {
+                                this.setState({prolongCount: gdprshare.clamp(value, 0, file.maxProlongCount)})
+                            }.bind(this))}
                     </div>
                 </div>
-                <div className="d-flex align-items-center gap-2 mt-2">
-                    <small className="text-muted prolong-preview">
-                        {days || count
-                            ? `${file.count + count} DL${file.count + count > 1 ? 's' : ''} or ${newExpiry.toLocaleString()}`
-                            : 'Pick days or downloads to add'}
-                    </small>
-                    <button type="button" className="btn btn-sm btn-outline-secondary ms-auto"
+                <div className="prolong-actions">
+                    <span className="prolong-preview">
+                        {days || count ? (
+                            <React.Fragment>
+                                <span className="hint">{t('files.prolongNew')}</span>
+                                <span className="chip chip-accent">
+                                    {t('upload.chipDownloads', {count: file.count + count})}
+                                </span>
+                                <span className="chip chip-accent">
+                                    {t('files.until', {date: gdprshare.formatDate(newExpiry)})}
+                                </span>
+                            </React.Fragment>
+                        ) : (
+                            <span className="hint">{t('files.prolongEmpty')}</span>
+                        )}
+                    </span>
+                    <button type="button" className="btn btn-sm"
                             onClick={function () { this.handleProlongToggle(fileId) }.bind(this)}>
-                        Cancel
+                        {t('common.cancel')}
                     </button>
                     <button type="button" className="btn btn-sm btn-primary"
                             onClick={function () { this.handleProlong(fileId) }.bind(this)}
                             disabled={!days && !count}>
-                        Prolong
+                        {t('files.prolongSubmit')}
                     </button>
                 </div>
             </div>
         )
     }
 
+    fileItem(saved) {
+        const t = this.props.t
+        let fileId = saved.fileId
+        let file = this.state.fileInfo && this.state.fileInfo[fileId]
+        if (!file)
+            return null
+
+        let state
+        let canProlong = false
+        let ended = false
+
+        if (file.error) {
+            console.log(file.error)
+            state = <span className="expiry expiry-error">{t('files.notYours')}</span>
+        } else {
+            let expiryDate = new Date(file.expiryDate)
+            // go's time.Time zero value
+            let isInitDate = expiryDate.getTime() == new Date('0001-01-01T00:00:00Z').getTime()
+            let isExpired = isInitDate || file.count < 1 || Date.now() > expiryDate
+
+            ended = isExpired
+            if (isExpired) {
+                state = (
+                    <span className="expiry expiry-expired">
+                        {isInitDate ? t('files.gone') : t('files.noneLeft')}
+                    </span>
+                )
+            } else {
+                canProlong = file.maxProlongDays > 0 || file.maxProlongCount > 0
+                let total = saved.totalCount
+                state = (
+                    <span className="expiry">
+                        {total ? t('files.downloadsLeftOf', {count: file.count, total: total})
+                               : t('files.downloadsLeft', {count: file.count})}
+                    </span>
+                )
+            }
+
+            if (!isExpired && !isInitDate)
+                state = (
+                    <React.Fragment>
+                        {state}
+                        <span className="chip">{t('files.until', {date: gdprshare.formatDateTime(expiryDate)})}</span>
+                    </React.Fragment>
+                )
+        }
+
+        return (
+            <div className={ended ? 'file-item card file-item-ended' : 'file-item card'} key={fileId}>
+                <div className="file-item-top">
+                    <div className="d-flex flex-column" style={{minWidth: 0, flexGrow: 1}}>
+                        <span className="file-name long-text">{saved.filename}</span>
+                        <span className="file-id long-text">{fileId}</span>
+                    </div>
+                    <div className="file-actions">
+                        <button id="copy" className="btn btn-icon" type="button"
+                                onClick={function (e) { gdprshare.copyText.call(this, e.currentTarget, saved.location) }.bind(this)}
+                                data-for="copy-tip" data-tip aria-label={t('common.copyLink')}>
+                            <Copy size="15" />
+                        </button>
+                        <button id="prolong" className={this.prolongClasses(fileId)} type="button"
+                                onClick={function () { this.handleProlongToggle(fileId) }.bind(this)}
+                                disabled={!canProlong} data-tip data-for="prolong-tip"
+                                aria-expanded={this.state.prolongFor === fileId}
+                                aria-label={t('files.prolong')}>
+                            <MoreTime size="15" />
+                        </button>
+                        <button id="delete" className="btn btn-icon" type="button"
+                                onClick={function (e) { this.handleDelete(fileId, e) }.bind(this)}
+                                data-tip data-for="delete-tip" aria-label={t('files.delete')}>
+                            <Trash size="15" />
+                        </button>
+                    </div>
+                </div>
+                <div className="chip-row" style={{marginTop: '9px'}}>
+                    {state}
+                </div>
+                {canProlong && this.state.prolongFor === fileId && this.prolongPanel(fileId, file)}
+            </div>
+        )
+    }
+
+    typePicker() {
+        const t = this.props.t
+        var types = [
+            {value: 'file', label: t('upload.typeFile'), icon: <FileIcon size="14" />},
+            {value: 'text', label: t('upload.typeText'), icon: <TextIcon size="14" />},
+            {value: 'image', label: t('upload.typeImage'), icon: <ImageIcon size="14" />},
+        ]
+
+        return (
+            <div className="seg" role="radiogroup" aria-label={t('upload.typeFile')}>
+                {types.map(function (type) {
+                    return (
+                        <React.Fragment key={type.value}>
+                            <input type="radio" name="type" id={'type-' + type.value}
+                                   value={type.value} checked={this.state.type === type.value}
+                                   onChange={this.handleTypeChange} />
+                            <label htmlFor={'type-' + type.value}>
+                                {type.icon}{type.label}
+                            </label>
+                        </React.Fragment>
+                    )
+                }.bind(this))}
+            </div>
+        )
+    }
+
+    contentInput() {
+        const t = this.props.t
+
+        if (this.state.type === 'text')
+            return (
+                <textarea className="form-control" id="text" ref="text" rows="4" minLength="3"
+                          maxLength={gdprshare.config.contentMaxLength} required autoFocus
+                          aria-label={t('upload.titleText')} />
+            )
+
+        var isImage = this.state.type === 'image'
+        var input = isImage
+            ? <input className="drop-file" id="image-content" type="file" ref="image"
+                     accept={strippableImageTypes.join(',')} onChange={this.handleFile} required />
+            : <input className="drop-file" id="content" type="file" ref="file"
+                     onChange={this.handleFile} required />
+
+        if (this.state.picked)
+            return (
+                <div className="picked">
+                    {input}
+                    {isImage ? <ImageIcon size="16" /> : <FileIcon size="16" />}
+                    <div className="d-flex flex-column" style={{minWidth: 0, flexGrow: 1}}>
+                        <span className="long-text" style={{fontSize: '13px'}}>{this.state.picked.name}</span>
+                        <span className="hint">
+                            {gdprshare.formatSize(this.state.picked.size)} · {t('upload.encrypted')}
+                        </span>
+                    </div>
+                    <button type="button" className="btn btn-icon" onClick={this.handleClearFile}
+                            aria-label={t('upload.removeFile')}>
+                        <X size="14" />
+                    </button>
+                </div>
+            )
+
+        return (
+            <div className="drop" onClick={this.handleBrowse}>
+                {input}
+                <UploadIcon size="26" stroke="1.3" />
+                <span className="drop-title">
+                    {isImage ? t('upload.dropImage') : t('upload.dropFile')}
+                </span>
+                <span className="hint">
+                    <span className="drop-browse">{t('upload.browse')}</span>
+                    &nbsp;·&nbsp; {t('upload.sizeLimit', {size: gdprshare.config.maxFileSize})}
+                </span>
+            </div>
+        )
+    }
+
+    options() {
+        const t = this.props.t
+        var countries = this.state.countryList
+            .filter(function (c) {
+                if (!this.state.countrySearch) return true
+                return c.name.toLowerCase().indexOf(this.state.countrySearch.toLowerCase()) !== -1
+            }.bind(this))
+            .sort(function (a, b) {
+                var yours = this.state.yourCountry
+                if (a.code === yours) return -1
+                if (b.code === yours) return 1
+                return 0
+            }.bind(this))
+
+        return (
+            <div className="stack">
+                <div className="rule"></div>
+
+                <div className="row g-3">
+                    <div className="col-6 field">
+                        <label htmlFor="count" className="lbl">{t('upload.downloads')}</label>
+                        {this.stepper('count', this.state.count, 1, 15, this.handleCountChange)}
+                    </div>
+                    <div className="col-6 field">
+                        <label htmlFor="expiry" className="lbl">{t('upload.expiry')}</label>
+                        {this.stepper('expiry', this.state.expiry, 1, 14, this.handleExpiryChange, t('upload.days'))}
+                    </div>
+                </div>
+
+                <div className="field">
+                    <label htmlFor="geo-restriction" className="lbl">{t('upload.region')}</label>
+                    <select className="form-select" id="geo-restriction"
+                            value={this.state.geoRestriction}
+                            onChange={this.handleGeoRestrictionChange}>
+                        <option value="none">{t('upload.regionNone')}</option>
+                        <option value="eea">{t('upload.regionEea')}</option>
+                        <option value="gdpr-aligned">{t('upload.regionAligned')}</option>
+                        <option value="custom">{t('upload.regionCustom')}</option>
+                    </select>
+                    <span className="hint">{t('upload.regionHint')}</span>
+                </div>
+
+                {this.state.geoRestriction === 'custom' && (
+                    <div className="panel stack" style={{gap: '8px'}}>
+                        <div className="d-flex gap-2">
+                            <input className="form-control" type="text" placeholder={t('upload.searchCountries')}
+                                   value={this.state.countrySearch} onChange={this.handleCountrySearch} />
+                            <button type="button" className="btn" onClick={this.handleDeselectAll}>
+                                {t('common.clear')}
+                            </button>
+                        </div>
+                        <div className="country-picker">
+                            {countries.map(function (c) {
+                                return (
+                                    <div key={c.code} className="form-check">
+                                        <input className="form-check-input" type="checkbox"
+                                               id={'country-' + c.code}
+                                               checked={this.state.selectedCountries.indexOf(c.code) !== -1}
+                                               onChange={function () { this.handleCountryToggle(c.code) }.bind(this)} />
+                                        <label htmlFor={'country-' + c.code} className="form-check-label">
+                                            {c.name}
+                                        </label>
+                                    </div>
+                                )
+                            }.bind(this))}
+                        </div>
+                        <span className="hint">
+                            {t('upload.selectedCountries', {
+                                count: this.state.selectedCountries.length,
+                                total: this.state.countryList.length,
+                            })}
+                        </span>
+                    </div>
+                )}
+
+                <div className="field">
+                    <label htmlFor="delay" className="lbl">{t('upload.delay')}</label>
+                    <select className="form-select" id="delay" value={this.state.delay}
+                            onChange={this.handleDelayChange}>
+                        <option value="0">{t('upload.delayNone')}</option>
+                        {[1, 5, 15, 30, 60, 120, 1440].map(function (minutes) {
+                            return (
+                                <option key={minutes} value={minutes}>
+                                    {this.delayLabel(minutes)}
+                                </option>
+                            )
+                        }.bind(this))}
+                    </select>
+                    <span className="hint">{t('upload.delayHint')}</span>
+                </div>
+
+                <div className="field">
+                    <label htmlFor="email" className="lbl">{t('upload.email')}</label>
+                    <input className="form-control" id="email" type="email" ref="email"
+                           placeholder={t('upload.emailPlaceholder')} maxLength="255" minLength="6"
+                           value={this.state.email} onChange={this.handleEmailChange} />
+                    <span className="hint">{t('upload.emailHint')}</span>
+                </div>
+
+                {this.state.type === 'file' && (
+                    <div className="switch-row">
+                        <span className="switch">
+                            <input type="checkbox" id="strip" checked={this.state.strip}
+                                   onChange={this.handleStripChange} />
+                            <span className="slider"></span>
+                        </span>
+                        <label htmlFor="strip" className="d-flex flex-column" style={{cursor: 'pointer'}}>
+                            <span style={{fontSize: '13px'}}>{t('upload.strip')}</span>
+                            <span className="hint">{t('upload.stripHint')}</span>
+                        </label>
+                    </div>
+                )}
+
+                {this.state.type === 'image' && (
+                    <div className="panel">
+                        <div className="d-flex align-items-center gap-3">
+                            <label htmlFor="ephemeral" className="d-flex flex-column" style={{flexGrow: 1, cursor: 'pointer'}}>
+                                <span style={{fontSize: '13px'}}>{t('upload.ephemeral')}</span>
+                                <span className="hint">{t('upload.ephemeralHint')}</span>
+                            </label>
+                            <select className="form-select" id="ephemeral" style={{width: '150px'}}
+                                    value={this.state.ephemeral} onChange={this.handleEphemeralChange}>
+                                <option value="0">{t('upload.ephemeralNone')}</option>
+                                {[5, 10, 30, 60, 120, 300].map(function (seconds) {
+                                    return (
+                                        <option key={seconds} value={seconds}>
+                                            {this.ephemeralLabel(seconds)}
+                                        </option>
+                                    )
+                                }.bind(this))}
+                            </select>
+                        </div>
+                    </div>
+                )}
+            </div>
+        )
+    }
+
     render() {
+        const t = this.props.t
         var savedFiles = []
         var files = {}
 
@@ -671,346 +1134,80 @@ class Upload extends React.Component {
         }
 
         for (var i in files) {
-            let expiry
-            let canProlong = false
-            let file = this.state.fileInfo && this.state.fileInfo[files[i].fileId]
-            if (!file)
-                continue
-
-            if (file.error) {
-                console.log(file.error)
-                expiry = (
-                    <span className="expiry expiry-error">
-                        &lt;error&gt;
-                    </span>
-                )
-            } else {
-                let expiryDate = new Date(file.expiryDate)
-                // go's time.Time zero value
-                let isInitDate = expiryDate.getTime() == new Date('0001-01-01T00:00:00Z').getTime()
-                let isExpired = isInitDate || file.count < 1 || Date.now() > expiryDate
-
-                let text
-                let classes
-                if (isExpired) {
-                    classes = 'expiry expiry-expired'
-                    text = '<expired>'
-                } else {
-                    canProlong = file.maxProlongDays > 0 || file.maxProlongCount > 0
-                    classes = 'expiry'
-                    let expires = isInitDate ? '<no data>' : expiryDate.toLocaleString()
-                    let total = files[i].totalCount
-                    let countText = total ? `${file.count}/${total}` : `${file.count}`
-                    let s = file.count > 1 ? 's' : ''
-                    text = `${countText} DL${s} or ${expires}`
-                }
-                expiry = (
-                    <span className={classes}>
-                        {text}
-                    </span>
-                )
-            }
-
-            let fileId = files[i].fileId
-            savedFiles.push(
-                <div className="card" key={fileId}>
-                    <div className="card-header">
-                        <div className="input-group">
-                            <div className="input-group-prepend">
-                                <button id="copy" className="btn btn-sm" onClick={this.copyHandler} type="button"
-                                        data-for="copy-tip" data-tip>
-                                    <Octicon icon={Clippy}/>
-                                </button>
-                                <button id="delete" className="btn btn-sm" onClick={this.handleDelete} type="button"
-                                        data-tip data-for="delete-tip">
-                                    <Octicon icon={Trashcan}/>
-                                </button>
-                                <button id="prolong" className={this.prolongClasses(fileId)} type="button"
-                                        onClick={function () { this.handleProlongToggle(fileId) }.bind(this)}
-                                        disabled={!canProlong} data-tip data-for="prolong-tip"
-                                        aria-expanded={this.state.prolongFor === fileId}>
-                                    <Octicon icon={Clock}/>
-                                </button>
-                            </div>
-                            <span className="card-header-text long-text">
-                                {fileId}
-                            </span>
-                        </div>
-                    </div>
-                    <div className="card-body long-text">
-                        {files[i].filename}
-                        {expiry}
-                    </div>
-                    {canProlong && this.state.prolongFor === fileId && this.prolongPanel(fileId, file)}
-                </div>
-            )
+            var item = this.fileItem(files[i])
+            if (item)
+                savedFiles.push(item)
         }
 
-        var filesCol = null
-        var colWidth = 4
-        if (savedFiles.length > 0) {
-            colWidth = 8
-            filesCol = (
-                <div className="col-sm">
-                    <h6 className="text-center">Uploaded files</h6>
-                    <div className="saved-files overflow-auto">
-                        {savedFiles}
+        var uploadCard = (
+            <div className={this.outerClasses()} onDragEnter={this.handleDragOn}>
+                <div className={this.dndClasses()} onDrop={this.handleDrop} onDragEnter={this.handleDragOn}
+                     onDragOver={this.handleDragOn} onDragLeave={this.handleDragOff}
+                     onDragEnd={this.handleDragOff}>
+                    <UploadIcon size="26" stroke="1.3" />
+                    <span className="drop-title">{t('upload.dropAnywhere')}</span>
+                </div>
+                <form ref="form" className={this.innerClasses()} onSubmit={this.handleUpload}>
+                    <div className="row-between">
+                        <h4>{t({file: 'upload.titleFile', text: 'upload.titleText', image: 'upload.titleImage'}[this.state.type])}</h4>
+                        {this.typePicker()}
                     </div>
-                </div>
-            )
-        }
 
-        let contentInput
-        if (this.state.type === 'file') {
-            contentInput = (
-                <div className="col-sm-9 mb-3">
-                    <input className="form-control form-control-sm" id="content" type="file"
-                           ref="file" onChange={this.handleFile} required autoFocus/>
+                    {this.contentInput()}
+                    {this.summaryChips()}
+
+                    <button type="button" className="btn btn-link-quiet btn-sm align-self-start px-0"
+                            onClick={this.toggleOptions} aria-expanded={this.state.optionsOpen}>
+                        {this.state.optionsOpen ? <ChevronDown size="15" /> : <ChevronRight size="15" />}
+                        {this.state.optionsOpen ? t('upload.fewerOptions') : t('upload.moreOptions')}
+                    </button>
+
+                    {this.state.optionsOpen && this.options()}
+
+                    <input type="submit" ref="submit" className="btn btn-primary btn-block"
+                           value={t('upload.submit')}
+                           disabled={this.state.geoRestriction !== 'none' && this.state.selectedCountries.length === 0} />
+                    <span className="hint text-center">{t('upload.submitHint')}</span>
+                    <Alert error={this.state.error} />
+                </form>
+            </div>
+        )
+
+        if (savedFiles.length < 1)
+            return (
+                <div className="container-fluid">
+                    {uploadCard}
+                    <Tooltip id="copy-tip" openOnClick={false} render={() => this.state.copy} delayHide={1000} />
                 </div>
             )
-        } else if (this.state.type === 'image') {
-            contentInput = (
-                <div className="col-sm-9 mb-3">
-                    <input className="form-control form-control-sm" id="image-content" type="file"
-                           ref="image" accept="image/*" onChange={this.handleFile} required autoFocus/>
-                </div>
-            )
-        } else {
-            contentInput = (
-                <div className="col-sm-9">
-                    <textarea className="form-control" id="text" ref="text" rows="2" minLength="3"
-                              maxLength={gdprshare.config.contentMaxLength} required/>
-                </div>
-            )
-        }
 
         return (
-            <div className={'container-fluid col-sm-' + colWidth}>
-                <div className={this.outerClasses()}>
-                    <h4 className="text-center">File upload</h4>
-                    <div className="row">
-                        <div className="col-sm" onDragEnter={this.handleDragOn}>
-                            <div className={this.dndClasses()} onDrop={this.handleDrop} onDragEnter={this.handleDragOn}
-                                 onDragOver={this.handleDragOn} onDragLeave={this.handleDragOff}
-                                 onDragEnd={this.handleDragOff}>
-                                <Octicon size="large" icon={CloudUpload}/>
-                                <h3>
-                                    drop file here
-                                </h3>
+            <div className="container-fluid" style={{maxWidth: '1040px'}}>
+                <div className="row g-4">
+                    <div className="col-lg-5">
+                        {uploadCard}
+                    </div>
+                    <div className="col-lg-7">
+                        <div className="app-outer files-card">
+                            <div className="files-hdr">
+                                <h4>{t('files.title')}</h4>
+                                <span className="chip mono">{savedFiles.length}</span>
+                                <div style={{flexGrow: 1}}></div>
+                                <button type="button" className="btn btn-icon" onClick={this.updateValidity}
+                                        aria-label={t('files.refresh')}>
+                                    <Refresh size="15" />
+                                </button>
                             </div>
-                            <form ref="form" className={this.innerClasses()} onSubmit={this.handleUpload}>
-                                <div className="mb-3 row">
-                                    <label htmlFor="type" className="col-sm-3 col-form-label col-form-label-sm">
-                                        Type
-                                    </label>
-                                    <div className="col-sm-9 mb-1">
-                                        <select className="form-select form-select-sm" id="type"
-                                                value={this.state.type} onChange={this.handleTypeChange}>
-                                            <option value="file">File</option>
-                                            <option value="text">Text</option>
-                                            <option value="image">Image</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div className="mb-3 row">
-                                    <label className="col-sm-3 col-form-label col-form-label-sm">
-                                        Content
-                                    </label>
-                                    {contentInput}
-                                </div>
-
-                                <div>
-                                    <div className="mb-3 row">
-                                        <label htmlFor="email" className="col-sm-3 col-form-label col-form-label-sm">
-                                            Notification
-                                        </label>
-                                        <div className="col-sm-9">
-                                            <input className="form-control form-control-sm" id="email" type="email"
-                                                   ref="email" placeholder="Enter email (optional)" maxLength="255"
-                                                   aria-describedby="emailHelp"
-                                                   defaultValue={window.localStorage.getItem('email')} minLength="6"
-                                            />
-                                            <small id="emailHelp" className="form-text text-muted">Email to receive
-                                                download notifications</small>
-                                        </div>
-                                    </div>
-
-                                    <div className="mb-3 row">
-                                        <label htmlFor="count" className="col-sm-3 col-form-label col-form-label-sm">
-                                            Count
-                                        </label>
-                                        <div className="col-sm-9">
-                                            <input className="form-control form-control-sm" id="count" type="number"
-                                                   ref="count" min="1" max="15" defaultValue="1" required
-                                                   aria-describedby="countHelp"/>
-                                            <small id="countHelp" className="form-text text-muted">Maximum downloads
-                                                before link expires</small>
-                                        </div>
-                                    </div>
-
-                                    <div className="mb-3 row">
-                                        <label htmlFor="expiry" className="col-sm-3 col-form-label col-form-label-sm">
-                                            Expiry
-                                        </label>
-                                        <div className="col-sm-9">
-                                            <input className="form-control form-control-sm" id="expiry" type="number"
-                                                   ref="expiry" min="1" max="14" defaultValue="7" required
-                                                   aria-describedby="expiryHelp"/>
-                                            <small id="expiryHelp" className="form-text text-muted">Maximum days before
-                                                link expires</small>
-                                        </div>
-                                    </div>
-
-                                    <div className="mb-3 row">
-                                        <label htmlFor="geo-restriction" className="col-sm-3 col-form-label col-form-label-sm">
-                                            Region
-                                        </label>
-                                        <div className="col-sm-9">
-                                            <select className="form-select form-select-sm" id="geo-restriction"
-                                                    value={this.state.geoRestriction}
-                                                    onChange={this.handleGeoRestrictionChange}>
-                                                <option value="none">No restriction</option>
-                                                <option value="eea">EU/EEA</option>
-                                                <option value="gdpr-aligned">EU/EEA + GDPR-aligned</option>
-                                                <option value="custom">Custom</option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    {this.state.geoRestriction === 'custom' && (
-                                        <div className="mb-3 row">
-                                            <label className="col-sm-3 col-form-label col-form-label-sm">
-                                                Countries
-                                            </label>
-                                            <div className="col-sm-9">
-                                                <input className="form-control form-control-sm mb-1"
-                                                       type="text"
-                                                       placeholder="Search countries..."
-                                                       value={this.state.countrySearch}
-                                                       onChange={this.handleCountrySearch} />
-                                                <div className="d-flex gap-1 mb-1">
-                                                    <button type="button" className="btn btn-sm btn-outline-secondary"
-                                                            onClick={this.handleDeselectAll}>Clear</button>
-                                                    <span className="col-form-label-sm ms-auto">
-                                                        {this.state.selectedCountries.length} selected
-                                                    </span>
-                                                </div>
-                                                <div className="country-picker">
-                                                    {this.state.countryList
-                                                        .filter(function (c) {
-                                                            if (!this.state.countrySearch) return true
-                                                            return c.name.toLowerCase().indexOf(
-                                                                this.state.countrySearch.toLowerCase()
-                                                            ) !== -1
-                                                        }.bind(this))
-                                                        .sort(function (a, b) {
-                                                            var yours = this.state.yourCountry
-                                                            if (a.code === yours) return -1
-                                                            if (b.code === yours) return 1
-                                                            return 0
-                                                        }.bind(this))
-                                                        .map(function (c) {
-                                                            return (
-                                                                <div key={c.code} className="form-check form-check-sm">
-                                                                    <input className="form-check-input"
-                                                                           type="checkbox"
-                                                                           id={'country-' + c.code}
-                                                                           checked={this.state.selectedCountries.indexOf(c.code) !== -1}
-                                                                           onChange={function () { this.handleCountryToggle(c.code) }.bind(this)} />
-                                                                    <label htmlFor={'country-' + c.code}
-                                                                           className="form-check-label col-form-label-sm">
-                                                                        {c.name}
-                                                                    </label>
-                                                                </div>
-                                                            )
-                                                        }.bind(this))
-                                                    }
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    <div className="mb-3 row">
-                                        <label htmlFor="delay" className="col-sm-3 col-form-label col-form-label-sm">
-                                            Delay
-                                        </label>
-                                        <div className="col-sm-9">
-                                            <select className="form-select form-select-sm" id="delay"
-                                                    value={this.state.delay}
-                                                    onChange={this.handleDelayChange}>
-                                                <option value="0">No delay</option>
-                                                <option value="1">1 minute</option>
-                                                <option value="5">5 minutes</option>
-                                                <option value="15">15 minutes</option>
-                                                <option value="30">30 minutes</option>
-                                                <option value="60">1 hour</option>
-                                                <option value="120">2 hours</option>
-                                                <option value="1440">1 day</option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    {this.state.type === 'file' && (
-                                        <div className="mb-3 row">
-                                            <label htmlFor="strip" className="col-sm-3 col-form-label col-form-label-sm">
-                                                Metadata
-                                            </label>
-                                            <div className="col-sm-9">
-                                                <div className="form-check">
-                                                    <input className="form-check-input" type="checkbox" id="strip"
-                                                           checked={this.state.strip}
-                                                           onChange={this.handleStripChange}
-                                                           aria-describedby="stripHelp"/>
-                                                    <label className="form-check-label col-form-label-sm" htmlFor="strip">
-                                                        Strip metadata
-                                                    </label>
-                                                </div>
-                                                <small id="stripHelp" className="form-text text-muted">Removes EXIF, GPS
-                                                    and PDF metadata before upload</small>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {this.state.type === 'image' && (
-                                        <div className="mb-3 row">
-                                            <label htmlFor="ephemeral" className="col-sm-3 col-form-label col-form-label-sm">
-                                                Disappear
-                                            </label>
-                                            <div className="col-sm-9">
-                                                <select className="form-select form-select-sm" id="ephemeral"
-                                                        value={this.state.ephemeral}
-                                                        onChange={this.handleEphemeralChange}>
-                                                    <option value="0">No</option>
-                                                    <option value="5">5 seconds</option>
-                                                    <option value="10">10 seconds</option>
-                                                    <option value="30">30 seconds</option>
-                                                    <option value="60">1 minute</option>
-                                                    <option value="120">2 minutes</option>
-                                                    <option value="300">5 minutes</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="text-center col-sm-12">
-                                    <input type="submit" ref="submit" className="btn btn-primary" value="Upload"
-                                           disabled={this.state.geoRestriction !== 'none' && this.state.selectedCountries.length === 0}/>
-                                </div>
-                            </form>
-
-                            <br/>
-                            <Alert error={this.state.error}/>
+                            <div className="saved-files">
+                                {savedFiles}
+                            </div>
                         </div>
-                        {filesCol}
-                        <Tooltip id="copy-tip" openOnClick={false} render={() => this.state.copy} delayHide={1000}/>
-                        <Tooltip id="delete-tip" variant="info" place="bottom" content="Delete file" />
-                        <Tooltip id="prolong-tip" variant="info" place="bottom" content="Prolong file" />
                     </div>
                 </div>
+                <Tooltip id="copy-tip" openOnClick={false} render={() => this.state.copy} delayHide={1000} />
             </div>
         )
     }
 }
 
-export default withRouter(Upload)
+export default withTranslation()(withRouter(Upload))
