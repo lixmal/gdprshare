@@ -1147,30 +1147,45 @@ textarea.form-control {
 }
 
 .download-status {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: calc(50% + 22px);
-    z-index: 102;
-    text-align: center;
-    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.download-status-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
 }
 
 .download-status-text {
-    margin-bottom: 6px;
     font-size: 12.5px;
     color: var(--text-muted);
 }
 
+.download-status-value {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text);
+}
+
 .download-progress {
     position: relative;
-    width: 60%;
-    max-width: 240px;
-    height: 16px;
-    margin: 0 auto;
+    height: 6px;
     border-radius: 999px;
     background: var(--surface-3);
     overflow: hidden;
+}
+
+/* the number is read from the row above; this one stays for assistive tech */
+.download-progress-value {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
 }
 
 .download-progress-bar {
@@ -1178,15 +1193,6 @@ textarea.form-control {
     border-radius: 999px;
     background: var(--accent);
     transition: width 0.2s linear;
-}
-
-.download-progress-value {
-    position: absolute;
-    inset: 0;
-    font-family: var(--mono);
-    font-size: 11px;
-    line-height: 16px;
-    color: var(--text);
 }
 
 /* ------------------------------------------------------------------ images */
