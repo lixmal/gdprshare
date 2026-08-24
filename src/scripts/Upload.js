@@ -965,10 +965,8 @@ class Upload extends React.Component {
                                                         Strip metadata
                                                     </label>
                                                 </div>
-                                                <small id="stripHelp" className="form-text text-muted">Removes EXIF and
-                                                    GPS data from images, and title, author and XMP data from PDFs.
-                                                    Images other than GIFs are re-encoded, so quality may drop. Other
-                                                    file types are rejected. Always on for the image type.</small>
+                                                <small id="stripHelp" className="form-text text-muted">Removes EXIF, GPS
+                                                    and PDF metadata before upload</small>
                                             </div>
                                         </div>
                                     )}
