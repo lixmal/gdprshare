@@ -79,7 +79,9 @@ export class Download extends React.Component {
     classes() {
         return Classnames({
             'app-outer': true,
-            'loading-mask': this.state.mask,
+            // a phase draws its own progress block, so the overlay would just
+            // dim the numbers the visitor is reading
+            'loading-mask': this.state.mask && !this.state.phase,
         })
     }
 
@@ -340,12 +342,17 @@ export class Download extends React.Component {
             </form>
         )
 
-        // shown over the loading mask so the visitor knows the wait is doing
-        // something, and roughly how much of it is left
+        // tells the visitor the wait is doing something, and roughly how much of
+        // it is left
         var status = this.state.mask && this.state.phase ? (
             <div className="download-status" role="status" aria-live="polite">
-                <div className="download-status-text">
-                    {t('download.status.' + this.state.phase)}
+                <div className="download-status-head">
+                    <span className="download-status-text">
+                        {t('download.status.' + this.state.phase)}
+                    </span>
+                    {this.state.progress !== null && (
+                        <span className="download-status-value">{this.state.progress}%</span>
+                    )}
                 </div>
                 {this.state.progress !== null && (
                     <div className="download-progress"
@@ -368,7 +375,6 @@ export class Download extends React.Component {
         return (
             <div className="container-fluid">
                 <div className={this.classes()}>
-                    {status}
                     <div className="app-inner">
                         <div className="d-flex align-items-center gap-3">
                             <span className={done ? 'check-badge' : 'btn btn-icon'}
@@ -381,6 +387,7 @@ export class Download extends React.Component {
                             </div>
                         </div>
 
+                        {status}
                         {this.state.disableForm ? null : form}
 
                         {this.state.successful && <Success message={t('download.success')} />}
