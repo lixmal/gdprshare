@@ -895,9 +895,21 @@ textarea.form-control {
     overflow-y: auto;
 }
 
-.file-item {
+/* bootstrap paints .card white and rounds it; these rows keep the class for
+   its selector but take their look from the tokens */
+.card {
+    background: var(--surface);
+    border-color: var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+}
+
+.file-item.card {
     padding: 12px 14px;
+    background: transparent;
+    border: 0;
     border-top: 1px solid var(--border);
+    border-radius: 0;
 }
 
 .file-item-top {
