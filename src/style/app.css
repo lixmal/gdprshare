@@ -32,6 +32,30 @@
     margin: 5px 0px 0px 5px;
 }
 
+.prolong-open {
+    color: #0d6efd;
+}
+
+.prolong-panel {
+    padding: 8px;
+    border-top: 1px solid rgba(0, 0, 0, 0.125);
+    background-color: #fafafa;
+    border-bottom-left-radius: inherit;
+    border-bottom-right-radius: inherit;
+}
+
+.prolong-label {
+    display: block;
+    padding: 0;
+    color: #6c757d;
+}
+
+.prolong-preview {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .long-text {
     text-overflow: ellipsis;
     overflow: hidden;

@@ -74,7 +74,7 @@ func TestDelayedDownloadErrorCode(t *testing.T) {
 	srv, cleanup := setupTestServer(t)
 	defer cleanup()
 
-	fileId := uploadTestFile(t, srv, map[string]string{"delay": "1"})
+	fileId, _ := uploadTestFile(t, srv, map[string]string{"delay": "1"})
 
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/files/"+fileId, nil)
 	w := httptest.NewRecorder()
@@ -94,7 +94,7 @@ func TestDownloadCountExpiredErrorCode(t *testing.T) {
 	srv, cleanup := setupTestServer(t)
 	defer cleanup()
 
-	fileId := uploadTestFile(t, srv, map[string]string{"count": "1"})
+	fileId, _ := uploadTestFile(t, srv, map[string]string{"count": "1"})
 
 	// first download consumes the only allowed count
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/files/"+fileId, nil)
@@ -147,8 +147,8 @@ func TestErrorCodesAreUnique(t *testing.T) {
 }
 
 // uploadTestFile uploads a small file with the given extra form fields and
-// returns its id.
-func uploadTestFile(t *testing.T, srv *Server, fields map[string]string) string {
+// returns its id and owner token.
+func uploadTestFile(t *testing.T, srv *Server, fields map[string]string) (string, string) {
 	t.Helper()
 
 	body := &bytes.Buffer{}
@@ -177,5 +177,8 @@ func uploadTestFile(t *testing.T, srv *Server, fields map[string]string) string 
 	fileId, ok := resp["fileId"].(string)
 	require.True(t, ok, "upload response has no fileId: %v", resp)
 
-	return fileId
+	ownerToken, ok := resp["ownerToken"].(string)
+	require.True(t, ok, "upload response has no ownerToken: %v", resp)
+
+	return fileId, ownerToken
 }

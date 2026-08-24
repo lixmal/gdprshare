@@ -15,12 +15,22 @@ const (
 	MultipartMem  = 8 << 20 // 8M
 	OwnerTokenLen = 20
 	IndexFile     = "public/index.html"
+
+	// MaxExpiryDays and MaxDownloadCount mirror the upload binding limits on
+	// StoredFile.Expiry and StoredFile.Count. Prolonging a file stays within
+	// them, so an owner can't extend a file beyond what an upload allows.
+	MaxExpiryDays    = 14
+	MaxDownloadCount = 15
 )
 
 type StoredFileInfo struct {
 	ExpiryDate time.Time `json:"expiryDate"`
 	Count      uint      `json:"count"`
-	Error      string    `json:"error"`
+	// MaxProlongDays and MaxProlongCount tell the client how much room is left
+	// for prolonging, so it can offer only values the server accepts.
+	MaxProlongDays  uint   `json:"maxProlongDays"`
+	MaxProlongCount uint   `json:"maxProlongCount"`
+	Error           string `json:"error"`
 }
 
 type FileId struct {
@@ -29,6 +39,12 @@ type FileId struct {
 
 type OwnerToken struct {
 	OwnerToken string `form:"ownerToken" binding:"required,printascii,min=3,max=64"`
+}
+
+type ProlongRequest struct {
+	OwnerToken
+	Days  uint `form:"days"  binding:"omitempty,min=0,max=14"`
+	Count uint `form:"count" binding:"omitempty,min=0,max=15"`
 }
 
 type OwnedFile struct {
@@ -67,6 +83,7 @@ func setupRoutes(router *gin.Engine, srv *Server) {
 	v1.GET("/files/:fileId", srv.downloadFile)
 	v1.POST("/files/:fileId", srv.confirmReceipt)
 	v1.DELETE("/files/:fileId", srv.deleteFile)
+	v1.POST("/files/:fileId/prolong", srv.prolongFile)
 	v1.POST("/files/validate", srv.validateFiles)
 }
 

@@ -34,6 +34,11 @@ const (
 	ErrCodeOwnerTokenMismatch ErrorCode = "owner_token_mismatch"
 	ErrCodeDeleteFailed       ErrorCode = "file_deletion_failed"
 
+	// prolonging
+	ErrCodeFileExpired   ErrorCode = "file_expired"
+	ErrCodeProlongLimit  ErrorCode = "prolong_limit_exceeded"
+	ErrCodeProlongFailed ErrorCode = "file_prolong_failed"
+
 	// shared
 	ErrCodeTLSRequirements ErrorCode = "tls_requirements_not_met"
 	ErrCodeRateLimited     ErrorCode = "rate_limit_exceeded"

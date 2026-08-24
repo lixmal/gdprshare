@@ -4,6 +4,7 @@ import (
 	"crypto/subtle"
 	"fmt"
 	"log"
+	"math"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -163,10 +164,7 @@ func (s *Server) validateFiles(c *gin.Context) {
 				Error: "Owner token mismatch",
 			}
 		} else {
-			fileInfo[fileId] = StoredFileInfo{
-				ExpiryDate: storedFile.CreatedAt.AddDate(0, 0, int(storedFile.Expiry)),
-				Count:      storedFile.Count,
-			}
+			fileInfo[fileId] = storedFileInfo(&storedFile)
 		}
 	}
 
@@ -385,6 +383,92 @@ func (s *Server) deleteFile(c *gin.Context) {
 	)
 }
 
+// prolongFile extends the expiry date and/or the remaining download count of a
+// file, up to the limits that apply to a fresh upload. Requires the owner token.
+func (s *Server) prolongFile(c *gin.Context) {
+	fileId, err := bindFileID(c)
+	if err != nil {
+		return
+	}
+
+	var p ProlongRequest
+	if err := c.ShouldBind(&p); err != nil {
+		// TODO: get FieldError and return relevant part only
+		apiError(c, http.StatusBadRequest, ErrCodeInvalidRequest, err.Error())
+		return
+	}
+
+	if p.Days == 0 && p.Count == 0 {
+		apiError(c, http.StatusBadRequest, ErrCodeInvalidRequest, "neither days nor downloads given")
+		return
+	}
+
+	var storedFile database.StoredFile
+	if err := s.db.Where(&database.StoredFile{FileId: fileId}).Find(&storedFile).Error; err != nil {
+		log.Printf("Failed to find file with id %s in database: %s\n", fileId, err)
+		apiError(c, http.StatusNotFound, ErrCodeFileNotFound, "file not found")
+		return
+	}
+
+	// check if owner token matches the stored one
+	if subtle.ConstantTimeCompare([]byte(p.OwnerToken.OwnerToken), []byte(storedFile.OwnerToken)) != 1 {
+		apiError(c, http.StatusUnauthorized, ErrCodeOwnerTokenMismatch, "owner token doesn't match")
+		return
+	}
+
+	// a file whose download count ran out is gone from storage, prolonging
+	// can't bring it back
+	if storedFile.Count < 1 {
+		apiError(c, http.StatusConflict, ErrCodeCountExpired, "download count expired")
+		return
+	}
+
+	if time.Now().After(expiryDate(&storedFile)) {
+		apiError(c, http.StatusConflict, ErrCodeFileExpired, "file already expired")
+		return
+	}
+
+	path := filepath.Join(s.config.StorePath, storedFile.Name)
+	if info, err := os.Stat(path); err != nil || info.IsDir() {
+		if err != nil {
+			log.Printf("Failed to access file with id %s: %s\n", fileId, err)
+		} else {
+			log.Printf("File with id %s is a directory\n", fileId)
+		}
+
+		apiError(c, http.StatusNotFound, ErrCodeFileNotFound, "file not found")
+		return
+	}
+
+	maxDays, maxCount := prolongLimits(&storedFile)
+	if p.Days > maxDays || p.Count > maxCount {
+		apiError(
+			c,
+			http.StatusBadRequest,
+			ErrCodeProlongLimit,
+			fmt.Sprintf("at most %d more day(s) and %d more download(s) allowed", maxDays, maxCount),
+		)
+		return
+	}
+
+	storedFile.Expiry += p.Days
+	storedFile.Count += p.Count
+
+	if err := s.db.Save(&storedFile).Error; err != nil {
+		log.Printf("Failed to prolong file with id %s: %s\n", fileId, err)
+		apiError(c, http.StatusInternalServerError, ErrCodeProlongFailed, "failed to prolong file")
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		gin.H{
+			"message":  "file prolonged",
+			"fileInfo": storedFileInfo(&storedFile),
+		},
+	)
+}
+
 func (s *Server) setStats(c *gin.Context) {
 	var stats database.Stats
 	if err := c.ShouldBind(&stats); err != nil {
@@ -548,4 +632,36 @@ func bindFileID(c *gin.Context) (string, error) {
 		return "", err
 	}
 	return f.FileId, nil
+}
+
+func expiryDate(f *database.StoredFile) time.Time {
+	return f.CreatedAt.AddDate(0, 0, int(f.Expiry))
+}
+
+// prolongLimits returns how many days and downloads may still be added to the
+// file without pushing it past the limits of a fresh upload.
+func prolongLimits(f *database.StoredFile) (days, count uint) {
+	remaining := int(math.Ceil(time.Until(expiryDate(f)).Hours() / 24))
+	if remaining < MaxExpiryDays {
+		if remaining < 0 {
+			remaining = 0
+		}
+		days = uint(MaxExpiryDays - remaining)
+	}
+	if f.Count < MaxDownloadCount {
+		count = MaxDownloadCount - f.Count
+	}
+
+	return days, count
+}
+
+func storedFileInfo(f *database.StoredFile) StoredFileInfo {
+	maxDays, maxCount := prolongLimits(f)
+
+	return StoredFileInfo{
+		ExpiryDate:      expiryDate(f),
+		Count:           f.Count,
+		MaxProlongDays:  maxDays,
+		MaxProlongCount: maxCount,
+	}
 }
