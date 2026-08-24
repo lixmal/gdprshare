@@ -524,3 +524,118 @@ func TestIndexRoute(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Contains(t, w.Body.String(), "Test")
 }
+
+func prolong(t *testing.T, srv *Server, fileId, ownerToken, days, count string) *httptest.ResponseRecorder {
+	t.Helper()
+
+	req := httptest.NewRequest(
+		http.MethodPost,
+		fmt.Sprintf("/api/v1/files/%s/prolong?ownerToken=%s&days=%s&count=%s", fileId, ownerToken, days, count),
+		nil,
+	)
+	w := httptest.NewRecorder()
+	srv.Handler.ServeHTTP(w, req)
+
+	return w
+}
+
+// TestProlongFile verifies that expiry and download count are extended
+func TestProlongFile(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	fileId, ownerToken := uploadTestFile(t, srv, map[string]string{
+		"expiry": "2",
+		"count":  "1",
+	})
+
+	w := prolong(t, srv, fileId, ownerToken, "5", "3")
+	require.Equal(t, http.StatusOK, w.Code, w.Body.String())
+
+	var resp struct {
+		FileInfo StoredFileInfo `json:"fileInfo"`
+	}
+	require.NoError(t, json.NewDecoder(w.Body).Decode(&resp))
+
+	assert.Equal(t, uint(4), resp.FileInfo.Count)
+	// 2 + 5 days from creation, and the remaining room up to the maximum
+	assert.WithinDuration(t, time.Now().AddDate(0, 0, 7), resp.FileInfo.ExpiryDate, time.Minute)
+	assert.Equal(t, uint(7), resp.FileInfo.MaxProlongDays)
+	assert.Equal(t, uint(11), resp.FileInfo.MaxProlongCount)
+
+	var storedFile database.StoredFile
+	require.NoError(t, srv.db.Where(&database.StoredFile{FileId: fileId}).Find(&storedFile).Error)
+	assert.Equal(t, uint(7), storedFile.Expiry)
+	assert.Equal(t, uint(4), storedFile.Count)
+
+	// the added downloads are actually usable
+	for i := 0; i < 4; i++ {
+		downloadW := httptest.NewRecorder()
+		srv.Handler.ServeHTTP(downloadW, httptest.NewRequest(http.MethodGet, "/api/v1/files/"+fileId, nil))
+		assert.Equal(t, http.StatusOK, downloadW.Code, "download %d", i+1)
+	}
+
+	downloadW := httptest.NewRecorder()
+	srv.Handler.ServeHTTP(downloadW, httptest.NewRequest(http.MethodGet, "/api/v1/files/"+fileId, nil))
+	assert.Equal(t, http.StatusNotFound, downloadW.Code)
+}
+
+// TestProlongFileWrongToken verifies that prolonging needs the owner token
+func TestProlongFileWrongToken(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	fileId, _ := uploadTestFile(t, srv, nil)
+
+	w := prolong(t, srv, fileId, "wrongtoken123", "1", "0")
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+
+	var storedFile database.StoredFile
+	require.NoError(t, srv.db.Where(&database.StoredFile{FileId: fileId}).Find(&storedFile).Error)
+	assert.Equal(t, uint(14), storedFile.Expiry)
+}
+
+// TestProlongFileLimits verifies that the upload limits also bound prolonging
+func TestProlongFileLimits(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	fileId, ownerToken := uploadTestFile(t, srv, map[string]string{
+		"expiry": "10",
+		"count":  "5",
+	})
+
+	// 10 + 5 days exceeds the 14 day maximum
+	w := prolong(t, srv, fileId, ownerToken, "5", "0")
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	// 5 + 11 downloads exceeds the maximum of 15
+	w = prolong(t, srv, fileId, ownerToken, "0", "11")
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	// nothing to do
+	w = prolong(t, srv, fileId, ownerToken, "0", "0")
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	// within the limits
+	w = prolong(t, srv, fileId, ownerToken, "4", "10")
+	assert.Equal(t, http.StatusOK, w.Code, w.Body.String())
+}
+
+// TestProlongFileExhausted verifies that a file without downloads left can't be revived
+func TestProlongFileExhausted(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	fileId, ownerToken := uploadTestFile(t, srv, map[string]string{
+		"count": "1",
+	})
+
+	downloadReq := httptest.NewRequest(http.MethodGet, "/api/v1/files/"+fileId, nil)
+	downloadW := httptest.NewRecorder()
+	srv.Handler.ServeHTTP(downloadW, downloadReq)
+	require.Equal(t, http.StatusOK, downloadW.Code)
+
+	w := prolong(t, srv, fileId, ownerToken, "1", "1")
+	assert.Equal(t, http.StatusConflict, w.Code)
+}

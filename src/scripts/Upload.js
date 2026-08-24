@@ -1,6 +1,6 @@
 import React from 'react'
 import Classnames from 'classnames'
-import Octicon, {Clippy, CloudUpload, Trashcan} from '@primer/octicons-react'
+import Octicon, {Clippy, CloudUpload, Trashcan, Clock} from '@primer/octicons-react'
 import Alert from './Alert'
 import { Tooltip } from 'react-tooltip'
 import { withRouter } from './withRouter'
@@ -29,6 +29,9 @@ class Upload extends React.Component {
         this.handleCountrySearch = this.handleCountrySearch.bind(this)
         this.handleDeselectAll = this.handleDeselectAll.bind(this)
         this.handleDelayChange = this.handleDelayChange.bind(this)
+        this.handleProlongToggle = this.handleProlongToggle.bind(this)
+        this.handleProlongChange = this.handleProlongChange.bind(this)
+        this.handleProlong = this.handleProlong.bind(this)
 
         this.state = {
             error: null,
@@ -46,6 +49,9 @@ class Upload extends React.Component {
             delay: '0',
             ephemeral: '0',
             strip: false,
+            prolongFor: null,
+            prolongDays: 0,
+            prolongCount: 0,
         }
     }
 
@@ -359,6 +365,104 @@ class Upload extends React.Component {
         }
     }
 
+    handleProlongToggle(fileId) {
+        if (this.state.prolongFor === fileId) {
+            this.setState({
+                prolongFor: null,
+            })
+            return
+        }
+
+        var info = this.state.fileInfo && this.state.fileInfo[fileId]
+        if (!info)
+            return
+
+        this.setState({
+            error: null,
+            prolongFor: fileId,
+            // preselect a sensible default within what the server still allows
+            prolongDays: Math.min(7, info.maxProlongDays),
+            prolongCount: Math.min(1, info.maxProlongCount),
+        })
+    }
+
+    handleProlongChange(event) {
+        var info = this.state.fileInfo[this.state.prolongFor]
+        var value = parseInt(event.target.value, 10)
+        if (isNaN(value) || value < 0)
+            value = 0
+
+        if (event.target.id === 'prolong-days')
+            this.setState({prolongDays: Math.min(value, info.maxProlongDays)})
+        else
+            this.setState({prolongCount: Math.min(value, info.maxProlongCount)})
+    }
+
+    async handleProlong(fileId) {
+        if (this.state.mask)
+            return
+
+        var days = this.state.prolongDays
+        var count = this.state.prolongCount
+        if (!days && !count)
+            return
+
+        this.setState({
+            mask: true,
+            error: null,
+        })
+
+        let response
+        try {
+            let files = JSON.parse(window.localStorage.getItem('savedFiles'))
+            let formData = new FormData()
+            formData.append('ownerToken', files[fileId].ownerToken)
+            formData.append('days', days)
+            formData.append('count', count)
+
+            response = await window.fetch(gdprshare.config.apiUrl + '/' + fileId + '/prolong', {
+                method: 'POST',
+                body: formData,
+            })
+        } catch (error) {
+            return gdprshare.displayErr.call(this, error)
+        }
+
+        let fetchData
+        try {
+            fetchData = await response.clone().json()
+        } catch (error) {
+            return gdprshare.asTextErr.call(this, response, error)
+        }
+
+        if (!response.ok)
+            return gdprshare.displayErr.call(this, fetchData.message)
+
+        // the total is only kept locally, keep it in sync with the new maximum
+        this.addTotalCount(fileId, count)
+
+        var fileInfo = Object.assign({}, this.state.fileInfo)
+        fileInfo[fileId] = fetchData.fileInfo
+
+        this.setState({
+            mask: false,
+            fileInfo: fileInfo,
+            prolongFor: null,
+        })
+    }
+
+    addTotalCount(fileId, count) {
+        try {
+            var files = JSON.parse(window.localStorage.getItem('savedFiles'))
+            if (!files || !files[fileId])
+                return
+            files[fileId].totalCount = (files[fileId].totalCount || 0) + count
+            window.localStorage.setItem('savedFiles', JSON.stringify(files))
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
     checkFileSize(file) {
         if (!file)
             return
@@ -499,6 +603,63 @@ class Upload extends React.Component {
         })
     }
 
+    prolongClasses(fileId) {
+        return Classnames({
+            'btn': true,
+            'btn-sm': true,
+            'prolong-open': this.state.prolongFor === fileId,
+        })
+    }
+
+    prolongPanel(fileId, file) {
+        var days = this.state.prolongDays
+        var count = this.state.prolongCount
+        // calendar days, same as the server adds them
+        var newExpiry = new Date(file.expiryDate)
+        newExpiry.setDate(newExpiry.getDate() + days)
+
+        return (
+            <div className="prolong-panel">
+                <div className="row g-1 align-items-end">
+                    <div className="col-6">
+                        <label htmlFor="prolong-days" className="col-form-label-sm prolong-label">
+                            + days (max {file.maxProlongDays})
+                        </label>
+                        <input className="form-control form-control-sm" id="prolong-days" type="number"
+                               min="0" max={file.maxProlongDays} value={days}
+                               onChange={this.handleProlongChange}
+                               disabled={file.maxProlongDays < 1}/>
+                    </div>
+                    <div className="col-6">
+                        <label htmlFor="prolong-count" className="col-form-label-sm prolong-label">
+                            + downloads (max {file.maxProlongCount})
+                        </label>
+                        <input className="form-control form-control-sm" id="prolong-count" type="number"
+                               min="0" max={file.maxProlongCount} value={count}
+                               onChange={this.handleProlongChange}
+                               disabled={file.maxProlongCount < 1}/>
+                    </div>
+                </div>
+                <div className="d-flex align-items-center gap-2 mt-2">
+                    <small className="text-muted prolong-preview">
+                        {days || count
+                            ? `${file.count + count} DL${file.count + count > 1 ? 's' : ''} or ${newExpiry.toLocaleString()}`
+                            : 'Pick days or downloads to add'}
+                    </small>
+                    <button type="button" className="btn btn-sm btn-outline-secondary ms-auto"
+                            onClick={function () { this.handleProlongToggle(fileId) }.bind(this)}>
+                        Cancel
+                    </button>
+                    <button type="button" className="btn btn-sm btn-primary"
+                            onClick={function () { this.handleProlong(fileId) }.bind(this)}
+                            disabled={!days && !count}>
+                        Prolong
+                    </button>
+                </div>
+            </div>
+        )
+    }
+
     render() {
         var savedFiles = []
         var files = {}
@@ -511,6 +672,7 @@ class Upload extends React.Component {
 
         for (var i in files) {
             let expiry
+            let canProlong = false
             let file = this.state.fileInfo && this.state.fileInfo[files[i].fileId]
             if (!file)
                 continue
@@ -534,6 +696,7 @@ class Upload extends React.Component {
                     classes = 'expiry expiry-expired'
                     text = '<expired>'
                 } else {
+                    canProlong = file.maxProlongDays > 0 || file.maxProlongCount > 0
                     classes = 'expiry'
                     let expires = isInitDate ? '<no data>' : expiryDate.toLocaleString()
                     let total = files[i].totalCount
@@ -548,8 +711,9 @@ class Upload extends React.Component {
                 )
             }
 
+            let fileId = files[i].fileId
             savedFiles.push(
-                <div className="card" key={files[i].fileId}>
+                <div className="card" key={fileId}>
                     <div className="card-header">
                         <div className="input-group">
                             <div className="input-group-prepend">
@@ -561,9 +725,15 @@ class Upload extends React.Component {
                                         data-tip data-for="delete-tip">
                                     <Octicon icon={Trashcan}/>
                                 </button>
+                                <button id="prolong" className={this.prolongClasses(fileId)} type="button"
+                                        onClick={function () { this.handleProlongToggle(fileId) }.bind(this)}
+                                        disabled={!canProlong} data-tip data-for="prolong-tip"
+                                        aria-expanded={this.state.prolongFor === fileId}>
+                                    <Octicon icon={Clock}/>
+                                </button>
                             </div>
                             <span className="card-header-text long-text">
-                                {files[i].fileId}
+                                {fileId}
                             </span>
                         </div>
                     </div>
@@ -571,6 +741,7 @@ class Upload extends React.Component {
                         {files[i].filename}
                         {expiry}
                     </div>
+                    {canProlong && this.state.prolongFor === fileId && this.prolongPanel(fileId, file)}
                 </div>
             )
         }
@@ -836,6 +1007,7 @@ class Upload extends React.Component {
                         {filesCol}
                         <Tooltip id="copy-tip" openOnClick={false} render={() => this.state.copy} delayHide={1000}/>
                         <Tooltip id="delete-tip" variant="info" place="bottom" content="Delete file" />
+                        <Tooltip id="prolong-tip" variant="info" place="bottom" content="Prolong file" />
                     </div>
                 </div>
             </div>
