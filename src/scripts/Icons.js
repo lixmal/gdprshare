@@ -185,6 +185,17 @@ export const Timer = (p) => (
     </Icon>
 )
 
+export const ListIcon = (p) => (
+    <Icon {...p}>
+        <path d="M9 6h11" />
+        <path d="M9 12h11" />
+        <path d="M9 18h11" />
+        <circle cx="4.5" cy="6" r="0.9" fill="currentColor" stroke="none" />
+        <circle cx="4.5" cy="12" r="0.9" fill="currentColor" stroke="none" />
+        <circle cx="4.5" cy="18" r="0.9" fill="currentColor" stroke="none" />
+    </Icon>
+)
+
 export const Refresh = (p) => (
     <Icon {...p}>
         <path d="M20 12a8 8 0 10-3 6.2" />

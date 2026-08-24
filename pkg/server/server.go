@@ -47,6 +47,18 @@ type ProlongRequest struct {
 	Count uint `form:"count" binding:"omitempty,min=0,max=15"`
 }
 
+// One recipient's download, as the owner of a share gets to see it. It is the
+// same material the notification mail carries, so this adds a way to read it
+// rather than a new kind of record.
+type DownloadRecord struct {
+	Time       time.Time `json:"time"`
+	Address    string    `json:"address"`
+	UserAgent  string    `json:"userAgent"`
+	TLSVersion string    `json:"tlsVersion"`
+	TLSCipher  string    `json:"tlsCipher"`
+	Location   string    `json:"location"`
+}
+
 type OwnedFile struct {
 	FileId
 	OwnerToken
@@ -84,6 +96,7 @@ func setupRoutes(router *gin.Engine, srv *Server) {
 	v1.POST("/files/:fileId", srv.confirmReceipt)
 	v1.DELETE("/files/:fileId", srv.deleteFile)
 	v1.POST("/files/:fileId/prolong", srv.prolongFile)
+	v1.POST("/files/:fileId/downloads", srv.downloadRecords)
 	v1.POST("/files/validate", srv.validateFiles)
 }
 

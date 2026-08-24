@@ -174,12 +174,58 @@ test.describe('A share the server no longer has', () => {
     const row = page.locator('.file-item').first();
     await expect(row.locator('.expiry-error')).toBeVisible();
     await expect(row.locator('button#delete')).toHaveAttribute('aria-label', en.files.forget);
+    // no record to read for a share this server no longer knows
+    await expect(row.locator('button#record')).toHaveCount(0);
 
     await row.locator('button#delete').click();
     await expect(page.locator('.file-item')).toHaveCount(0);
     // and it stays gone, rather than coming back on the next check
     await page.goto('/');
     await expect(page.locator('.file-item')).toHaveCount(0);
+
+    fs.unlinkSync(testFilePath);
+  });
+});
+
+test.describe('Download record', () => {
+  // The same material the notification mail carries, readable in the app.
+  test('lists one line per download, and only for the owner', async ({ page, request }) => {
+    await page.goto('/');
+
+    const testFilePath = path.join(__dirname, 'test-record.txt');
+    fs.writeFileSync(testFilePath, 'record me');
+    await page.locator('input#content').setInputFiles(testFilePath);
+    await openOptions(page);
+    await page.locator('input#count').fill('3');
+    await page.locator('select#geo-restriction').selectOption('none');
+    await page.locator('input[type="submit"]').click();
+    await page.waitForURL(/\/uploaded/);
+
+    const link = await page.locator('input#link-key').inputValue();
+    const fileId = link.split('/d/')[1].split('#')[0];
+
+    const en = JSON.parse(
+      fs.readFileSync(path.join(__dirname, '..', 'public', 'locales', 'en.json'), 'utf8'));
+
+    await page.goto('/');
+    await page.locator('button#record').click();
+    await expect(page.locator('.record-panel')).toContainText(en.files.recordEmpty);
+
+    // two downloads, straight at the API: the record is about the server's view
+    await request.get(`/api/v1/files/${fileId}`);
+    await request.get(`/api/v1/files/${fileId}`);
+
+    await page.reload();
+    await page.locator('button#record').click();
+    await expect(page.locator('.record-line')).toHaveCount(2);
+    // this server stores no client info, so the person stays out of it
+    await expect(page.locator('.record-line').first()).toContainText(en.files.recordNoAddress);
+
+    // and the record needs the owner token
+    const denied = await request.post(`/api/v1/files/${fileId}/downloads`, {
+      form: { ownerToken: 'not-the-owner-token' },
+    });
+    expect(denied.status()).toBe(401);
 
     fs.unlinkSync(testFilePath);
   });

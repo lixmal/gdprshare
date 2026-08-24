@@ -2,6 +2,7 @@ package server
 
 import (
 	"crypto/subtle"
+	"crypto/tls"
 	"fmt"
 	"log"
 	"math"
@@ -641,6 +642,106 @@ func bindFileID(c *gin.Context) (string, error) {
 		return "", err
 	}
 	return f.FileId, nil
+}
+
+// downloadRecords answers with what was recorded about each download of a
+// share. Only the owner token opens it, and it reports what the server actually
+// stored: with client info turned off that is the time and the encryption, and
+// nothing about the person.
+func (s *Server) downloadRecords(c *gin.Context) {
+	fileId, err := bindFileID(c)
+	if err != nil {
+		return
+	}
+
+	var o OwnerToken
+	if err := c.ShouldBind(&o); err != nil {
+		// TODO: get FieldError and return relevant part only
+		apiError(c, http.StatusBadRequest, ErrCodeInvalidRequest, err.Error())
+		return
+	}
+
+	var storedFile database.StoredFile
+	if err := s.db.Where(&database.StoredFile{FileId: fileId}).Find(&storedFile).Error; err != nil {
+		log.Printf("Failed to find file with id %s in database: %s\n", fileId, err)
+		apiError(c, http.StatusNotFound, ErrCodeFileNotFound, "file not found")
+		return
+	}
+
+	// check if owner token matches the stored one
+	if subtle.ConstantTimeCompare([]byte(o.OwnerToken), []byte(storedFile.OwnerToken)) != 1 {
+		apiError(c, http.StatusUnauthorized, ErrCodeOwnerTokenMismatch, "owner token doesn't match")
+		return
+	}
+
+	var clients []*database.DstClient
+	if err := s.db.Model(&storedFile).Related(&clients).Error; err != nil {
+		log.Printf("Failed to read download records for id %s: %s\n", fileId, err)
+		apiError(c, http.StatusNotFound, ErrCodeRetrievalFailed, "file retrieval error")
+		return
+	}
+
+	records := make([]DownloadRecord, 0, len(clients))
+	for _, client := range clients {
+		records = append(records, DownloadRecord{
+			Time:       client.CreatedAt,
+			Address:    client.Addr,
+			UserAgent:  client.UserAgent,
+			TLSVersion: tlsVersionName(client.TLSVersion),
+			TLSCipher:  tlsCipherName(client.TLSCipherSuite),
+			Location:   s.locationOf(client.Addr),
+		})
+	}
+
+	c.JSON(
+		http.StatusOK,
+		gin.H{
+			"downloads": records,
+		},
+	)
+}
+
+// The stored values come either from the TLS connection, as decimal numbers, or
+// from a reverse proxy header, which is already text. A number is named, and
+// anything else is passed through as it was recorded.
+func tlsVersionName(stored string) string {
+	value, err := strconv.ParseUint(stored, 10, 16)
+	if err != nil {
+		return stored
+	}
+
+	return tls.VersionName(uint16(value))
+}
+
+func tlsCipherName(stored string) string {
+	value, err := strconv.ParseUint(stored, 10, 16)
+	if err != nil {
+		return stored
+	}
+
+	return tls.CipherSuiteName(uint16(value))
+}
+
+// Where a download came from, as far as the local database can tell. Empty when
+// no database is configured or the address was never stored.
+func (s *Server) locationOf(addr string) string {
+	if s.config.GeoIPPath == "" || addr == "" {
+		return ""
+	}
+
+	location, err := geoip.LookupIP(s.config.GeoIPPath, addr)
+	if err != nil || location == nil {
+		return ""
+	}
+
+	parts := make([]string, 0, 2)
+	for _, part := range []string{location.City, location.Country} {
+		if part != "" {
+			parts = append(parts, part)
+		}
+	}
+
+	return strings.Join(parts, ", ")
 }
 
 func expiryDate(f *database.StoredFile) time.Time {

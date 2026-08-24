@@ -667,3 +667,74 @@ func TestConfigReportsWhatTheFooterStates(t *testing.T) {
 	assert.Equal(t, float64(MaxExpiryDays), resp["maxExpiry"])
 	assert.Equal(t, float64(MaxDownloadCount), resp["maxCount"])
 }
+
+func downloadRecords(t *testing.T, srv *Server, fileId, ownerToken string) *httptest.ResponseRecorder {
+	t.Helper()
+
+	req := httptest.NewRequest(
+		http.MethodPost,
+		fmt.Sprintf("/api/v1/files/%s/downloads?ownerToken=%s", fileId, ownerToken),
+		nil,
+	)
+	w := httptest.NewRecorder()
+	srv.Handler.ServeHTTP(w, req)
+
+	return w
+}
+
+// TestDownloadRecords reports one entry per download, which is the same
+// material the notification mail carries.
+func TestDownloadRecords(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	fileId, ownerToken := uploadTestFile(t, srv, map[string]string{"count": "3"})
+
+	w := downloadRecords(t, srv, fileId, ownerToken)
+	require.Equal(t, http.StatusOK, w.Code)
+
+	var empty struct {
+		Downloads []DownloadRecord `json:"downloads"`
+	}
+	require.NoError(t, json.NewDecoder(w.Body).Decode(&empty))
+	assert.Empty(t, empty.Downloads, "nothing was downloaded yet")
+
+	for i := 0; i < 2; i++ {
+		downloadW := httptest.NewRecorder()
+		srv.Handler.ServeHTTP(downloadW, httptest.NewRequest(http.MethodGet, "/api/v1/files/"+fileId, nil))
+		require.Equal(t, http.StatusOK, downloadW.Code)
+	}
+
+	w = downloadRecords(t, srv, fileId, ownerToken)
+	require.Equal(t, http.StatusOK, w.Code)
+
+	var resp struct {
+		Downloads []DownloadRecord `json:"downloads"`
+	}
+	require.NoError(t, json.NewDecoder(w.Body).Decode(&resp))
+	require.Len(t, resp.Downloads, 2)
+	assert.WithinDuration(t, time.Now(), resp.Downloads[0].Time, time.Minute)
+	// this server keeps no client info, so the person stays out of the record
+	assert.Empty(t, resp.Downloads[0].Address)
+	assert.Empty(t, resp.Downloads[0].Location)
+}
+
+// TestDownloadRecordsWrongToken keeps the records to the owner
+func TestDownloadRecordsWrongToken(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	fileId, _ := uploadTestFile(t, srv, nil)
+
+	w := downloadRecords(t, srv, fileId, "wrongtoken123")
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+}
+
+// TestTLSNamesAreReadable turns what was stored into something a person can read
+func TestTLSNamesAreReadable(t *testing.T) {
+	assert.Equal(t, "TLS 1.3", tlsVersionName("772"))
+	assert.Equal(t, "TLS_AES_128_GCM_SHA256", tlsCipherName("4865"))
+	// a reverse proxy sends text rather than numbers, and it is kept as it came
+	assert.Equal(t, "TLSv1.3", tlsVersionName("TLSv1.3"))
+	assert.Equal(t, "", tlsCipherName(""))
+}

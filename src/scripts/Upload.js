@@ -1,7 +1,7 @@
 import React from 'react'
 import Classnames from 'classnames'
 import { Copy, Trash, MoreTime, Upload as UploadIcon, FileIcon, TextIcon, ImageIcon,
-         Lock, Minus, Plus, X, ChevronDown, ChevronRight, Refresh } from './Icons'
+         Lock, Minus, Plus, X, ChevronDown, ChevronRight, Refresh, ListIcon } from './Icons'
 import Alert from './Alert'
 import { Tooltip } from 'react-tooltip'
 import { withRouter } from './withRouter'
@@ -40,6 +40,7 @@ class Upload extends React.Component {
         this.handleClearFile = this.handleClearFile.bind(this)
         this.handleEmailChange = this.handleEmailChange.bind(this)
         this.forgetFile = this.forgetFile.bind(this)
+        this.toggleRecord = this.toggleRecord.bind(this)
 
         this.state = {
             error: null,
@@ -66,6 +67,8 @@ class Upload extends React.Component {
             email: window.localStorage.getItem('email') || '',
             optionsOpen: false,
             picked: null,
+            recordFor: null,
+            records: {},
         }
     }
 
@@ -365,6 +368,95 @@ class Upload extends React.Component {
                 error: e,
             })
         }
+    }
+
+    // The download record is fetched when it is asked for: most of the time
+    // nobody opens it, and it is one request per file.
+    async toggleRecord(fileId, event) {
+        event.currentTarget.blur()
+
+        if (this.state.recordFor === fileId) {
+            this.setState({recordFor: null})
+            return
+        }
+
+        this.setState({recordFor: fileId, error: null})
+
+        if (this.state.records[fileId])
+            return
+
+        let response
+        try {
+            let files = JSON.parse(window.localStorage.getItem('savedFiles'))
+            let formData = new FormData()
+            formData.append('ownerToken', files[fileId].ownerToken)
+
+            response = await window.fetch(gdprshare.config.apiUrl + '/' + fileId + '/downloads', {
+                method: 'POST',
+                body: formData,
+            })
+        } catch (error) {
+            this.setState({recordFor: null})
+            return gdprshare.displayErr.call(this, error)
+        }
+
+        let fetchData
+        try {
+            fetchData = await response.clone().json()
+        } catch (error) {
+            this.setState({recordFor: null})
+            return gdprshare.asTextErr.call(this, response, error)
+        }
+
+        if (!response.ok) {
+            // closing it again beats leaving the panel on its loading dots
+            this.setState({recordFor: null})
+
+            // the share was confirmed or swept between the list and this click:
+            // the record went with it, which is not a failure to report as one
+            if (fetchData.code === 'file_not_found')
+                return gdprshare.displayErr.call(this, this.props.t('files.recordGone'), 'notice')
+
+            return gdprshare.displayErr.call(this, this.props.t('files.recordFailed', {message: fetchData.message}))
+        }
+
+        var records = Object.assign({}, this.state.records)
+        records[fileId] = fetchData.downloads || []
+        this.setState({records: records})
+    }
+
+    recordPanel(fileId) {
+        const t = this.props.t
+        var records = this.state.records[fileId]
+
+        if (!records)
+            return <div className="record-panel"><span className="hint">…</span></div>
+
+        if (records.length < 1)
+            return <div className="record-panel"><span className="hint">{t('files.recordEmpty')}</span></div>
+
+        return (
+            <div className="record-panel">
+                {records.map(function (record, index) {
+                    var parts = [
+                        record.address || t('files.recordNoAddress'),
+                        record.location,
+                        record.tlsVersion,
+                        record.tlsCipher,
+                        record.userAgent,
+                    ].filter(function (part) { return part && part !== 'none' })
+
+                    return (
+                        <div className="record-line" key={index}>
+                            <span className="record-time">
+                                {gdprshare.formatDateTime(record.time)}
+                            </span>
+                            <span className="record-detail long-text">{parts.join(' · ')}</span>
+                        </div>
+                    )
+                })}
+            </div>
+        )
     }
 
     // The server has nothing to delete for an entry it disowns or never heard
@@ -806,6 +898,14 @@ class Upload extends React.Component {
         )
     }
 
+    recordClasses(fileId) {
+        return Classnames({
+            'btn': true,
+            'btn-icon': true,
+            'btn-icon-on': this.state.recordFor === fileId,
+        })
+    }
+
     prolongClasses(fileId) {
         return Classnames({
             'btn': true,
@@ -938,6 +1038,15 @@ class Upload extends React.Component {
                                 data-tooltip-id="copy-tip" aria-label={t('common.copyLink')}>
                             <Copy size="15" />
                         </button>
+                        {!onlyLocal && (
+                            <button id="record" className={this.recordClasses(fileId)} type="button"
+                                    onClick={function (e) { this.toggleRecord(fileId, e) }.bind(this)}
+                                    data-tooltip-id="tip" data-tooltip-content={t('files.record')}
+                                    aria-expanded={this.state.recordFor === fileId}
+                                    aria-label={t('files.record')}>
+                                <ListIcon size="15" />
+                            </button>
+                        )}
                         <button id="prolong" className={this.prolongClasses(fileId)} type="button"
                                 onClick={function () { this.handleProlongToggle(fileId) }.bind(this)}
                                 disabled={!canProlong}
@@ -963,6 +1072,7 @@ class Upload extends React.Component {
                 <div className="chip-row" style={{marginTop: '9px'}}>
                     {state}
                 </div>
+                {this.state.recordFor === fileId && this.recordPanel(fileId)}
                 {canProlong && this.state.prolongFor === fileId && this.prolongPanel(fileId, file)}
             </div>
         )
@@ -1230,7 +1340,7 @@ class Upload extends React.Component {
                            value={t('upload.submit')}
                            disabled={this.state.geoRestriction !== 'none' && this.state.selectedCountries.length === 0} />
                     <span className="hint text-center">{t('upload.submitHint')}</span>
-                    <Alert error={this.state.error} />
+                    <Alert error={this.state.error} tone={this.state.errorTone} />
                 </form>
             </div>
         )
