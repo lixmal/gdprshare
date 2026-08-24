@@ -122,6 +122,7 @@
         "refresh": "向服务器核对",
         "prolong": "多给点时间",
         "delete": "从服务器删除",
+        "forget": "从这个列表移除",
         "downloadsLeft": "剩余下载次数：{{count}}",
         "downloadsLeftOf": "剩余下载次数：{{total}} 次中的 {{count}} 次",
         "noneLeft": "没有剩余下载次数",
@@ -149,5 +150,18 @@
         "mailSubject": "下载 {{filename}}",
         "mailLink": "下载链接",
         "mailCount": "最多下载次数"
+    },
+    "footer": {
+        "kept": "数据处理",
+        "keptFile": "上传的文件及文件名（已加密）：为让收件人能够下载而处理。最迟 {{days}} 天后删除，或在下载次数用尽时删除（存储限制，第 5 条 (1) e）。",
+        "keptPassword": "解密密码：不作处理。密码留在链接里，从不到达这台服务器，因此这里存的副本无法读取（加密，第 32 条 (1) a）。",
+        "keptEmail": "通知邮箱地址（可选）：为把自己分享文件的下载尝试告知发送者而处理。",
+        "keptClient": "每次下载的 IP 地址、User-Agent 和 TLS 细节：为让发送者能够证明此次传输已加密以及去向而处理（问责，第 5 条 (2)、第 24 条 (1)）。",
+        "keptClientNone": "下载的 IP 地址、User-Agent 和 TLS 细节：本服务器不作处理。",
+        "keptLocation": "下载方 IP 地址所属国家：用本服务器上的数据库判定，不涉及第三方。",
+        "operator": "数据控制者以及此外的一切处理：运行这台服务器的人。",
+        "law": "所引条款出自 GDPR（欧盟条例 2016/679）。",
+        "privacy": "隐私",
+        "imprint": "运营者信息"
     }
 }

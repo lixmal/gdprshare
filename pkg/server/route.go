@@ -26,12 +26,21 @@ func (s *Server) index(c *gin.Context) {
 	c.File(IndexFile)
 }
 
+// The client renders the upload limits and the footer's account of what this
+// server keeps from this, so it states what the operator configured rather than
+// what the code can do in principle.
 func (s *Server) getConfig(c *gin.Context) {
 	c.JSON(
 		http.StatusOK,
 		gin.H{
-			"maxFileSize":   s.config.MaxUploadSize,
-			"showCountdown": s.config.ShowCountdown,
+			"maxFileSize":    s.config.MaxUploadSize,
+			"showCountdown":  s.config.ShowCountdown,
+			"maxExpiry":      MaxExpiryDays,
+			"maxCount":       MaxDownloadCount,
+			"saveClientInfo": s.config.SaveClientInfo,
+			"geoIP":          s.config.GeoIPPath != "",
+			"privacyUrl":     s.config.PrivacyURL,
+			"imprintUrl":     s.config.ImprintURL,
 		},
 	)
 }

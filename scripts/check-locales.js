@@ -35,6 +35,7 @@ const sharedWithEnglish = {
     'duration.m5': ['fr'],
     'duration.m15': ['fr'],
     'duration.m30': ['fr'],
+    'footer.privacy': ['it', 'nl'],
 }
 
 function flatten(value, prefix, out) {

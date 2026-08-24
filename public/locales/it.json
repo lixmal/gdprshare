@@ -122,6 +122,7 @@
         "refresh": "Chiedi al server",
         "prolong": "Dagli più tempo",
         "delete": "Elimina dal server",
+        "forget": "Togli da questa lista",
         "downloadsLeft": "Download rimasti: {{count}}",
         "downloadsLeftOf": "Download rimasti: {{count}} su {{total}}",
         "noneLeft": "Nessun download rimasto",
@@ -149,5 +150,18 @@
         "mailSubject": "Scarica {{filename}}",
         "mailLink": "Link per il download",
         "mailCount": "Download massimi"
+    },
+    "footer": {
+        "kept": "Trattamento dei dati",
+        "keptFile": "File caricato e nome del file, cifrati: trattati perché il destinatario possa scaricarli. Cancellati al più tardi dopo {{days}} giorni, o al raggiungimento del limite di download (limitazione della conservazione, art. 5 (1) e).",
+        "keptPassword": "Password di decifratura: non trattata. Resta nel link e non raggiunge mai questo server, quindi la copia conservata non è leggibile qui (cifratura, art. 32 (1) a).",
+        "keptEmail": "Indirizzo per gli avvisi, facoltativo: trattato per informare il mittente dei tentativi di download del proprio invio.",
+        "keptClient": "Indirizzo IP, user agent e dettagli TLS di ogni download: trattati perché il mittente possa dimostrare che il trasferimento era cifrato e dove è andato (responsabilizzazione, art. 5 (2), art. 24 (1)).",
+        "keptClientNone": "Indirizzi IP, user agent e dettagli TLS dei download: non trattati su questo server.",
+        "keptLocation": "Paese dell’indirizzo IP che scarica: determinato con un database presente su questo server, senza terzi.",
+        "operator": "Titolare del trattamento e ogni ulteriore trattamento: chi gestisce questo server.",
+        "law": "Gli articoli citati sono quelli del GDPR (regolamento (UE) 2016/679).",
+        "privacy": "Privacy",
+        "imprint": "Note legali"
     }
 }

@@ -122,6 +122,7 @@
         "refresh": "Preguntar al servidor",
         "prolong": "Darle más tiempo",
         "delete": "Borrar del servidor",
+        "forget": "Quitar de esta lista",
         "downloadsLeft": "Descargas restantes: {{count}}",
         "downloadsLeftOf": "Descargas restantes: {{count}} de {{total}}",
         "noneLeft": "No quedan descargas",
@@ -149,5 +150,18 @@
         "mailSubject": "Descargar {{filename}}",
         "mailLink": "Enlace de descarga",
         "mailCount": "Descargas máximas"
+    },
+    "footer": {
+        "kept": "Tratamiento de datos",
+        "keptFile": "Archivo subido y nombre del archivo, cifrados: se tratan para que quien lo recibe pueda descargarlos. Se borran como máximo a los {{days}} días, o al alcanzarse el límite de descargas (limitación del plazo de conservación, art. 5 (1) e).",
+        "keptPassword": "Contraseña de descifrado: no se trata. Se queda en el enlace y nunca llega a este servidor, así que la copia guardada no se puede leer aquí (cifrado, art. 32 (1) a).",
+        "keptEmail": "Dirección de avisos, opcional: se trata para informar a quien envía de los intentos de descarga de su propio envío.",
+        "keptClient": "Dirección IP, agente de usuario y datos TLS de cada descarga: se tratan para que quien envía pueda demostrar que la transferencia iba cifrada y a dónde fue (responsabilidad proactiva, art. 5 (2), art. 24 (1)).",
+        "keptClientNone": "Direcciones IP, agentes de usuario y datos TLS de las descargas: no se tratan en este servidor.",
+        "keptLocation": "País de la dirección IP que descarga: se determina con una base de datos de este servidor, sin terceros.",
+        "operator": "Responsable del tratamiento y cualquier tratamiento adicional: quien administra este servidor.",
+        "law": "Los artículos citados son del RGPD (Reglamento (UE) 2016/679).",
+        "privacy": "Privacidad",
+        "imprint": "Aviso legal"
     }
 }

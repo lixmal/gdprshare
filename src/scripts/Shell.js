@@ -2,6 +2,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import { withTranslation } from 'react-i18next'
 import { Shield, Moon, Sun } from './Icons'
+import Footer from './Footer'
 
 const STORAGE_KEY = 'theme'
 
@@ -75,6 +76,7 @@ class Shell extends React.Component {
                 <main className="shell-main">
                     {this.props.children}
                 </main>
+                <Footer />
             </div>
         )
     }

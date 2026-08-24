@@ -20,6 +20,12 @@ window.gdprshare = {}
 
 gdprshare.config = {
     maxFileSize: 25,
+    maxExpiry: 14,
+    maxCount: 15,
+    saveClientInfo: false,
+    geoIP: false,
+    privacyUrl: '',
+    imprintUrl: '',
     contentMaxLength: 1024,
     keyLength: 32,
     saveFiles: true,

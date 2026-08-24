@@ -311,6 +311,47 @@ small.form-text {
     }
 }
 
+.shell-footer {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 0 16px 28px;
+}
+
+.shell-footer-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    font-size: 11.5px;
+}
+
+.shell-footer-row a {
+    color: var(--text-muted);
+}
+
+.shell-footer-row a:hover {
+    color: var(--accent);
+}
+
+.shell-footer-facts {
+    margin: 8px 0 0;
+    padding-left: 18px;
+    font-size: 11.5px;
+    color: var(--text-faint);
+}
+
+.shell-footer-facts li {
+    margin-bottom: 2px;
+}
+
+.shell-footer-law {
+    margin: 6px 0 0;
+    font-size: 11.5px;
+    color: var(--text-faint);
+}
+
 /* ---------------------------------------------------------------- surfaces */
 
 .app-outer {

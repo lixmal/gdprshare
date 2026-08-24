@@ -122,6 +122,7 @@
         "refresh": "Check with the server",
         "prolong": "Give it more time",
         "delete": "Delete from the server",
+        "forget": "Remove from this list",
         "downloadsLeft": "Downloads left: {{count}}",
         "downloadsLeftOf": "Downloads left: {{count}} of {{total}}",
         "noneLeft": "No downloads left",
@@ -149,5 +150,18 @@
         "mailSubject": "Download {{filename}}",
         "mailLink": "Download link",
         "mailCount": "Max downloads"
+    },
+    "footer": {
+        "kept": "Data processing",
+        "keptFile": "Uploaded file and file name, encrypted: processed so the recipient can download them. Erased after {{days}} days at the latest, or once the download limit is reached (storage limitation, Art. 5 (1) e).",
+        "keptPassword": "Decryption password: not processed. It stays in the link and never reaches this server, so the stored copy cannot be read here (encryption, Art. 32 (1) a).",
+        "keptEmail": "Notification address, optional: processed to inform the sender of download attempts on their own share.",
+        "keptClient": "IP address, user agent and TLS details of each download: processed so the sender can demonstrate that the transfer was encrypted and where it went (accountability, Art. 5 (2), Art. 24 (1)).",
+        "keptClientNone": "IP addresses, user agents and TLS details of downloads: not processed on this server.",
+        "keptLocation": "Country of the downloading IP address: determined against a database on this server, without involving a third party.",
+        "operator": "Controller, and any processing beyond this: the operator of this server.",
+        "law": "Article references are to the GDPR (Regulation (EU) 2016/679).",
+        "privacy": "Privacy",
+        "imprint": "Imprint"
     }
 }

@@ -639,3 +639,31 @@ func TestProlongFileExhausted(t *testing.T) {
 	w := prolong(t, srv, fileId, ownerToken, "1", "1")
 	assert.Equal(t, http.StatusConflict, w.Code)
 }
+
+// TestConfigReportsWhatTheFooterStates covers the fields the client's footer
+// builds its account of stored data from: it has to follow the operator's
+// configuration, not the code's capabilities.
+func TestConfigReportsWhatTheFooterStates(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	srv.config.SaveClientInfo = true
+	srv.config.PrivacyURL = "https://example.org/privacy"
+	srv.config.ImprintURL = ""
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/config", nil)
+	w := httptest.NewRecorder()
+	srv.Handler.ServeHTTP(w, req)
+	require.Equal(t, http.StatusOK, w.Code)
+
+	var resp map[string]interface{}
+	require.NoError(t, json.NewDecoder(w.Body).Decode(&resp))
+
+	assert.Equal(t, true, resp["saveClientInfo"])
+	assert.Equal(t, false, resp["geoIP"], "no GeoIP path is configured")
+	assert.Equal(t, "https://example.org/privacy", resp["privacyUrl"])
+	assert.Equal(t, "", resp["imprintUrl"])
+	// the upload limits come from the same place the prolong bounds do
+	assert.Equal(t, float64(MaxExpiryDays), resp["maxExpiry"])
+	assert.Equal(t, float64(MaxDownloadCount), resp["maxCount"])
+}

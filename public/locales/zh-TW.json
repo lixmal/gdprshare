@@ -122,6 +122,7 @@
         "refresh": "向伺服器核對",
         "prolong": "多給一點時間",
         "delete": "從伺服器刪除",
+        "forget": "從這個列表移除",
         "downloadsLeft": "剩餘下載次數：{{count}}",
         "downloadsLeftOf": "剩餘下載次數：{{total}} 次中的 {{count}} 次",
         "noneLeft": "沒有剩餘下載次數",
@@ -149,5 +150,18 @@
         "mailSubject": "下載 {{filename}}",
         "mailLink": "下載連結",
         "mailCount": "最多下載次數"
+    },
+    "footer": {
+        "kept": "資料處理",
+        "keptFile": "上傳的檔案及檔名（已加密）：為讓收件人能夠下載而處理。最遲 {{days}} 天後刪除，或在下載次數用盡時刪除（儲存限制，第 5 條 (1) e）。",
+        "keptPassword": "解密密碼：不作處理。密碼留在連結裡，從不會到這台伺服器，因此這裡存的副本無法讀取（加密，第 32 條 (1) a）。",
+        "keptEmail": "通知用電子郵件地址（選填）：為把自己分享檔案的下載嘗試告知寄件者而處理。",
+        "keptClient": "每次下載的 IP 位址、User-Agent 與 TLS 細節：為讓寄件者能夠證明這次傳輸已加密以及去向而處理（問責，第 5 條 (2)、第 24 條 (1)）。",
+        "keptClientNone": "下載的 IP 位址、User-Agent 與 TLS 細節：本伺服器不作處理。",
+        "keptLocation": "下載方 IP 位址所屬國家：用本伺服器上的資料庫判定，不涉及第三方。",
+        "operator": "資料控管者以及此外的一切處理：營運這台伺服器的人。",
+        "law": "所引條款出自 GDPR（歐盟規則 2016/679）。",
+        "privacy": "隱私",
+        "imprint": "營運者資訊"
     }
 }

@@ -122,6 +122,7 @@
         "refresh": "Tanya server",
         "prolong": "Beri waktu lebih",
         "delete": "Hapus dari server",
+        "forget": "Hapus dari daftar ini",
         "downloadsLeft": "Unduhan tersisa: {{count}}",
         "downloadsLeftOf": "Unduhan tersisa: {{count}} dari {{total}}",
         "noneLeft": "Tidak ada unduhan tersisa",
@@ -149,5 +150,18 @@
         "mailSubject": "Unduh {{filename}}",
         "mailLink": "Tautan unduhan",
         "mailCount": "Unduhan maksimum"
+    },
+    "footer": {
+        "kept": "Pemrosesan data",
+        "keptFile": "Berkas yang diunggah dan namanya, terenkripsi: diproses supaya penerima bisa mengunduhnya. Dihapus paling lama setelah {{days}} hari, atau begitu batas unduhan tercapai (pembatasan penyimpanan, pasal 5 (1) e).",
+        "keptPassword": "Kata sandi dekripsi: tidak diproses. Tetap ada di tautan dan tidak pernah sampai ke server ini, jadi salinan yang tersimpan tidak bisa dibaca di sini (enkripsi, pasal 32 (1) a).",
+        "keptEmail": "Alamat pemberitahuan, opsional: diproses untuk mengabari pengirim tentang percobaan unduh pada kirimannya sendiri.",
+        "keptClient": "Alamat IP, user agent, dan rincian TLS setiap unduhan: diproses supaya pengirim bisa membuktikan bahwa pengirimannya terenkripsi dan ke mana perginya (akuntabilitas, pasal 5 (2), pasal 24 (1)).",
+        "keptClientNone": "Alamat IP, user agent, dan rincian TLS unduhan: tidak diproses di server ini.",
+        "keptLocation": "Negara alamat IP yang mengunduh: ditentukan dengan basis data di server ini, tanpa pihak ketiga.",
+        "operator": "Pengendali data dan pemrosesan lain di luar ini: pihak yang menjalankan server ini.",
+        "law": "Pasal yang dikutip berasal dari GDPR (Peraturan (UE) 2016/679).",
+        "privacy": "Privasi",
+        "imprint": "Informasi hukum"
     }
 }

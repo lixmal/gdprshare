@@ -122,6 +122,7 @@
         "refresh": "Zapytaj serwer",
         "prolong": "Daj mu więcej czasu",
         "delete": "Usuń z serwera",
+        "forget": "Usuń z tej listy",
         "downloadsLeft": "Pozostałe pobrania: {{count}}",
         "downloadsLeftOf": "Pozostałe pobrania: {{count}} z {{total}}",
         "noneLeft": "Brak pozostałych pobrań",
@@ -149,5 +150,18 @@
         "mailSubject": "Pobierz {{filename}}",
         "mailLink": "Link do pobrania",
         "mailCount": "Maksymalna liczba pobrań"
+    },
+    "footer": {
+        "kept": "Przetwarzanie danych",
+        "keptFile": "Przesłany plik i nazwa pliku, zaszyfrowane: przetwarzane, żeby odbiorca mógł je pobrać. Usuwane najpóźniej po {{days}} dniach albo po wyczerpaniu limitu pobrań (ograniczenie przechowywania, art. 5 (1) e).",
+        "keptPassword": "Hasło do odszyfrowania: nieprzetwarzane. Zostaje w linku i nigdy nie dociera na ten serwer, więc zapisanej kopii nie da się tu odczytać (szyfrowanie, art. 32 (1) a).",
+        "keptEmail": "Adres do powiadomień, dobrowolny: przetwarzany, aby informować nadawcę o próbach pobrania jego własnej wysyłki.",
+        "keptClient": "Adres IP, user agent i szczegóły TLS każdego pobrania: przetwarzane, żeby nadawca mógł wykazać, że transfer był zaszyfrowany i gdzie trafił (rozliczalność, art. 5 (2), art. 24 (1)).",
+        "keptClientNone": "Adresy IP, user agenty i szczegóły TLS pobrań: nieprzetwarzane na tym serwerze.",
+        "keptLocation": "Kraj pobierającego adresu IP: ustalany na podstawie bazy na tym serwerze, bez udziału osób trzecich.",
+        "operator": "Administrator danych i każde dalsze przetwarzanie: osoba prowadząca ten serwer.",
+        "law": "Powołania na artykuły dotyczą RODO (rozporządzenie (UE) 2016/679).",
+        "privacy": "Prywatność",
+        "imprint": "Informacje prawne"
     }
 }

@@ -66,6 +66,18 @@ as it is.
 * the notification carries the TLS version and ciphers of both sides, which is
   the evidence half of the accountability duty
 
+### What the visitor is told
+
+The page footer carries a short data processing notice, built from the
+configuration this server reports rather than from what the code could do: an
+operator who leaves client info off gets a notice that says so. Each entry names
+the data, why it is processed and when it goes. It cites
+[Art. 5 (1) e](https://gdpr-info.eu/art-5-gdpr/) for the automatic deletion,
+[Art. 32 (1) a](https://gdpr-info.eu/art-32-gdpr/) for the encryption, and
+Art. 5 (2) with [Art. 24 (1)](https://gdpr-info.eu/art-24-gdpr/) for the
+download records. `privacyurl` and `imprinturl` add links to the operator's own
+pages; without them the footer says the rest is up to whoever runs the server.
+
 ### The interface
 
 * localized in 22 languages, picked from the browser's preferences. API errors
@@ -129,8 +141,11 @@ Run locally:
 gdprshare looks for a `config.yml` in its working directory; `gdprshare -config
 <config file>` points it somewhere else.
 
-Take a look at `misc/gdprshare.service` for an example systemd unit and
-`misc/crontab` for the cronjob that deletes expired files.
+Expired files are deleted by the server itself, every `cleanup.interval`
+(1 hour by default), which is one less moving part in a container. Set
+`cleanup.enabled: false` to drive it from outside instead: `gdprshare -cleanup`
+sweeps once and exits, and `misc/crontab` has an example entry.
+`misc/gdprshare.service` is an example systemd unit.
 
 Alternatively run the [docker image](https://ghcr.io/lixmal/gdprshare):
 

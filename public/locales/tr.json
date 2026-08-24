@@ -122,6 +122,7 @@
         "refresh": "Sunucuya sor",
         "prolong": "Biraz daha süre ver",
         "delete": "Sunucudan sil",
+        "forget": "Bu listeden çıkar",
         "downloadsLeft": "Kalan indirme: {{count}}",
         "downloadsLeftOf": "Kalan indirme: {{total}} üzerinden {{count}}",
         "noneLeft": "İndirme hakkı kalmadı",
@@ -149,5 +150,18 @@
         "mailSubject": "{{filename}} dosyasını indir",
         "mailLink": "İndirme bağlantısı",
         "mailCount": "En fazla indirme"
+    },
+    "footer": {
+        "kept": "Veri işleme",
+        "keptFile": "Yüklenen dosya ve dosya adı, şifreli: alıcı indirebilsin diye işlenir. En geç {{days}} gün sonra ya da indirme sınırına ulaşıldığında silinir (saklamanın sınırlanması, madde 5 (1) e).",
+        "keptPassword": "Şifre çözme parolası: işlenmez. Bağlantıda kalır ve bu sunucuya hiç ulaşmaz, bu yüzden saklanan kopya burada okunamaz (şifreleme, madde 32 (1) a).",
+        "keptEmail": "Bildirim adresi, isteğe bağlı: gönderene kendi paylaşımındaki indirme denemelerini bildirmek için işlenir.",
+        "keptClient": "Her indirmenin IP adresi, tarayıcı bilgisi ve TLS ayrıntıları: gönderen aktarımın şifreli olduğunu ve nereye gittiğini kanıtlayabilsin diye işlenir (hesap verebilirlik, madde 5 (2), madde 24 (1)).",
+        "keptClientNone": "İndirmelerin IP adresleri, tarayıcı bilgileri ve TLS ayrıntıları: bu sunucuda işlenmez.",
+        "keptLocation": "İndiren IP adresinin ülkesi: bu sunucudaki bir veritabanıyla belirlenir, üçüncü taraf olmadan.",
+        "operator": "Veri sorumlusu ve bunun ötesindeki her işleme: bu sunucuyu işleten kişi.",
+        "law": "Anılan maddeler GDPR (AB) 2016/679 sayılı tüzüğe aittir.",
+        "privacy": "Gizlilik",
+        "imprint": "Yasal bilgiler"
     }
 }
