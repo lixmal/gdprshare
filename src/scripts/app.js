@@ -124,6 +124,16 @@ gdprshare.decrypt = async function (data, key) {
     }
 }
 
+// Dates follow the language the interface is in, so a German page does not
+// print American dates.
+gdprshare.formatDate = function (date) {
+    return new Date(date).toLocaleDateString(i18n.language)
+}
+
+gdprshare.formatDateTime = function (date) {
+    return new Date(date).toLocaleString(i18n.language)
+}
+
 gdprshare.formatSize = function (bytes) {
     var units = ['B', 'KB', 'MB', 'GB']
     var value = bytes
@@ -169,11 +179,11 @@ gdprshare.copyText = function (btn, value) {
     var me = this
     Clipboard.writeText(value).then(
         function () {
-            gdprshare.showTooltip.bind(me)(btn, 'Copied')
+            gdprshare.showTooltip.bind(me)(btn, i18n.t('common.copied'))
         },
         function (err) {
             console.log(err)
-            gdprshare.showTooltip.bind(me)(btn, 'Failed to copy')
+            gdprshare.showTooltip.bind(me)(btn, i18n.t('common.copyFailed'))
         },
     )
 }
@@ -183,10 +193,6 @@ gdprshare.showTooltip = function (btn, message) {
     this.setState({
         copy: message,
     })
-}
-
-gdprshare.handleTipContent = function () {
-    return this.state.copy
 }
 
 gdprshare.confirmReceipt = function (fileId) {

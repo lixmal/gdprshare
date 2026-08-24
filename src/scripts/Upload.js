@@ -1,18 +1,18 @@
 import React from 'react'
 import Classnames from 'classnames'
 import { Copy, Trash, MoreTime, Upload as UploadIcon, FileIcon, TextIcon, ImageIcon,
-         Lock, Minus, Plus, Search, X, ChevronDown, ChevronRight, Refresh } from './Icons'
+         Lock, Minus, Plus, X, ChevronDown, ChevronRight, Refresh } from './Icons'
 import Alert from './Alert'
 import { Tooltip } from 'react-tooltip'
 import { withRouter } from './withRouter'
-import { stripMetadata, loadPdfLib } from './strip'
+import { withTranslation } from 'react-i18next'
+import { stripMetadata, loadPdfLib, canStrip, strippableImageTypes } from './strip'
 
 class Upload extends React.Component {
     constructor() {
         super()
 
         this.copyHandler = gdprshare.copyHandler.bind(this)
-        this.handleTipContent = gdprshare.handleTipContent.bind(this)
         this.encrypt = gdprshare.encrypt.bind(this)
         this.handleFile = this.handleFile.bind(this)
         this.handleUpload = this.handleUpload.bind(this)
@@ -38,6 +38,7 @@ class Upload extends React.Component {
         this.toggleOptions = this.toggleOptions.bind(this)
         this.handleBrowse = this.handleBrowse.bind(this)
         this.handleClearFile = this.handleClearFile.bind(this)
+        this.handleEmailChange = this.handleEmailChange.bind(this)
 
         this.state = {
             error: null,
@@ -60,6 +61,7 @@ class Upload extends React.Component {
             prolongCount: 0,
             count: 1,
             expiry: 7,
+            email: window.localStorage.getItem('email') || '',
             optionsOpen: false,
             picked: null,
         }
@@ -126,7 +128,7 @@ class Upload extends React.Component {
         }
 
         if (!response.ok) {
-            let error = 'fetching file validity failed: ' + fetchData.message
+            let error = this.props.t('files.checkFailed', {message: fetchData.message})
             // TODO: mask removal could be a race with something else
             return gdprshare.displayErr.call(this, error)
         }
@@ -168,7 +170,7 @@ class Upload extends React.Component {
             },
         )
 
-        var email = this.refs.email.value
+        var email = this.state.email
         formData.append('type', this.state.type)
         formData.append('file', file, encFilename)
         formData.append('filename', encFilename)
@@ -236,9 +238,9 @@ class Upload extends React.Component {
 
         var regionLabels = {
             none: '',
-            eea: 'EU / EEA only',
-            'gdpr-aligned': 'EU / EEA and aligned countries only',
-            custom: this.state.selectedCountries.length + ' countries only',
+            eea: this.props.t('upload.regionEea'),
+            'gdpr-aligned': this.props.t('upload.regionAligned'),
+            custom: this.props.t('upload.chipCountries', {count: this.state.selectedCountries.length}),
         }
 
         this.props.router.navigate('/uploaded', {
@@ -302,7 +304,7 @@ class Upload extends React.Component {
                 } catch (err) {
                     // never fall back to the original: the upload would leak
                     // the metadata the user asked to have removed
-                    gdprshare.displayErr.call(this, 'Could not strip metadata: ' + err.message)
+                    gdprshare.displayErr.call(this, this.props.t('upload.stripFailed', {message: err.message}))
                     return
                 }
             }
@@ -316,10 +318,19 @@ class Upload extends React.Component {
 
             var reader = new FileReader()
             reader.onload = async function (event) {
-                // encryption of file
-                const cipherText = await gdprshare.encrypt(event.target.result, key)
+                // the outer catch cannot see this callback's rejections, and a
+                // silent one would leave the form masked forever
+                try {
+                    // encryption of file
+                    const cipherText = await gdprshare.encrypt(event.target.result, key)
 
-                await this.uploadFile(key, cipherText, filename, file.name)
+                    await this.uploadFile(key, cipherText, filename, file.name)
+                } catch (error) {
+                    gdprshare.displayErr.call(this, error)
+                }
+            }.bind(this)
+            reader.onerror = function () {
+                gdprshare.displayErr.call(this, reader.error || 'could not read the file')
             }.bind(this)
             reader.readAsArrayBuffer(file)
         } catch (error) {
@@ -487,7 +498,7 @@ class Upload extends React.Component {
 
         if (file.size > allowedSize * 1024 * 1024) {
             this.setState({
-                error: 'File too big, maximum allowed size: ' + allowedSize + ' MiB.',
+                error: this.props.t('upload.tooBig', {size: allowedSize}),
             })
             var ref = this.state.type === 'image' ? this.refs.image : this.refs.file
             if (ref) ref.value = null
@@ -503,12 +514,30 @@ class Upload extends React.Component {
             this.setState({picked: null})
             return
         }
+        // stripping is not optional for the image type, so a format it cannot
+        // handle is refused here rather than at submit time
+        if (file && this.state.type === 'image' && !canStrip(file)) {
+            event.currentTarget.value = null
+            this.setState({
+                picked: null,
+                error: this.props.t('upload.notStrippable', {
+                    type: file.type || this.props.t('upload.unknownType'),
+                }),
+            })
+            return
+        }
         this.setState({
+            error: null,
             picked: file ? {name: file.name, size: file.size} : null,
         })
     }
 
-    handleBrowse() {
+    handleBrowse(event) {
+        // the hidden input sits inside the drop area: a click on it already
+        // opens the picker, forwarding it again would open a second dialog
+        if (event && event.target && event.target.tagName === 'INPUT')
+            return
+
         var ref = this.state.type === 'image' ? this.refs.image : this.refs.file
         if (ref) ref.click()
     }
@@ -518,6 +547,10 @@ class Upload extends React.Component {
         var ref = this.state.type === 'image' ? this.refs.image : this.refs.file
         if (ref) ref.value = null
         this.setState({picked: null})
+    }
+
+    handleEmailChange(event) {
+        this.setState({email: event.target.value})
     }
 
     handleCountChange(value) {
@@ -660,14 +693,14 @@ class Upload extends React.Component {
             <div className="d-flex align-items-center gap-2">
                 <div className="step">
                     <button type="button" className="step-btn" onClick={step(-1)}
-                            disabled={value <= min} aria-label={'One less'}>
+                            disabled={value <= min} aria-label={this.props.t('files.less')}>
                         <Minus size="14" />
                     </button>
                     <input className="form-control" id={id} type="number" ref={id}
                            min={min} max={max} value={value} required
                            onChange={function (e) { onChange(e.target.value) }} />
                     <button type="button" className="step-btn" onClick={step(1)}
-                            disabled={value >= max} aria-label={'One more'}>
+                            disabled={value >= max} aria-label={this.props.t('files.more')}>
                         <Plus size="14" />
                     </button>
                 </div>
@@ -677,28 +710,31 @@ class Upload extends React.Component {
     }
 
     summaryChips() {
+        const t = this.props.t
+
         var region = {
-            none: 'Any region',
-            eea: 'EU / EEA',
-            'gdpr-aligned': 'EU / EEA + aligned',
-            custom: this.state.selectedCountries.length + ' countries',
+            none: t('upload.chipRegionAny'),
+            eea: t('upload.regionEea'),
+            'gdpr-aligned': t('upload.regionAligned'),
+            custom: t('upload.chipCountries', {count: this.state.selectedCountries.length}),
         }[this.state.geoRestriction]
 
-        var delay = this.state.delay === '0'
-            ? 'No delay'
-            : 'Starts in ' + this.delayLabel(this.state.delay)
+        var expires = new Date()
+        expires.setDate(expires.getDate() + parseInt(this.state.expiry, 10))
 
         var chips = [
-            this.state.count + (this.state.count > 1 ? ' downloads' : ' download'),
-            this.state.expiry + (this.state.expiry > 1 ? ' days' : ' day'),
+            t('upload.chipDownloads', {count: this.state.count}),
+            t('upload.chipUntil', {date: gdprshare.formatDate(expires)}),
             region,
-            delay,
+            this.state.delay === '0'
+                ? t('upload.delayNone')
+                : t('upload.chipStartsIn', {delay: this.delayLabel(this.state.delay)}),
         ]
 
         if (this.state.type === 'image' || this.state.strip)
-            chips.push('Hidden data removed')
+            chips.push(t('upload.chipMetadata'))
         if (this.state.type === 'image' && this.state.ephemeral !== '0')
-            chips.push('Disappears after ' + this.state.ephemeral + 's')
+            chips.push(t('upload.chipDisappears', {duration: this.ephemeralLabel(this.state.ephemeral)}))
 
         return (
             <div className="chip-row">
@@ -709,13 +745,17 @@ class Upload extends React.Component {
         )
     }
 
+    // both selects and the summary chips read their labels from the same keys
     delayLabel(minutes) {
-        var value = parseInt(minutes, 10)
-        if (value >= 1440)
-            return '1 day'
-        if (value >= 60)
-            return (value / 60) + (value === 60 ? ' hour' : ' hours')
-        return value + ' min'
+        var keys = {1: 'm1', 5: 'm5', 15: 'm15', 30: 'm30', 60: 'h1', 120: 'h2', 1440: 'd1'}
+        var key = keys[parseInt(minutes, 10)]
+        return key ? this.props.t('duration.' + key) : String(minutes)
+    }
+
+    ephemeralLabel(seconds) {
+        var keys = {5: 's5', 10: 's10', 30: 's30', 60: 'm1', 120: 'm2', 300: 'm5'}
+        var key = keys[parseInt(seconds, 10)]
+        return key ? this.props.t('duration.' + key) : String(seconds)
     }
 
     prolongClasses(fileId) {
@@ -727,6 +767,7 @@ class Upload extends React.Component {
     }
 
     prolongPanel(fileId, file) {
+        const t = this.props.t
         var days = this.state.prolongDays
         var count = this.state.prolongCount
         // calendar days, same as the server adds them
@@ -738,7 +779,7 @@ class Upload extends React.Component {
                 <div className="row g-2">
                     <div className="col-6 field">
                         <label htmlFor="prolong-days" className="prolong-label">
-                            More days <span className="hint">({file.maxProlongDays} left)</span>
+                            {t('files.moreDays')} <span className="hint">{t('files.left', {count: file.maxProlongDays})}</span>
                         </label>
                         {this.stepper('prolong-days', days, 0, file.maxProlongDays,
                             function (value) {
@@ -747,7 +788,7 @@ class Upload extends React.Component {
                     </div>
                     <div className="col-6 field">
                         <label htmlFor="prolong-count" className="prolong-label">
-                            More downloads <span className="hint">({file.maxProlongCount} left)</span>
+                            {t('files.moreDownloads')} <span className="hint">{t('files.left', {count: file.maxProlongCount})}</span>
                         </label>
                         {this.stepper('prolong-count', count, 0, file.maxProlongCount,
                             function (value) {
@@ -755,22 +796,30 @@ class Upload extends React.Component {
                             }.bind(this))}
                     </div>
                 </div>
-                <div className="d-flex align-items-center gap-2">
-                    <span className="chip chip-accent prolong-preview">
-                        {days || count
-                            ? 'New: ' + (file.count + count) + (file.count + count > 1 ? ' downloads' : ' download') +
-                              ', until ' + newExpiry.toLocaleString()
-                            : 'Pick days or downloads to add'}
+                <div className="prolong-actions">
+                    <span className="prolong-preview">
+                        {days || count ? (
+                            <React.Fragment>
+                                <span className="hint">{t('files.prolongNew')}</span>
+                                <span className="chip chip-accent">
+                                    {t('upload.chipDownloads', {count: file.count + count})}
+                                </span>
+                                <span className="chip chip-accent">
+                                    {t('files.until', {date: gdprshare.formatDate(newExpiry)})}
+                                </span>
+                            </React.Fragment>
+                        ) : (
+                            <span className="hint">{t('files.prolongEmpty')}</span>
+                        )}
                     </span>
-                    <div style={{flexGrow: 1}}></div>
                     <button type="button" className="btn btn-sm"
                             onClick={function () { this.handleProlongToggle(fileId) }.bind(this)}>
-                        Cancel
+                        {t('common.cancel')}
                     </button>
                     <button type="button" className="btn btn-sm btn-primary"
                             onClick={function () { this.handleProlong(fileId) }.bind(this)}
                             disabled={!days && !count}>
-                        Prolong
+                        {t('files.prolongSubmit')}
                     </button>
                 </div>
             </div>
@@ -778,6 +827,7 @@ class Upload extends React.Component {
     }
 
     fileItem(saved) {
+        const t = this.props.t
         let fileId = saved.fileId
         let file = this.state.fileInfo && this.state.fileInfo[fileId]
         if (!file)
@@ -788,7 +838,7 @@ class Upload extends React.Component {
 
         if (file.error) {
             console.log(file.error)
-            state = <span className="expiry expiry-error">Not yours any more</span>
+            state = <span className="expiry expiry-error">{t('files.notYours')}</span>
         } else {
             let expiryDate = new Date(file.expiryDate)
             // go's time.Time zero value
@@ -798,7 +848,7 @@ class Upload extends React.Component {
             if (isExpired) {
                 state = (
                     <span className="expiry expiry-expired">
-                        {isInitDate ? 'Gone from the server' : 'No downloads left'}
+                        {isInitDate ? t('files.gone') : t('files.noneLeft')}
                     </span>
                 )
             } else {
@@ -806,8 +856,8 @@ class Upload extends React.Component {
                 let total = saved.totalCount
                 state = (
                     <span className="expiry">
-                        {total ? file.count + ' of ' + total + ' downloads left'
-                               : file.count + (file.count > 1 ? ' downloads left' : ' download left')}
+                        {total ? t('files.downloadsLeftOf', {count: file.count, total: total})
+                               : t('files.downloadsLeft', {count: file.count})}
                     </span>
                 )
             }
@@ -816,7 +866,7 @@ class Upload extends React.Component {
                 state = (
                     <React.Fragment>
                         {state}
-                        <span className="chip">Until {expiryDate.toLocaleString()}</span>
+                        <span className="chip">{t('files.until', {date: gdprshare.formatDateTime(expiryDate)})}</span>
                     </React.Fragment>
                 )
         }
@@ -831,19 +881,19 @@ class Upload extends React.Component {
                     <div className="file-actions">
                         <button id="copy" className="btn btn-icon" type="button"
                                 onClick={function (e) { gdprshare.copyText.call(this, e.currentTarget, saved.location) }.bind(this)}
-                                data-for="copy-tip" data-tip aria-label="Copy the link">
+                                data-for="copy-tip" data-tip aria-label={t('common.copyLink')}>
                             <Copy size="15" />
                         </button>
                         <button id="prolong" className={this.prolongClasses(fileId)} type="button"
                                 onClick={function () { this.handleProlongToggle(fileId) }.bind(this)}
                                 disabled={!canProlong} data-tip data-for="prolong-tip"
                                 aria-expanded={this.state.prolongFor === fileId}
-                                aria-label="Give it more time">
+                                aria-label={t('files.prolong')}>
                             <MoreTime size="15" />
                         </button>
                         <button id="delete" className="btn btn-icon" type="button"
                                 onClick={function (e) { this.handleDelete(fileId, e) }.bind(this)}
-                                data-tip data-for="delete-tip" aria-label="Delete from the server">
+                                data-tip data-for="delete-tip" aria-label={t('files.delete')}>
                             <Trash size="15" />
                         </button>
                     </div>
@@ -857,14 +907,15 @@ class Upload extends React.Component {
     }
 
     typePicker() {
+        const t = this.props.t
         var types = [
-            {value: 'file', label: 'File', icon: <FileIcon size="14" />},
-            {value: 'text', label: 'Text', icon: <TextIcon size="14" />},
-            {value: 'image', label: 'Image', icon: <ImageIcon size="14" />},
+            {value: 'file', label: t('upload.typeFile'), icon: <FileIcon size="14" />},
+            {value: 'text', label: t('upload.typeText'), icon: <TextIcon size="14" />},
+            {value: 'image', label: t('upload.typeImage'), icon: <ImageIcon size="14" />},
         ]
 
         return (
-            <div className="seg" role="radiogroup" aria-label="Type">
+            <div className="seg" role="radiogroup" aria-label={t('upload.typeFile')}>
                 {types.map(function (type) {
                     return (
                         <React.Fragment key={type.value}>
@@ -882,16 +933,19 @@ class Upload extends React.Component {
     }
 
     contentInput() {
+        const t = this.props.t
+
         if (this.state.type === 'text')
             return (
                 <textarea className="form-control" id="text" ref="text" rows="4" minLength="3"
-                          maxLength={gdprshare.config.contentMaxLength} required autoFocus />
+                          maxLength={gdprshare.config.contentMaxLength} required autoFocus
+                          aria-label={t('upload.titleText')} />
             )
 
         var isImage = this.state.type === 'image'
         var input = isImage
             ? <input className="drop-file" id="image-content" type="file" ref="image"
-                     accept="image/*" onChange={this.handleFile} required />
+                     accept={strippableImageTypes.join(',')} onChange={this.handleFile} required />
             : <input className="drop-file" id="content" type="file" ref="file"
                      onChange={this.handleFile} required />
 
@@ -903,11 +957,11 @@ class Upload extends React.Component {
                     <div className="d-flex flex-column" style={{minWidth: 0, flexGrow: 1}}>
                         <span className="long-text" style={{fontSize: '13px'}}>{this.state.picked.name}</span>
                         <span className="hint">
-                            {gdprshare.formatSize(this.state.picked.size)} · locked before it leaves your device
+                            {gdprshare.formatSize(this.state.picked.size)} · {t('upload.encrypted')}
                         </span>
                     </div>
                     <button type="button" className="btn btn-icon" onClick={this.handleClearFile}
-                            aria-label="Remove the file">
+                            aria-label={t('upload.removeFile')}>
                         <X size="14" />
                     </button>
                 </div>
@@ -918,16 +972,18 @@ class Upload extends React.Component {
                 {input}
                 <UploadIcon size="26" stroke="1.3" />
                 <span className="drop-title">
-                    {isImage ? 'Drop a picture here' : 'Drop a file here'}
+                    {isImage ? t('upload.dropImage') : t('upload.dropFile')}
                 </span>
                 <span className="hint">
-                    or <span className="drop-browse">browse</span> &nbsp;·&nbsp; up to {gdprshare.config.maxFileSize} MB
+                    <span className="drop-browse">{t('upload.browse')}</span>
+                    &nbsp;·&nbsp; {t('upload.sizeLimit', {size: gdprshare.config.maxFileSize})}
                 </span>
             </div>
         )
     }
 
     options() {
+        const t = this.props.t
         var countries = this.state.countryList
             .filter(function (c) {
                 if (!this.state.countrySearch) return true
@@ -946,34 +1002,36 @@ class Upload extends React.Component {
 
                 <div className="row g-3">
                     <div className="col-6 field">
-                        <label htmlFor="count" className="lbl">Downloads</label>
-                        {this.stepper('count', this.state.count, 1, 15, this.handleCountChange, 'up to 15')}
+                        <label htmlFor="count" className="lbl">{t('upload.downloads')}</label>
+                        {this.stepper('count', this.state.count, 1, 15, this.handleCountChange)}
                     </div>
                     <div className="col-6 field">
-                        <label htmlFor="expiry" className="lbl">Expires after</label>
-                        {this.stepper('expiry', this.state.expiry, 1, 14, this.handleExpiryChange, 'days')}
+                        <label htmlFor="expiry" className="lbl">{t('upload.expiry')}</label>
+                        {this.stepper('expiry', this.state.expiry, 1, 14, this.handleExpiryChange, t('upload.days'))}
                     </div>
                 </div>
 
                 <div className="field">
-                    <label htmlFor="geo-restriction" className="lbl">Region</label>
+                    <label htmlFor="geo-restriction" className="lbl">{t('upload.region')}</label>
                     <select className="form-select" id="geo-restriction"
                             value={this.state.geoRestriction}
                             onChange={this.handleGeoRestrictionChange}>
-                        <option value="none">Anywhere</option>
-                        <option value="eea">EU / EEA</option>
-                        <option value="gdpr-aligned">EU / EEA and countries with the same rules</option>
-                        <option value="custom">Countries I pick</option>
+                        <option value="none">{t('upload.regionNone')}</option>
+                        <option value="eea">{t('upload.regionEea')}</option>
+                        <option value="gdpr-aligned">{t('upload.regionAligned')}</option>
+                        <option value="custom">{t('upload.regionCustom')}</option>
                     </select>
-                    <span className="hint">Only people in these countries can open the link</span>
+                    <span className="hint">{t('upload.regionHint')}</span>
                 </div>
 
                 {this.state.geoRestriction === 'custom' && (
                     <div className="panel stack" style={{gap: '8px'}}>
                         <div className="d-flex gap-2">
-                            <input className="form-control" type="text" placeholder="Search countries"
+                            <input className="form-control" type="text" placeholder={t('upload.searchCountries')}
                                    value={this.state.countrySearch} onChange={this.handleCountrySearch} />
-                            <button type="button" className="btn" onClick={this.handleDeselectAll}>Clear</button>
+                            <button type="button" className="btn" onClick={this.handleDeselectAll}>
+                                {t('common.clear')}
+                            </button>
                         </div>
                         <div className="country-picker">
                             {countries.map(function (c) {
@@ -991,33 +1049,36 @@ class Upload extends React.Component {
                             }.bind(this))}
                         </div>
                         <span className="hint">
-                            {this.state.selectedCountries.length} of {this.state.countryList.length} selected
+                            {t('upload.selectedCountries', {
+                                count: this.state.selectedCountries.length,
+                                total: this.state.countryList.length,
+                            })}
                         </span>
                     </div>
                 )}
 
                 <div className="field">
-                    <label htmlFor="delay" className="lbl">Delay</label>
+                    <label htmlFor="delay" className="lbl">{t('upload.delay')}</label>
                     <select className="form-select" id="delay" value={this.state.delay}
                             onChange={this.handleDelayChange}>
-                        <option value="0">No delay</option>
-                        <option value="1">1 minute</option>
-                        <option value="5">5 minutes</option>
-                        <option value="15">15 minutes</option>
-                        <option value="30">30 minutes</option>
-                        <option value="60">1 hour</option>
-                        <option value="120">2 hours</option>
-                        <option value="1440">1 day</option>
+                        <option value="0">{t('upload.delayNone')}</option>
+                        {[1, 5, 15, 30, 60, 120, 1440].map(function (minutes) {
+                            return (
+                                <option key={minutes} value={minutes}>
+                                    {this.delayLabel(minutes)}
+                                </option>
+                            )
+                        }.bind(this))}
                     </select>
-                    <span className="hint">How long before the link starts working</span>
+                    <span className="hint">{t('upload.delayHint')}</span>
                 </div>
 
                 <div className="field">
-                    <label htmlFor="email" className="lbl">Notify by email</label>
+                    <label htmlFor="email" className="lbl">{t('upload.email')}</label>
                     <input className="form-control" id="email" type="email" ref="email"
-                           placeholder="you@example.org (optional)" maxLength="255" minLength="6"
-                           defaultValue={window.localStorage.getItem('email')} />
-                    <span className="hint">One email each time someone opens the link</span>
+                           placeholder={t('upload.emailPlaceholder')} maxLength="255" minLength="6"
+                           value={this.state.email} onChange={this.handleEmailChange} />
+                    <span className="hint">{t('upload.emailHint')}</span>
                 </div>
 
                 {this.state.type === 'file' && (
@@ -1028,11 +1089,8 @@ class Upload extends React.Component {
                             <span className="slider"></span>
                         </span>
                         <label htmlFor="strip" className="d-flex flex-column" style={{cursor: 'pointer'}}>
-                            <span style={{fontSize: '13px'}}>Remove hidden data</span>
-                            <span className="hint">
-                                Location, camera and author details are taken out first. Pictures other
-                                than GIFs are re-encoded, other file types are refused.
-                            </span>
+                            <span style={{fontSize: '13px'}}>{t('upload.strip')}</span>
+                            <span className="hint">{t('upload.stripHint')}</span>
                         </label>
                     </div>
                 )}
@@ -1041,18 +1099,19 @@ class Upload extends React.Component {
                     <div className="panel">
                         <div className="d-flex align-items-center gap-3">
                             <label htmlFor="ephemeral" className="d-flex flex-column" style={{flexGrow: 1, cursor: 'pointer'}}>
-                                <span style={{fontSize: '13px'}}>Disappears after</span>
-                                <span className="hint">How long the picture stays on screen</span>
+                                <span style={{fontSize: '13px'}}>{t('upload.ephemeral')}</span>
+                                <span className="hint">{t('upload.ephemeralHint')}</span>
                             </label>
                             <select className="form-select" id="ephemeral" style={{width: '150px'}}
                                     value={this.state.ephemeral} onChange={this.handleEphemeralChange}>
-                                <option value="0">Stays open</option>
-                                <option value="5">5 seconds</option>
-                                <option value="10">10 seconds</option>
-                                <option value="30">30 seconds</option>
-                                <option value="60">1 minute</option>
-                                <option value="120">2 minutes</option>
-                                <option value="300">5 minutes</option>
+                                <option value="0">{t('upload.ephemeralNone')}</option>
+                                {[5, 10, 30, 60, 120, 300].map(function (seconds) {
+                                    return (
+                                        <option key={seconds} value={seconds}>
+                                            {this.ephemeralLabel(seconds)}
+                                        </option>
+                                    )
+                                }.bind(this))}
                             </select>
                         </div>
                     </div>
@@ -1062,6 +1121,7 @@ class Upload extends React.Component {
     }
 
     render() {
+        const t = this.props.t
         var savedFiles = []
         var files = {}
 
@@ -1083,11 +1143,11 @@ class Upload extends React.Component {
                      onDragOver={this.handleDragOn} onDragLeave={this.handleDragOff}
                      onDragEnd={this.handleDragOff}>
                     <UploadIcon size="26" stroke="1.3" />
-                    <span className="drop-title">Drop it anywhere</span>
+                    <span className="drop-title">{t('upload.dropAnywhere')}</span>
                 </div>
                 <form ref="form" className={this.innerClasses()} onSubmit={this.handleUpload}>
                     <div className="row-between">
-                        <h4>{ {file: 'Send a file', text: 'Send a message', image: 'Send a picture'}[this.state.type] }</h4>
+                        <h4>{t({file: 'upload.titleFile', text: 'upload.titleText', image: 'upload.titleImage'}[this.state.type])}</h4>
                         {this.typePicker()}
                     </div>
 
@@ -1097,17 +1157,15 @@ class Upload extends React.Component {
                     <button type="button" className="btn btn-link-quiet btn-sm align-self-start px-0"
                             onClick={this.toggleOptions} aria-expanded={this.state.optionsOpen}>
                         {this.state.optionsOpen ? <ChevronDown size="15" /> : <ChevronRight size="15" />}
-                        {this.state.optionsOpen ? 'Fewer options' : 'More options'}
+                        {this.state.optionsOpen ? t('upload.fewerOptions') : t('upload.moreOptions')}
                     </button>
 
                     {this.state.optionsOpen && this.options()}
 
                     <input type="submit" ref="submit" className="btn btn-primary btn-block"
-                           value="Encrypt and upload"
+                           value={t('upload.submit')}
                            disabled={this.state.geoRestriction !== 'none' && this.state.selectedCountries.length === 0} />
-                    <span className="hint text-center">
-                        Anyone who has the link can open the file, so pass it on carefully.
-                    </span>
+                    <span className="hint text-center">{t('upload.submitHint')}</span>
                     <Alert error={this.state.error} />
                 </form>
             </div>
@@ -1130,11 +1188,11 @@ class Upload extends React.Component {
                     <div className="col-lg-7">
                         <div className="app-outer files-card">
                             <div className="files-hdr">
-                                <h4>Your uploads</h4>
+                                <h4>{t('files.title')}</h4>
                                 <span className="chip mono">{savedFiles.length}</span>
                                 <div style={{flexGrow: 1}}></div>
                                 <button type="button" className="btn btn-icon" onClick={this.updateValidity}
-                                        aria-label="Check with the server">
+                                        aria-label={t('files.refresh')}>
                                     <Refresh size="15" />
                                 </button>
                             </div>
@@ -1150,4 +1208,4 @@ class Upload extends React.Component {
     }
 }
 
-export default withRouter(Upload)
+export default withTranslation()(withRouter(Upload))

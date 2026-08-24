@@ -4,6 +4,7 @@ import Alert from './Alert'
 import { Tooltip } from 'react-tooltip'
 import { QRCodeSVG } from 'qrcode.react'
 import { withRouter } from './withRouter'
+import { withTranslation } from 'react-i18next'
 import { Copy, Qr, Share, Check, Lock } from './Icons'
 
 class Uploaded extends React.Component {
@@ -13,7 +14,6 @@ class Uploaded extends React.Component {
         this.copyHandler = gdprshare.copyHandler.bind(this)
         this.shareHandler = this.shareHandler.bind(this)
         this.qrHandler = this.qrHandler.bind(this)
-        this.handleTipContent = gdprshare.handleTipContent.bind(this)
         this.state = {
             error: null,
             copy: null,
@@ -31,18 +31,21 @@ class Uploaded extends React.Component {
         var state = this.props.router.location.state
         var downloadLink = state.location + '#' + state.key
 
+        const t = this.props.t
+        var subjectText = t('uploaded.mailSubject', {filename: state.filename})
+
         if (window.navigator.share) {
             var shr = {
                 title: state.filename,
-                text: 'Download ' + state.filename,
+                text: subjectText,
                 url: downloadLink,
             }
             window.navigator.share(shr)
         }
         else {
-            var subject = '?subject=Download %20' + window.encodeURIComponent(state.filename)
-            var body = '&body=Download link' + window.encodeURIComponent(': ' + downloadLink) +
-                '%0aMax downloads' + window.encodeURIComponent(': ' + state.count)
+            var subject = '?subject=' + window.encodeURIComponent(subjectText)
+            var body = '&body=' + window.encodeURIComponent(t('uploaded.mailLink') + ': ' + downloadLink) +
+                '%0a' + window.encodeURIComponent(t('uploaded.mailCount') + ': ' + state.count)
 
             var mailto = 'mailto:' + subject + body
 
@@ -60,14 +63,15 @@ class Uploaded extends React.Component {
     }
 
     chips(state) {
+        const t = this.props.t
         var chips = [
-            state.count + (state.count > 1 ? ' downloads' : ' download'),
+            t('upload.chipDownloads', {count: state.count}),
         ]
 
         if (state.expiry) {
             var expires = new Date()
             expires.setDate(expires.getDate() + parseInt(state.expiry, 10))
-            chips.push('Until ' + expires.toLocaleString())
+            chips.push(t('upload.chipUntil', {date: gdprshare.formatDateTime(expires)}))
         }
         if (state.region)
             chips.push(state.region)
@@ -83,6 +87,7 @@ class Uploaded extends React.Component {
             return null
         }
 
+        const t = this.props.t
         const state = this.props.router.location.state
         const link = state.location + '#' + state.key
 
@@ -93,36 +98,34 @@ class Uploaded extends React.Component {
                         <div className="d-flex align-items-center gap-3">
                             <span className="check-badge"><Check size="16" /></span>
                             <div className="d-flex flex-column" style={{minWidth: 0}}>
-                                <h4>Uploaded</h4>
+                                <h4>{t('uploaded.title')}</h4>
                                 <span className="hint long-text">{state.filename}</span>
                             </div>
                         </div>
 
                         <div className="field">
-                            <label htmlFor="link-key" className="lbl">Download link</label>
+                            <label htmlFor="link-key" className="lbl">{t('uploaded.linkLabel')}</label>
                             <div className="link-group">
                                 <input className="form-control mono-input" id="link-key" type="text"
                                        ref="link-key" readOnly value={link}
                                        aria-describedby="link-key-help" />
                                 <button id="link-copy" onClick={this.copyHandler} type="button"
                                         className="btn btn-icon" data-for="copy-tip" data-tip
-                                        aria-label="Copy the link">
+                                        aria-label={t('common.copyLink')}>
                                     <Copy size="15" />
                                 </button>
                                 <button id="link-qr" onClick={this.qrHandler} type="button"
                                         className="btn btn-icon" data-tip data-for="qrcode-tip"
-                                        aria-label="Show the QR code">
+                                        aria-label={t('uploaded.qr')}>
                                     <Qr size="15" />
                                 </button>
                                 <button id="link-share" onClick={this.shareHandler} type="button"
                                         className="btn btn-icon" data-tip data-for="share-tip"
-                                        aria-label="Share the link">
+                                        aria-label={t('uploaded.share')}>
                                     <Share size="15" />
                                 </button>
                             </div>
-                            <span id="link-key-help" className="hint">
-                                The password is built into the link, so send it exactly as it is.
-                            </span>
+                            <span id="link-key-help" className="hint">{t('uploaded.linkHint')}</span>
                         </div>
 
                         {this.state.dialogOpen && (
@@ -137,10 +140,7 @@ class Uploaded extends React.Component {
 
                         <div className="note">
                             <Lock size="15" />
-                            <span>
-                                Anyone who gets this link can open the file, so send it somewhere only
-                                the recipient can read.
-                            </span>
+                            <span>{t('uploaded.note')}</span>
                         </div>
 
                         <Alert error={this.state.error} />
@@ -148,15 +148,15 @@ class Uploaded extends React.Component {
                 </div>
 
                 <div className="text-center" style={{marginTop: '16px'}}>
-                    <Link to="/">Upload another file</Link>
+                    <Link to="/">{t('uploaded.another')}</Link>
                 </div>
 
                 <Tooltip id="copy-tip" openOnClick={false} render={() => this.state.copy} delayHide={1000} />
-                <Tooltip id="qrcode-tip" variant="info" place="bottom" content="Show the QR code" />
-                <Tooltip id="share-tip" variant="info" place="bottom" content="Share" />
+                <Tooltip id="qrcode-tip" variant="info" place="bottom" content={t('uploaded.qr')} />
+                <Tooltip id="share-tip" variant="info" place="bottom" content={t('uploaded.share')} />
             </div>
         )
     }
 }
 
-export default withRouter(Uploaded)
+export default withTranslation()(withRouter(Uploaded))
