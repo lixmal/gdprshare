@@ -3,7 +3,7 @@
         "title": "Någon har delat en fil med dig",
         "password": "Lösenord",
         "submit": "Ladda ner",
-        "success": "Nedladdningen lyckades, kontrollera din nedladdningsmapp",
+        "success": "Sparad. Du hittar filen bland dina nedladdningar.",
         "viewImage": "Visa bild",
         "uploadLink": "Ladda upp en fil",
         "close": "Stäng",
@@ -13,6 +13,7 @@
             "decrypting": "Dekrypterar…"
         },
         "subtitle": "Filen låses upp här på din enhet",
+        "goneTitle": "Den här länken fungerar inte längre",
         "passwordHint": "Länken du fick fyller vanligtvis i detta. Klistra in det om avsändaren skickade det separat."
     },
     "shell": {

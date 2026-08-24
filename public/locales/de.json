@@ -3,7 +3,7 @@
         "title": "Jemand hat eine Datei mit dir geteilt",
         "password": "Passwort",
         "submit": "Herunterladen",
-        "success": "Erfolgreich heruntergeladen, prüfen Sie Ihren Download-Ordner",
+        "success": "Gespeichert. Die Datei liegt in deinen Downloads.",
         "viewImage": "Bild anzeigen",
         "uploadLink": "Datei hochladen",
         "close": "Schließen",
@@ -13,6 +13,7 @@
             "decrypting": "Wird entschlüsselt…"
         },
         "subtitle": "Die Datei wird hier auf deinem Gerät entschlüsselt",
+        "goneTitle": "Dieser Link funktioniert nicht mehr",
         "passwordHint": "Der Link, den du bekommen hast, füllt das normalerweise aus. Füge es ein, wenn es separat geschickt wurde."
     },
     "shell": {

@@ -3,7 +3,7 @@
         "title": "Alguém partilhou um ficheiro contigo",
         "password": "Palavra-passe",
         "submit": "Transferir",
-        "success": "Transferência concluída, verifique a sua pasta de transferências",
+        "success": "Guardado. Encontras o ficheiro nas tuas transferências.",
         "viewImage": "Ver imagem",
         "uploadLink": "Carregar um ficheiro",
         "close": "Fechar",
@@ -13,6 +13,7 @@
             "decrypting": "A desencriptar…"
         },
         "subtitle": "O ficheiro é decifrado aqui, no teu dispositivo",
+        "goneTitle": "Este link já não funciona",
         "passwordHint": "O link que recebeste normalmente preenche isto. Cola-o se te foi enviado em separado."
     },
     "shell": {

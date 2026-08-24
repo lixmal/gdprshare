@@ -132,6 +132,22 @@ async function fetchLocale(locale) {
     }
 }
 
+// Codes that are the system working as designed rather than something going
+// wrong: the link ran out, was deleted, or is not open yet. They read as a
+// notice instead of an error.
+const expectedStates = [
+    'file_not_found',
+    'file_not_found_or_limit_exceeded',
+    'download_count_expired',
+    'file_not_yet_downloadable',
+    'download_location_forbidden',
+]
+
+// Whether a server error response describes an expected end state.
+export function serverErrorIsExpected(data) {
+    return !!data && expectedStates.indexOf(data.code) !== -1
+}
+
 // Looks up the message for a server error response. Falls back to the English
 // message the API sent whenever the code is missing or not translated yet, so
 // a new backend error is always readable even before its locale entry exists.

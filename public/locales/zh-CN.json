@@ -3,7 +3,7 @@
         "title": "有人给你分享了一个文件",
         "password": "密码",
         "submit": "下载",
-        "success": "下载成功，请查看您的下载文件夹",
+        "success": "已保存。文件在你的下载里。",
         "viewImage": "查看图片",
         "uploadLink": "上传文件",
         "close": "关闭",
@@ -13,6 +13,7 @@
             "decrypting": "正在解密…"
         },
         "subtitle": "文件在你自己的设备上解密",
+        "goneTitle": "这个链接已经失效",
         "passwordHint": "你收到的链接通常已经带上了它。如果是单独发来的，就粘贴到这里。"
     },
     "shell": {

@@ -451,7 +451,7 @@ test.describe('Full E2E Upload and Download Flow', () => {
     // terse wire message
     const en = JSON.parse(
       fs.readFileSync(path.join(__dirname, '..', 'public', 'locales', 'en.json'), 'utf8'));
-    const errorMessage = downloadPage.locator('.alert-danger');
+    const errorMessage = downloadPage.locator('.alert-notice');
     await expect(errorMessage).toBeVisible({ timeout: 5000 });
     await expect(errorMessage).toContainText(en.errors.server.download_location_forbidden);
 

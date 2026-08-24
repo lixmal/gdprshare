@@ -3,7 +3,7 @@
         "title": "有人分享了一個檔案給你",
         "password": "密碼",
         "submit": "下載",
-        "success": "下載成功，請查看您的下載資料夾",
+        "success": "已儲存。檔案在你的下載裡。",
         "viewImage": "檢視圖片",
         "uploadLink": "上傳檔案",
         "close": "關閉",
@@ -13,6 +13,7 @@
             "decrypting": "正在解密…"
         },
         "subtitle": "檔案在你自己的裝置上解密",
+        "goneTitle": "這個連結已經失效",
         "passwordHint": "你收到的連結通常已經帶著它。如果是另外傳來的，就貼到這裡。"
     },
     "shell": {

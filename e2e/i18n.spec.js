@@ -140,7 +140,9 @@ test.describe('Download page localization', () => {
     // no such file: the API answers with code file_not_found_or_limit_exceeded
     await page.goto('/d/thisfiledoesnotexist#AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
 
-    const alert = page.locator('.alert-danger');
+    // an exhausted or unknown link is an expected end state, so it reads as a
+    // notice rather than an error
+    const alert = page.locator('.alert-notice');
     await expect(alert).toBeVisible({ timeout: 10000 });
     await expect(alert).toContainText(de.errors.server.file_not_found_or_limit_exceeded);
     // the terse English API message must not leak through
@@ -164,7 +166,7 @@ test.describe('Download page localization', () => {
 
     // now the link is exhausted
     await page.goto(url);
-    const alert = page.locator('.alert-danger');
+    const alert = page.locator('.alert-notice');
     await expect(alert).toBeVisible({ timeout: 10000 });
     await expect(alert).toContainText(fr.errors.server.download_count_expired);
     // the terse English API message must not leak through

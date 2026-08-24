@@ -3,7 +3,7 @@
         "title": "Iemand heeft een bestand met je gedeeld",
         "password": "Wachtwoord",
         "submit": "Downloaden",
-        "success": "Download voltooid, controleer je downloadmap",
+        "success": "Opgeslagen. Je vindt het bestand bij je downloads.",
         "viewImage": "Afbeelding bekijken",
         "uploadLink": "Een bestand uploaden",
         "close": "Sluiten",
@@ -13,6 +13,7 @@
             "decrypting": "Ontsleutelen…"
         },
         "subtitle": "Het bestand wordt hier op je apparaat ontsleuteld",
+        "goneTitle": "Deze link werkt niet meer",
         "passwordHint": "De link die je kreeg vult dit meestal in. Plak het als de afzender het apart heeft gestuurd."
     },
     "shell": {

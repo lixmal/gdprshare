@@ -117,6 +117,14 @@ export const AlertIcon = (p) => (
     </Icon>
 )
 
+export const Info = (p) => (
+    <Icon {...p}>
+        <circle cx="12" cy="12" r="8.5" />
+        <path d="M12 11v5" />
+        <circle cx="12" cy="8" r="0.6" fill="currentColor" />
+    </Icon>
+)
+
 export const ChevronDown = (p) => (
     <Icon {...p}>
         <path d="M6 9l6 6 6-6" />

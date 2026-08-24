@@ -3,7 +3,7 @@
         "title": "Có người chia sẻ một tệp cho bạn",
         "password": "Mật khẩu",
         "submit": "Tải xuống",
-        "success": "Tải xuống thành công, hãy kiểm tra thư mục tải xuống của bạn",
+        "success": "Đã lưu. Bạn sẽ thấy tệp trong phần tải xuống.",
         "viewImage": "Xem ảnh",
         "uploadLink": "Tải tệp lên",
         "close": "Đóng",
@@ -13,6 +13,7 @@
             "decrypting": "Đang giải mã…"
         },
         "subtitle": "Tệp được giải mã ngay trên máy của bạn",
+        "goneTitle": "Liên kết này không còn dùng được",
         "passwordHint": "Liên kết bạn nhận được thường đã có sẵn. Dán vào đây nếu người gửi gửi riêng."
     },
     "shell": {

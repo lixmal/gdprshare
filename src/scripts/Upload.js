@@ -835,6 +835,7 @@ class Upload extends React.Component {
 
         let state
         let canProlong = false
+        let ended = false
 
         if (file.error) {
             console.log(file.error)
@@ -845,6 +846,7 @@ class Upload extends React.Component {
             let isInitDate = expiryDate.getTime() == new Date('0001-01-01T00:00:00Z').getTime()
             let isExpired = isInitDate || file.count < 1 || Date.now() > expiryDate
 
+            ended = isExpired
             if (isExpired) {
                 state = (
                     <span className="expiry expiry-expired">
@@ -872,7 +874,7 @@ class Upload extends React.Component {
         }
 
         return (
-            <div className="file-item card" key={fileId}>
+            <div className={ended ? 'file-item card file-item-ended' : 'file-item card'} key={fileId}>
                 <div className="file-item-top">
                     <div className="d-flex flex-column" style={{minWidth: 0, flexGrow: 1}}>
                         <span className="file-name long-text">{saved.filename}</span>

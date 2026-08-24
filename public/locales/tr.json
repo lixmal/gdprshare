@@ -3,7 +3,7 @@
         "title": "Biri seninle bir dosya paylaştı",
         "password": "Parola",
         "submit": "İndir",
-        "success": "İndirme başarılı, indirilenler klasörünüzü kontrol edin",
+        "success": "Kaydedildi. Dosyayı indirilenler arasında bulacaksın.",
         "viewImage": "Resmi görüntüle",
         "uploadLink": "Dosya yükle",
         "close": "Kapat",
@@ -13,6 +13,7 @@
             "decrypting": "Şifre çözülüyor…"
         },
         "subtitle": "Dosyanın şifresi burada, kendi cihazında çözülüyor",
+        "goneTitle": "Bu bağlantı artık çalışmıyor",
         "passwordHint": "Sana gelen bağlantı bunu genelde kendisi doldurur. Ayrı gönderildiyse buraya yapıştır."
     },
     "shell": {
