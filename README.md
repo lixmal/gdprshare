@@ -5,52 +5,106 @@
   <img src="misc/screenshots/upload-dark.png" alt="Sending a file, dark theme" width="49%">
 </p>
 
+Send someone a file without putting it in an email. The browser encrypts it
+before it leaves the device, the server only ever holds ciphertext, and the
+share deletes itself once it has been downloaded often enough or has sat around
+long enough.
+
 ## DESCRIPTION
-GDPRShare is a web application that was developed to aid in avoiding of sending sensitive data via email. Some issues with email are:
 
-* email transport encryption is known to have [issues](https://www.digicert.com/blog/striptls-attacks-and-email-security/), especially before MTA-STS was introduced. Unfortuantely MTA-STS is not very widespread yet and all involved MTAs need to be configured correctly for email transport to be secure.
-* email end-to-end encryption is hard, especially between parties that previously didn't have any contact
-* emails are usually stored in some unencrypted mailbox, which might become contaminated at some point in the future
-* deletion of emails is mostly reversible, as shredding is rare
-* some laws require businesses to archive emails (with sensitive data) for a very long time (up to 10 years), which might not be desirable for individuals
+### Why not email
 
-GDPRShare tries to provide file sharing capabilities that help with above problems and to comply with the GDPR law.
-It does so by:
+* transport encryption has known
+  [issues](https://www.digicert.com/blog/striptls-attacks-and-email-security/),
+  and MTA-STS is still not widespread: every MTA on the way has to be
+  configured correctly for the hop to be secure
+* end-to-end encryption is hard, especially between parties that never had
+  contact before
+* mail usually rests in an unencrypted mailbox, which may be breached later
+* deleting mail is mostly reversible, shredding is rare
+* some businesses have to archive mail with sensitive data for up to ten years,
+  which an individual may not want
 
-* encrypting files on the client side (AES-GCM), so files don't need to be shredded on the server side after deletion (NOTE: Usage of the web client won't protect from contaminated servers or malicious server operators)
-* shredding files nevertheless (not yet implemented)
-* providing records of used encryption in the transmission from sender to server to receiver. Implemented by sending an email to the sender upon successful download, including TLS version and ciphers used for both sender and receiver
-* automatically deleting files after a period of time
-* automatically deleting files after file was downloaded a specified amount of times
-* letting the sender give a share more time or more downloads afterwards, never beyond what a fresh upload is allowed
-* conviently notifies sender on each download
-* stripping metadata in the browser before upload: EXIF and GPS data from images (always for the image type, opt-in for the file type), comment and XMP blocks from GIFs without touching the animation, document info and XMP data from PDFs
-* localized interface in 22 languages, selected from the browser's language preferences. API errors carry a stable code so the recipient reads them in their own language
-* the interface follows the system light/dark preference and can be switched by hand. Its fonts are served from the same host as the app, so no third party learns who is sending or downloading what
+See also [GDPR Art. 5 (2.)](https://gdpr-info.eu/art-5-gdpr/) and
+[GDPR Art. 24 (1.)](https://gdpr-info.eu/art-24-gdpr/) for the accountability
+aspects.
 
-See also [GDPR Art. 5 (2.)](https://gdpr-info.eu/art-5-gdpr/) and [GDPR Art. 24 (1.)](https://gdpr-info.eu/art-24-gdpr/) for the accountability aspects.
+### Encryption
 
-To maximize security, the file URL and the password should be distributed by the sender via two different channels (for example email + phone or email + messenger).
-Using a dedicated (non-web) client would also make file transmission end-to-end encrypted (work in progress).
+* files are encrypted in the browser (AES-GCM), so nothing has to be shredded
+  on the server after deletion
+* the key lives in the link fragment and never reaches the server
+* shredding the stored file as well is not implemented yet
+* the web client cannot protect against a contaminated server or a malicious
+  operator: the code doing the encrypting is served by that same server on every
+  visit. A dedicated (non-web) client would, and is work in progress
 
-It is recommended to allow TLS1.2 and above only. As the config options are not yet available, it is advisable to use a reverse proxy in front of the application.
+### Limits on a share
+
+* 1 to 15 downloads and 1 to 14 days, whichever runs out first
+* the sender can add days or downloads afterwards, never beyond what a fresh
+  upload is allowed
+* a link can be held back for a while before it starts working
+* downloads can be limited to the EU/EEA, to countries with the same rules, or
+  to a hand-picked list (needs a GeoIP database, see `geoippath`)
+* uploads and downloads are rate limited per IP address
+
+### Metadata
+
+Stripped in the browser, before anything is encrypted:
+
+* images: EXIF and GPS data, always for the image type, opt-in for files
+* GIFs: comment and XMP blocks, without touching the animation
+* PDFs: document info and XMP data
+
+A picture in a format that cannot be stripped is refused rather than uploaded
+as it is.
+
+### Records and notifications
+
+* the sender is notified on each download attempt
+* the notification carries the TLS version and ciphers of both sides, which is
+  the evidence half of the accountability duty
+
+### The interface
+
+* localized in 22 languages, picked from the browser's preferences. API errors
+  carry a stable code, so the recipient reads them in their own language
+* follows the system light/dark preference and can be switched by hand
+* fonts are served from the same host as the app, so no third party learns who
+  is sending or downloading what
+* a picture can be shown inline and taken off the screen again after a few
+  seconds
+
+### Handing over a share
+
+Anyone holding the whole link can open the file, so treat the link as the file
+itself. For something sensitive, split it: everything after the `#` is the
+password, so send the link without that part and pass it on by another route,
+for example the link by email and the password by phone. The download page asks
+for the password when the link does not carry it.
 
 ## REQUIREMENTS
 
 ### Client
-* a modern web browser (not Internet Explorer/Edge)
+
+* a current browser (Internet Explorer and pre-Chromium Edge are out)
+* HTTPS, or localhost: the Web Crypto API the client encrypts with only exists
+  in a secure context
 
 ### Server
-* nothing if build statically
-* some container engine if run as container image
+
+* nothing if built statically
+* a container engine if run as a container image
 
 ### Building
+
 * go compiler
 * c compiler
 * npm
 
-
 ## BUILDING
+
 Build the binary:
 
     go build \
@@ -61,24 +115,46 @@ or
     go build -ldflags="-extldflags=-static" \
       -o gdprshare github.com/lixmal/gdprshare/cmd/gdprshare
 
-
-
 Afterwards build the js bundle:
 
-`npm install`
-
-`npm run build`
+    npm install
+    npm run build
 
 ## RUN
+
 Run locally:
-`GIN_MODE=release ./gdprshare`
 
-gdprshare will look for a `config.yml` in it's working directory, but you can specify `gdprshare -config <config file>` to change this.
+    GIN_MODE=release ./gdprshare
 
-Take a look at `misc/gdprshare.service` for an example systemd unit and `misc/crontab` for the cronjob to delete expired files.
+gdprshare looks for a `config.yml` in its working directory; `gdprshare -config
+<config file>` points it somewhere else.
+
+Take a look at `misc/gdprshare.service` for an example systemd unit and
+`misc/crontab` for the cronjob that deletes expired files.
 
 Alternatively run the [docker image](https://ghcr.io/lixmal/gdprshare):
 
-`sudo docker run -p 8080:8080 -v conf/path:/conf -v data/path:/data ghcr.io/lixmal/gdprshare`
+    sudo docker run -p 8080:8080 -v conf/path:/conf -v data/path:/data ghcr.io/lixmal/gdprshare
 
-The `/data` volume needs to be writable by the `nobody` user, and it requires a `files` directory inside (automatically created).
+The `/data` volume has to be writable by uid 1000, the user the image runs as,
+and needs a `files` directory inside it (created automatically).
+
+### TLS
+
+Allow TLS 1.2 and above only. The server checks this itself: `tlsvalidation` in
+`config.yml` sets the minimum version and a cipher blocklist, and refuses a
+transfer that does not meet them. Behind a reverse proxy it reads the version
+and cipher from the headers named under `header`, so the proxy has to set them.
+
+## TRANSLATIONS
+
+The interface ships in 22 languages, chosen from the browser's language
+preferences; `?lang=<code>` overrides that. Adding a language means dropping a
+`<code>.json` into `public/locales` and adding the code to `supportedLocales` in
+`src/scripts/i18n.js`.
+
+    npm run check:locales
+
+fails when a language misses a key English has, keeps one English dropped, still
+carries the English source string, loses a placeholder in translation, or when
+the code asks for a key no locale defines. CI runs it on every pull request.
