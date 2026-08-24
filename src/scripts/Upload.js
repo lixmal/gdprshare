@@ -43,6 +43,7 @@ class Upload extends React.Component {
         this.state = {
             error: null,
             mask: false,
+            filesBusy: false,
             copy: null,
             fileInfo: null,
             type: 'file',
@@ -108,6 +109,7 @@ class Upload extends React.Component {
 
         this.setState({
             error: null,
+            filesBusy: true,
         })
 
         let response
@@ -134,7 +136,8 @@ class Upload extends React.Component {
         }
 
         this.setState({
-            fileInfo: fetchData.fileInfo
+            fileInfo: fetchData.fileInfo,
+            filesBusy: false,
         })
     }
 
@@ -143,6 +146,14 @@ class Upload extends React.Component {
             'app-outer': true,
             'drag-outer': this.state.isDragOver,
             'loading-mask': this.state.mask,
+        })
+    }
+
+    filesClasses() {
+        return Classnames({
+            'app-outer': true,
+            'files-card': true,
+            'loading-mask': this.state.filesBusy,
         })
     }
 
@@ -352,11 +363,11 @@ class Upload extends React.Component {
     }
 
     async handleDelete(fileID, event) {
-        if (this.state.mask)
+        if (this.state.filesBusy)
             return
 
         this.setState({
-            mask: true,
+            filesBusy: true,
             error: null
         })
 
@@ -381,7 +392,7 @@ class Upload extends React.Component {
         if (response.ok || response.status === 404) {
             this.deleteFileId(fileID)
             this.setState({
-                mask: false,
+                filesBusy: false,
             })
         } else {
             try {
@@ -427,7 +438,7 @@ class Upload extends React.Component {
     }
 
     async handleProlong(fileId) {
-        if (this.state.mask)
+        if (this.state.filesBusy)
             return
 
         var days = this.state.prolongDays
@@ -436,7 +447,7 @@ class Upload extends React.Component {
             return
 
         this.setState({
-            mask: true,
+            filesBusy: true,
             error: null,
         })
 
@@ -473,7 +484,7 @@ class Upload extends React.Component {
         fileInfo[fileId] = fetchData.fileInfo
 
         this.setState({
-            mask: false,
+            filesBusy: false,
             fileInfo: fileInfo,
             prolongFor: null,
         })
@@ -1188,7 +1199,7 @@ class Upload extends React.Component {
                         {uploadCard}
                     </div>
                     <div className="col-lg-7">
-                        <div className="app-outer files-card">
+                        <div className={this.filesClasses()}>
                             <div className="files-hdr">
                                 <h4>{t('files.title')}</h4>
                                 <span className="chip mono">{savedFiles.length}</span>
