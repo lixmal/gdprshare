@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"text/template"
+	"time"
 
 	"github.com/jinzhu/configor"
 )
@@ -37,8 +38,18 @@ type Config struct {
 		TLSVersion     string `default:"X-TLS-Version"`
 		TLSCipherSuite string `default:"X-TLS-CipherSuite"`
 	}
-	SaveClientInfo       bool `default:"false"`
-	ShowCountdown        bool `default:"false"`
+	// Deleting expired files from inside the server, so a container does not
+	// need a cron job next to it. The -cleanup flag stays for setups that
+	// would rather drive it from outside.
+	Cleanup struct {
+		Enabled  bool   `default:"true"`
+		Interval string `default:"1h"`
+	}
+	SaveClientInfo bool `default:"false"`
+	ShowCountdown  bool `default:"false"`
+	// Operator pages the footer links to, left out of the footer when empty.
+	PrivacyURL           string
+	ImprintURL           string
 	GeoIPPath            string
 	DisallowedUserAgents []string
 	RateLimit            struct {
@@ -78,6 +89,29 @@ func New(path string) (*Config, error) {
 
 func (c *Config) validate() error {
 	// try parsing the mail body template
-	_, err := template.New("mailbody").Parse(c.Mail.Body)
-	return err
+	if _, err := template.New("mailbody").Parse(c.Mail.Body); err != nil {
+		return err
+	}
+
+	if c.Cleanup.Enabled {
+		interval, err := c.CleanupInterval()
+		if err != nil {
+			return err
+		}
+		if interval < time.Minute {
+			return fmt.Errorf("cleanup interval %s is below the one minute minimum", interval)
+		}
+	}
+
+	return nil
+}
+
+// CleanupInterval is how often expired files are swept, parsed from the config.
+func (c *Config) CleanupInterval() (time.Duration, error) {
+	interval, err := time.ParseDuration(c.Cleanup.Interval)
+	if err != nil {
+		return 0, fmt.Errorf("parse cleanup interval %q: %w", c.Cleanup.Interval, err)
+	}
+
+	return interval, nil
 }

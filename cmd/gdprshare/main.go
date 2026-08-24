@@ -78,6 +78,18 @@ func main() {
 
 	srv := server.New(db, conf)
 
+	cleanupCtx, stopCleanup := context.WithCancel(context.Background())
+	defer stopCleanup()
+
+	if conf.Cleanup.Enabled {
+		interval, err := conf.CleanupInterval()
+		if err != nil {
+			log.Fatalf("Cleanup interval: %s\n", err)
+		}
+		log.Printf("Deleting expired files every %s\n", interval)
+		go misc.RunCleanup(cleanupCtx, db, conf, interval)
+	}
+
 	go func() {
 		err := srv.Start()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
@@ -90,6 +102,8 @@ func main() {
 	<-sig
 
 	log.Println("Server shutdown ...")
+
+	stopCleanup()
 
 	ctx, cancel := context.WithTimeout(context.Background(), GracefulTimeout)
 	if err := srv.Shutdown(ctx); err != nil {

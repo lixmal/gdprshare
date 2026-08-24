@@ -1,9 +1,11 @@
 package misc
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"time"
@@ -62,4 +64,25 @@ func Cleanup(db *database.Database, config *config.Config) []error {
 	}
 
 	return errors
+}
+
+// RunCleanup sweeps expired files until the context is cancelled, starting with
+// one sweep right away: a server that is restarted often would otherwise never
+// reach the end of an interval. Errors are logged and the loop carries on, since
+// one unreadable file must not stop the rest from being deleted.
+func RunCleanup(ctx context.Context, db *database.Database, config *config.Config, interval time.Duration) {
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+
+	for {
+		for _, err := range Cleanup(db, config) {
+			log.Printf("File cleanup: %s\n", err)
+		}
+
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+		}
+	}
 }

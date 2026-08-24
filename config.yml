@@ -79,6 +79,16 @@ header:
 # saves receiver IP addr and user agent in database
 saveclientinfo: false
 
+# deletes expired files from inside the server, so no cron job is needed.
+# the -cleanup flag stays available for setups that drive it from outside.
+cleanup:
+    enabled:  true
+    interval: '1h'
+
+# linked in the page footer, left out when empty
+privacyurl: ''
+imprinturl: ''
+
 # show the closing countdown on ephemeral images during download
 showcountdown: false
 
