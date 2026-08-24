@@ -429,8 +429,10 @@ class Upload extends React.Component {
         const t = this.props.t
         var records = this.state.records[fileId]
 
+        // nothing is drawn while it is being read: it is one small request, and
+        // an ellipsis that lingers reads like a fault
         if (!records)
-            return <div className="record-panel"><span className="hint">…</span></div>
+            return null
 
         if (records.length < 1)
             return <div className="record-panel"><span className="hint">{t('files.recordEmpty')}</span></div>

@@ -693,6 +693,7 @@ func (s *Server) downloadRecords(c *gin.Context) {
 	}
 
 	records := make([]DownloadRecord, 0, len(clients))
+	countries := make(map[string]string, len(clients))
 	for _, client := range clients {
 		records = append(records, DownloadRecord{
 			Time:       client.CreatedAt,
@@ -702,7 +703,7 @@ func (s *Server) downloadRecords(c *gin.Context) {
 			UserAgent:  client.UserAgent,
 			TLSVersion: tlsVersionName(client.TLSVersion),
 			TLSCipher:  tlsCipherName(client.TLSCipherSuite),
-			Location:   s.locationOf(client.Addr),
+			Location:   s.locationOf(client.Addr, countries),
 		})
 	}
 
@@ -761,26 +762,28 @@ func tlsCipherName(stored string) string {
 	return tls.CipherSuiteName(uint16(value))
 }
 
-// Where a download came from, as far as the local database can tell. Empty when
-// no database is configured or the address was never stored.
-func (s *Server) locationOf(addr string) string {
+// The country a download came from, as far as the local database can tell.
+// Country and no finer: that is the granularity the region restriction works at,
+// and the record has no purpose that a city would serve better. Empty when no
+// database is configured or the address was never stored.
+func (s *Server) locationOf(addr string, seen map[string]string) string {
 	if s.config.GeoIPPath == "" || addr == "" {
 		return ""
 	}
 
-	location, err := geoip.LookupIP(s.config.GeoIPPath, addr)
-	if err != nil || location == nil {
-		return ""
+	// the same address usually appears more than once in a record, and every
+	// lookup opens the database file
+	if country, ok := seen[addr]; ok {
+		return country
 	}
 
-	parts := make([]string, 0, 2)
-	for _, part := range []string{location.City, location.Country} {
-		if part != "" {
-			parts = append(parts, part)
-		}
+	country := ""
+	if location, err := geoip.LookupIP(s.config.GeoIPPath, addr); err == nil && location != nil {
+		country = location.Country
 	}
+	seen[addr] = country
 
-	return strings.Join(parts, ", ")
+	return country
 }
 
 func expiryDate(f *database.StoredFile) time.Time {

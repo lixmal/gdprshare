@@ -866,3 +866,24 @@ func TestUserAgentBlockWorksWithoutClientInfo(t *testing.T) {
 	assert.Equal(t, string(ErrCodeUserAgentBlocked), resp.Downloads[0].Reason)
 	assert.Equal(t, "none", resp.Downloads[0].UserAgent)
 }
+
+// TestLocationStaysAtCountry keeps the record at the granularity the region
+// restriction works at, and no finer.
+func TestLocationStaysAtCountry(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	// no GeoIP database is configured here, so nothing is placed at all
+	require.Empty(t, srv.config.GeoIPPath)
+
+	seen := map[string]string{}
+	assert.Equal(t, "", srv.locationOf("203.0.113.7", seen))
+	assert.Empty(t, seen, "an unconfigured lookup caches nothing")
+
+	// with a database configured, a repeated address is looked up once
+	srv.config.GeoIPPath = "/nonexistent/GeoLite2-City.mmdb"
+	assert.Equal(t, "", srv.locationOf("203.0.113.7", seen))
+	require.Contains(t, seen, "203.0.113.7")
+	seen["203.0.113.7"] = "Germany"
+	assert.Equal(t, "Germany", srv.locationOf("203.0.113.7", seen))
+}
