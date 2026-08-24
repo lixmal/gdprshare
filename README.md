@@ -17,6 +17,7 @@ It does so by:
 * providing records of used encryption in the transmission from sender to server to receiver. Implemented by sending an email to the sender upon successful download, including TLS version and ciphers used for both sender and receiver
 * automatically deleting files after a period of time
 * automatically deleting files after file was downloaded a specified amount of times
+* letting the sender give a share more time or more downloads afterwards, never beyond what a fresh upload is allowed
 * conviently notifies sender on each download
 * stripping metadata in the browser before upload: EXIF and GPS data from images (always for the image type, opt-in for the file type), comment and XMP blocks from GIFs without touching the animation, document info and XMP data from PDFs
 * localized download page in 20 languages, selected from the browser's language preferences. API errors carry a stable code so the recipient reads them in their own language
