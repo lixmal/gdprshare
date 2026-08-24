@@ -96,6 +96,7 @@ test.describe('Download progress and loading feedback', () => {
     await expect(statusSeen).toHaveText(
       new RegExp(`${en.download.status.downloading}|${en.download.status.decrypting}`));
 
+    await downloadPage.unrouteAll({ behavior: 'ignoreErrors' });
     await downloadPage.close();
   });
 
@@ -108,6 +109,7 @@ test.describe('Download progress and loading feedback', () => {
     await expect(downloadPage.locator('.alert-success')).toBeVisible({ timeout: 15000 });
     await expect(downloadPage.locator('.download-status')).toHaveCount(0);
 
+    await downloadPage.unrouteAll({ behavior: 'ignoreErrors' });
     await downloadPage.close();
   });
 
@@ -137,6 +139,7 @@ test.describe('Download progress and loading feedback', () => {
     await expect(status).toHaveText(
       new RegExp(`${de.download.status.downloading}|${de.download.status.decrypting}`));
 
+    await downloadPage.unrouteAll({ behavior: 'ignoreErrors' });
     await downloadPage.close();
     await context.close();
   });
