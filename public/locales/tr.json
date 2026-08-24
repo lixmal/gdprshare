@@ -1,9 +1,9 @@
 {
     "download": {
-        "title": "Biri seninle bir dosya paylaştı",
+        "title": "Biri sizinle bir dosya paylaştı",
         "password": "Parola",
         "submit": "İndir",
-        "success": "Kaydedildi. Dosyayı indirilenler arasında bulacaksın.",
+        "success": "Kaydedildi. Dosyayı indirilenler arasında bulacaksınız.",
         "viewImage": "Resmi görüntüle",
         "uploadLink": "Dosya yükle",
         "close": "Kapat",
@@ -14,7 +14,7 @@
         },
         "subtitle": "Dosyanın şifresi burada, kendi cihazında çözülüyor",
         "goneTitle": "Bu bağlantı artık çalışmıyor",
-        "passwordHint": "Sana gelen bağlantı bunu genelde kendisi doldurur. Ayrı gönderildiyse buraya yapıştır."
+        "passwordHint": "Size gelen bağlantı bunu genelde kendisi doldurur. Ayrı gönderildiyse buraya yapıştırın."
     },
     "shell": {
         "tagline": "Cihazınızdan ayrılmadan önce şifrelenir",
@@ -96,7 +96,7 @@
         "delayHint": "Bağlantının çalışmaya başlamasına ne kadar var",
         "delayNone": "Gecikme yok",
         "email": "E-postayla haber ver",
-        "emailPlaceholder": "sen@example.org (isteğe bağlı)",
+        "emailPlaceholder": "ad@example.org (isteğe bağlı)",
         "emailHint": "Bağlantı her açıldığında bir e-posta",
         "strip": "Gizli verileri kaldır",
         "stripHint": "Konum, kamera ve yazar bilgisi önce çıkarılır. GIF dışındaki resimler yeniden kodlanır, diğer dosya türleri kabul edilmez.",
@@ -104,7 +104,7 @@
         "ephemeralHint": "Resmin ekranda ne kadar kaldığı",
         "ephemeralNone": "Açık kalır",
         "submit": "Şifrele ve yükle",
-        "submitHint": "Bağlantıya sahip olan herkes dosyayı açabilir, o yüzden dikkatli paylaş.",
+        "submitHint": "Bağlantıya sahip olan herkes dosyayı açabilir, o yüzden dikkatli paylaşın.",
         "chipDownloads": "İndirme: {{count}}",
         "chipUntil": "{{date}} tarihine kadar",
         "chipRegionAny": "Her bölge",
@@ -114,7 +114,7 @@
         "chipDisappears": "{{duration}} sonra kaybolur",
         "tooBig": "Dosya çok büyük. Bu sunucu en fazla {{size}} MiB alıyor.",
         "stripFailed": "Gizli veriler kaldırılamadı: {{message}}",
-        "notStrippable": "{{type}} biçiminden gizli veriler kaldırılamıyor, bu yüzden resim olarak gönderilemez. Dosya olarak gönder.",
+        "notStrippable": "{{type}} biçiminden gizli veriler kaldırılamıyor, bu yüzden resim olarak gönderilemez. Dosya olarak gönderin.",
         "unknownType": "bu biçim"
     },
     "files": {
@@ -127,13 +127,13 @@
         "downloadsLeftOf": "Kalan indirme: {{total}} üzerinden {{count}}",
         "noneLeft": "İndirme hakkı kalmadı",
         "gone": "Sunucuda yok",
-        "notYours": "Artık senin değil",
+        "notYours": "Artık sizin değil",
         "until": "{{date}} tarihine kadar",
         "moreDays": "Daha fazla gün",
         "moreDownloads": "Daha fazla indirme",
         "left": "({{count}} kaldı)",
         "prolongNew": "Yeni",
-        "prolongEmpty": "Gün ya da indirme seç",
+        "prolongEmpty": "Gün ya da indirme seçin",
         "prolongSubmit": "Süreyi uzat",
         "less": "Bir azalt",
         "more": "Bir arttır",
@@ -142,10 +142,10 @@
     "uploaded": {
         "title": "Yüklendi",
         "linkLabel": "İndirme bağlantısı",
-        "linkHint": "Şifre bağlantının içinde, bu yüzden bağlantıyı olduğu gibi gönder.",
+        "linkHint": "Şifre bağlantının içinde, bu yüzden bağlantıyı olduğu gibi gönderin.",
         "qr": "QR kodunu göster",
         "share": "Paylaş",
-        "note": "Bu bağlantıyı eline geçiren herkes dosyayı açabilir, bu yüzden yalnızca alıcının okuyabileceği bir yere gönder.",
+        "note": "Bu bağlantıyı eline geçiren herkes dosyayı açabilir, bu yüzden yalnızca alıcının okuyabileceği bir yere gönderin.",
         "another": "Başka bir dosya yükle",
         "mailSubject": "{{filename}} dosyasını indir",
         "mailLink": "İndirme bağlantısı",

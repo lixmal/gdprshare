@@ -1,9 +1,9 @@
 {
     "download": {
-        "title": "Seseorang membagikan berkas untukmu",
+        "title": "Seseorang membagikan berkas untuk Anda",
         "password": "Kata sandi",
         "submit": "Unduh",
-        "success": "Tersimpan. Berkasnya ada di unduhanmu.",
+        "success": "Tersimpan. Berkasnya ada di unduhan Anda.",
         "viewImage": "Lihat gambar",
         "uploadLink": "Unggah berkas",
         "close": "Tutup",
@@ -12,9 +12,9 @@
             "downloading": "Mengunduh…",
             "decrypting": "Mendekripsi…"
         },
-        "subtitle": "Berkas dibuka di perangkatmu sendiri",
+        "subtitle": "Berkas dibuka di perangkat Anda sendiri",
         "goneTitle": "Tautan ini sudah tidak berfungsi",
-        "passwordHint": "Tautan yang kamu terima biasanya sudah mengisinya. Tempel di sini kalau dikirim terpisah."
+        "passwordHint": "Tautan yang Anda terima biasanya sudah mengisinya. Tempel di sini kalau dikirim terpisah."
     },
     "shell": {
         "tagline": "Dienkripsi sebelum meninggalkan perangkat Anda",
@@ -96,7 +96,7 @@
         "delayHint": "Berapa lama sampai tautannya berfungsi",
         "delayNone": "Tanpa tunda",
         "email": "Kabari lewat email",
-        "emailPlaceholder": "kamu@example.org (opsional)",
+        "emailPlaceholder": "nama@example.org (opsional)",
         "emailHint": "Satu email setiap kali ada yang membuka tautannya",
         "strip": "Buang data tersembunyi",
         "stripHint": "Lokasi, kamera, dan penulis dibuang lebih dulu. Gambar selain GIF dikodekan ulang, jenis berkas lain ditolak.",
@@ -118,7 +118,7 @@
         "unknownType": "format ini"
     },
     "files": {
-        "title": "Unggahanmu",
+        "title": "Unggahan Anda",
         "refresh": "Tanya server",
         "prolong": "Beri waktu lebih",
         "delete": "Hapus dari server",
@@ -127,7 +127,7 @@
         "downloadsLeftOf": "Unduhan tersisa: {{count}} dari {{total}}",
         "noneLeft": "Tidak ada unduhan tersisa",
         "gone": "Sudah tidak ada di server",
-        "notYours": "Bukan milikmu lagi",
+        "notYours": "Bukan milik Anda lagi",
         "until": "Sampai {{date}}",
         "moreDays": "Tambah hari",
         "moreDownloads": "Tambah unduhan",
@@ -137,7 +137,7 @@
         "prolongSubmit": "Perpanjang",
         "less": "Kurangi satu",
         "more": "Tambah satu",
-        "checkFailed": "Tidak bisa memeriksa unggahanmu: {{message}}"
+        "checkFailed": "Tidak bisa memeriksa unggahan Anda: {{message}}"
     },
     "uploaded": {
         "title": "Terunggah",

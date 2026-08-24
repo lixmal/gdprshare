@@ -1,9 +1,9 @@
 {
     "download": {
-        "title": "有人分享了一個檔案給你",
+        "title": "有人分享了一個檔案給您",
         "password": "密碼",
         "submit": "下載",
-        "success": "已儲存。檔案在你的下載裡。",
+        "success": "已儲存。檔案在您的下載裡。",
         "viewImage": "檢視圖片",
         "uploadLink": "上傳檔案",
         "close": "關閉",
@@ -12,12 +12,12 @@
             "downloading": "正在下載…",
             "decrypting": "正在解密…"
         },
-        "subtitle": "檔案在你自己的裝置上解密",
+        "subtitle": "檔案在您自己的裝置上解密",
         "goneTitle": "這個連結已經失效",
-        "passwordHint": "你收到的連結通常已經帶著它。如果是另外傳來的，就貼到這裡。"
+        "passwordHint": "您收到的連結通常已經帶著它。如果是另外傳來的，就貼到這裡。"
     },
     "shell": {
-        "tagline": "在離開你的裝置前就已加密",
+        "tagline": "在離開您的裝置前就已加密",
         "dark": "切換至深色主題",
         "light": "切換至淺色主題"
     },
@@ -118,7 +118,7 @@
         "unknownType": "這種格式"
     },
     "files": {
-        "title": "你上傳的東西",
+        "title": "您上傳的東西",
         "refresh": "向伺服器核對",
         "prolong": "多給一點時間",
         "delete": "從伺服器刪除",
@@ -127,7 +127,7 @@
         "downloadsLeftOf": "剩餘下載次數：{{total}} 次中的 {{count}} 次",
         "noneLeft": "沒有剩餘下載次數",
         "gone": "伺服器上已經沒有了",
-        "notYours": "已經不屬於你了",
+        "notYours": "已經不屬於您了",
         "until": "到 {{date}}",
         "moreDays": "再加幾天",
         "moreDownloads": "再加幾次",
@@ -137,7 +137,7 @@
         "prolongSubmit": "延長",
         "less": "減一",
         "more": "加一",
-        "checkFailed": "無法核對你上傳的東西：{{message}}"
+        "checkFailed": "無法核對您上傳的東西：{{message}}"
     },
     "uploaded": {
         "title": "已上傳",

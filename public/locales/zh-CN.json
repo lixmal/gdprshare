@@ -1,9 +1,9 @@
 {
     "download": {
-        "title": "有人给你分享了一个文件",
+        "title": "有人给您分享了一个文件",
         "password": "密码",
         "submit": "下载",
-        "success": "已保存。文件在你的下载里。",
+        "success": "已保存。文件在您的下载里。",
         "viewImage": "查看图片",
         "uploadLink": "上传文件",
         "close": "关闭",
@@ -12,12 +12,12 @@
             "downloading": "正在下载…",
             "decrypting": "正在解密…"
         },
-        "subtitle": "文件在你自己的设备上解密",
+        "subtitle": "文件在您自己的设备上解密",
         "goneTitle": "这个链接已经失效",
-        "passwordHint": "你收到的链接通常已经带上了它。如果是单独发来的，就粘贴到这里。"
+        "passwordHint": "您收到的链接通常已经带上了它。如果是单独发来的，就粘贴到这里。"
     },
     "shell": {
-        "tagline": "在离开你的设备前就已加密",
+        "tagline": "在离开您的设备前就已加密",
         "dark": "切换到深色主题",
         "light": "切换到浅色主题"
     },
@@ -118,7 +118,7 @@
         "unknownType": "这种格式"
     },
     "files": {
-        "title": "你上传的东西",
+        "title": "您上传的东西",
         "refresh": "向服务器核对",
         "prolong": "多给点时间",
         "delete": "从服务器删除",
@@ -127,7 +127,7 @@
         "downloadsLeftOf": "剩余下载次数：{{total}} 次中的 {{count}} 次",
         "noneLeft": "没有剩余下载次数",
         "gone": "服务器上已经没有了",
-        "notYours": "已经不属于你了",
+        "notYours": "已经不属于您了",
         "until": "到 {{date}}",
         "moreDays": "再加几天",
         "moreDownloads": "再加几次",
@@ -137,7 +137,7 @@
         "prolongSubmit": "延长",
         "less": "减一",
         "more": "加一",
-        "checkFailed": "无法核对你上传的东西：{{message}}"
+        "checkFailed": "无法核对您上传的东西：{{message}}"
     },
     "uploaded": {
         "title": "已上传",

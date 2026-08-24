@@ -1,9 +1,9 @@
 {
     "download": {
-        "title": "Jemand hat eine Datei mit dir geteilt",
+        "title": "Jemand hat eine Datei mit Ihnen geteilt",
         "password": "Passwort",
         "submit": "Herunterladen",
-        "success": "Gespeichert. Die Datei liegt in deinen Downloads.",
+        "success": "Gespeichert. Die Datei liegt in Ihren Downloads.",
         "viewImage": "Bild anzeigen",
         "uploadLink": "Datei hochladen",
         "close": "Schließen",
@@ -12,12 +12,12 @@
             "downloading": "Wird heruntergeladen…",
             "decrypting": "Wird entschlüsselt…"
         },
-        "subtitle": "Die Datei wird hier auf deinem Gerät entschlüsselt",
+        "subtitle": "Die Datei wird hier auf Ihrem Gerät entschlüsselt",
         "goneTitle": "Dieser Link funktioniert nicht mehr",
-        "passwordHint": "Der Link, den du bekommen hast, füllt das normalerweise aus. Füge es ein, wenn es separat geschickt wurde."
+        "passwordHint": "Der Link, den Sie bekommen haben, füllt das normalerweise aus. Fügen Sie es ein, wenn es separat geschickt wurde."
     },
     "shell": {
-        "tagline": "Verschlüsselt, bevor es dein Gerät verlässt",
+        "tagline": "Verschlüsselt, bevor es Ihr Gerät verlässt",
         "dark": "Zum dunklen Design wechseln",
         "light": "Zum hellen Design wechseln"
     },
@@ -96,7 +96,7 @@
         "delayHint": "Wie lange, bis der Link funktioniert",
         "delayNone": "Keine Verzögerung",
         "email": "Per E-Mail benachrichtigen",
-        "emailPlaceholder": "du@example.org (optional)",
+        "emailPlaceholder": "name@example.org (optional)",
         "emailHint": "Eine E-Mail, sobald jemand den Link öffnet",
         "strip": "Verborgene Daten entfernen",
         "stripHint": "Ort, Kamera und Autor werden vorher entfernt. Bilder außer GIFs werden neu kodiert, andere Dateitypen abgelehnt.",
@@ -104,7 +104,7 @@
         "ephemeralHint": "Wie lange das Bild zu sehen ist",
         "ephemeralNone": "Bleibt offen",
         "submit": "Verschlüsseln und hochladen",
-        "submitHint": "Wer den Link hat, kann die Datei öffnen. Gib ihn also mit Bedacht weiter.",
+        "submitHint": "Wer den Link hat, kann die Datei öffnen. Geben Sie ihn also mit Bedacht weiter.",
         "chipDownloads": "Downloads: {{count}}",
         "chipUntil": "Bis {{date}}",
         "chipRegionAny": "Jede Region",
@@ -114,11 +114,11 @@
         "chipDisappears": "Verschwindet nach {{duration}}",
         "tooBig": "Die Datei ist zu groß. Dieser Server nimmt höchstens {{size}} MiB.",
         "stripFailed": "Verborgene Daten konnten nicht entfernt werden: {{message}}",
-        "notStrippable": "Aus {{type}} lassen sich die verborgenen Daten nicht entfernen, deshalb geht es nicht als Bild. Sende es als Datei.",
+        "notStrippable": "Aus {{type}} lassen sich die verborgenen Daten nicht entfernen, deshalb geht es nicht als Bild. Senden Sie es als Datei.",
         "unknownType": "diesem Format"
     },
     "files": {
-        "title": "Deine Uploads",
+        "title": "Ihre Uploads",
         "refresh": "Beim Server nachfragen",
         "prolong": "Mehr Zeit geben",
         "delete": "Vom Server löschen",
@@ -127,7 +127,7 @@
         "downloadsLeftOf": "Downloads übrig: {{count}} von {{total}}",
         "noneLeft": "Keine Downloads übrig",
         "gone": "Nicht mehr auf dem Server",
-        "notYours": "Gehört dir nicht mehr",
+        "notYours": "Gehört Ihnen nicht mehr",
         "until": "Bis {{date}}",
         "moreDays": "Mehr Tage",
         "moreDownloads": "Mehr Downloads",
@@ -137,7 +137,7 @@
         "prolongSubmit": "Verlängern",
         "less": "Eins weniger",
         "more": "Eins mehr",
-        "checkFailed": "Deine Uploads konnten nicht geprüft werden: {{message}}"
+        "checkFailed": "Ihre Uploads konnten nicht geprüft werden: {{message}}"
     },
     "uploaded": {
         "title": "Hochgeladen",
@@ -145,7 +145,7 @@
         "linkHint": "Das Passwort steckt im Link, schicke ihn also genau so, wie er ist.",
         "qr": "QR-Code zeigen",
         "share": "Teilen",
-        "note": "Wer diesen Link bekommt, kann die Datei öffnen. Schicke ihn also nur dorthin, wo ihn nur der Empfänger liest.",
+        "note": "Wer diesen Link bekommt, kann die Datei öffnen. Schicken Sie ihn also nur dorthin, wo ihn nur der Empfänger liest.",
         "another": "Weitere Datei hochladen",
         "mailSubject": "Download {{filename}}",
         "mailLink": "Download-Link",
