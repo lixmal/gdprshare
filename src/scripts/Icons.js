@@ -136,13 +136,6 @@ export const X = (p) => (
     </Icon>
 )
 
-export const Search = (p) => (
-    <Icon {...p}>
-        <circle cx="11" cy="11" r="6" />
-        <path d="M20 20l-4.2-4.2" />
-    </Icon>
-)
-
 export const Minus = (p) => (
     <Icon {...p}>
         <path d="M6 12h12" />
@@ -181,14 +174,6 @@ export const Timer = (p) => (
         <circle cx="12" cy="13" r="7" />
         <path d="M12 10v3l2 1.5" />
         <path d="M9 3h6" />
-    </Icon>
-)
-
-export const Download = (p) => (
-    <Icon {...p}>
-        <path d="M12 4v11" />
-        <path d="M8 11l4 4 4-4" />
-        <path d="M4 19h16" />
     </Icon>
 )
 

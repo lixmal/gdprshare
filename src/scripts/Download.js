@@ -2,7 +2,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import Classnames from 'classnames'
 import Alert from './Alert'
-import { Lock, ImageIcon, Timer } from './Icons'
+import { Lock, ImageIcon, Timer, Check } from './Icons'
 import Success from './Success'
 import Modal from 'react-modal'
 import { withTranslation } from 'react-i18next'
@@ -327,6 +327,7 @@ export class Download extends React.Component {
                     <label htmlFor="password" className="lbl">{t('download.password')}</label>
                     <input className="form-control mono-input" id="password" type="password" ref="password"
                            placeholder={t('download.password')} maxLength="255" autoFocus required />
+                    <span className="hint">{t('download.passwordHint')}</span>
                 </div>
                 <input type="submit" className="btn btn-primary btn-block" value={t('download.submit')} />
             </form>
@@ -365,9 +366,14 @@ export class Download extends React.Component {
                         <div className="d-flex align-items-center gap-3">
                             <span className={this.state.successful || this.state.imageReady ? 'check-badge' : 'btn btn-icon'}
                                   style={{pointerEvents: 'none'}}>
-                                <Lock size="15" />
+                                {this.state.successful || this.state.imageReady
+                                    ? <Check size="16" />
+                                    : <Lock size="15" />}
                             </span>
-                            <h4>{t('download.title')}</h4>
+                            <div className="d-flex flex-column">
+                                <h4>{t('download.title')}</h4>
+                                <span className="hint">{t('download.subtitle')}</span>
+                            </div>
                         </div>
 
                         {this.state.disableForm ? null : form}

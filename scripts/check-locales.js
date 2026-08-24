@@ -18,10 +18,23 @@ const baseLocale = 'en'
 // this list short and justify additions: it is the one hole in the untranslated
 // check.
 const sharedWithEnglish = {
-    'download.title': ['de', 'it', 'pt-BR'],
     'download.submit': ['nl'],
     'download.password': ['it'],
     'alert.errorLabel': ['es'],
+    // loan words and spellings that are genuinely the same in these languages
+    'upload.downloads': ['de', 'nl', 'pt-BR'],
+    'upload.chipDownloads': ['de', 'nl', 'pt-BR'],
+    'upload.region': ['de', 'pl', 'sv'],
+    'upload.regionEea': ['hi', 'ja', 'ko', 'th', 'vi'],
+    'upload.typeText': ['de', 'sv'],
+    'upload.typeFile': ['it'],
+    'upload.typeImage': ['fr'],
+    'uploaded.mailSubject': ['de', 'nl'],
+    'duration.m1': ['fr'],
+    'duration.m2': ['fr'],
+    'duration.m5': ['fr'],
+    'duration.m15': ['fr'],
+    'duration.m30': ['fr'],
 }
 
 function flatten(value, prefix, out) {
@@ -110,6 +123,57 @@ if (!declared) {
     listed.filter(function (l) { return onDisk.indexOf(l) === -1 })
         .forEach(function (l) { problems.push(l + ': in supportedLocales but public/locales/' + l + '.json is missing') })
 }
+
+// Every t('some.key') in the app has to exist in en.json, so a typo or a
+// string that was never added to the locale files fails here rather than
+// rendering the raw key to a visitor. Keys built at runtime (t('duration.' +
+// key)) cannot be checked statically; their prefixes are listed instead, and
+// every key under such a prefix has to be reachable from somewhere.
+const dynamicPrefixes = ['duration.', 'download.status.', 'errors.server.', 'upload.title']
+
+const sourceDir = path.join(__dirname, '..', 'src', 'scripts')
+const sourceFiles = []
+;(function walk(dir) {
+    fs.readdirSync(dir, { withFileTypes: true }).forEach(function (entry) {
+        const full = path.join(dir, entry.name)
+        if (entry.isDirectory()) {
+            if (entry.name !== '__tests__')
+                walk(full)
+        } else if (entry.name.endsWith('.js')) {
+            sourceFiles.push(full)
+        }
+    })
+})(sourceDir)
+
+const usedKeys = new Set()
+sourceFiles.forEach(function (file) {
+    const source = fs.readFileSync(file, 'utf8')
+    const pattern = /\bt\(\s*'([A-Za-z][\w.]*)'/g
+    let match
+    while ((match = pattern.exec(source)) !== null) {
+        // a literal ending in a dot is the prefix of a key built at runtime
+        if (match[1].endsWith('.'))
+            continue
+        usedKeys.add(match[1] + '\u0000' + path.basename(file))
+    }
+})
+
+usedKeys.forEach(function (entry) {
+    const parts = entry.split('\u0000')
+    const key = parts[0]
+    if (base[key] === undefined)
+        problems.push(parts[1] + ': t(\'' + key + '\') is not a key in ' + baseLocale + '.json')
+})
+
+baseKeys.filter(function (k) {
+    if (usedKeys.size === 0)
+        return false
+    const used = Array.from(usedKeys).some(function (e) { return e.split('\u0000')[0] === k })
+    const dynamic = dynamicPrefixes.some(function (prefix) { return k.indexOf(prefix) === 0 })
+    return !used && !dynamic
+}).forEach(function (k) {
+    problems.push(baseLocale + ': ' + k + ' is translated but never used in src/scripts')
+})
 
 if (problems.length) {
     console.error('Locale check failed:\n')

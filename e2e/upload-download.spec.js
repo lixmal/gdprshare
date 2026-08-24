@@ -642,7 +642,7 @@ test.describe('Full E2E Upload and Download Flow', () => {
     await page.locator('input[type="submit"]').click();
 
     // the upload must fail loudly instead of sending the file with its metadata
-    await expect(page.locator('text=/could not strip metadata/i')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('text=/could not remove the hidden data/i')).toBeVisible({ timeout: 10000 });
     expect(page.url()).not.toMatch(/\/uploaded/);
 
     fs.unlinkSync(docPath);
@@ -759,5 +759,47 @@ test.describe('Full E2E Upload and Download Flow', () => {
     expect(requested.length).toBeGreaterThan(0);
 
     fs.unlinkSync(pdfPath);
+  });
+});
+
+test.describe('Upload with the options panel closed', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+  });
+
+  // The email field only exists while the options are open, so reading it from
+  // the DOM used to throw and leave the form stuck behind its spinner.
+  test('uploads without ever opening the advanced options', async ({ page }) => {
+    const testFilePath = path.join(__dirname, 'test-collapsed.txt');
+    fs.writeFileSync(testFilePath, 'uploaded with the options collapsed');
+
+    await page.locator('input#content').setInputFiles(testFilePath);
+    await expect(page.locator('button[aria-expanded="false"]')).toBeVisible();
+
+    await page.locator('input[type="submit"]').click();
+
+    await page.waitForURL(/\/uploaded/);
+    await expect(page.locator('input#link-key')).toHaveValue(/\/d\/.+#.+/);
+
+    fs.unlinkSync(testFilePath);
+  });
+
+  test('remembers the notification address for the next upload', async ({ page }) => {
+    await openOptions(page);
+    await page.locator('input#email').fill('sender@example.org');
+
+    const testFilePath = path.join(__dirname, 'test-email.txt');
+    fs.writeFileSync(testFilePath, 'with a notification address');
+    await page.locator('input#content').setInputFiles(testFilePath);
+    await openOptions(page);
+    await page.locator('select#geo-restriction').selectOption('none');
+    await page.locator('input[type="submit"]').click();
+    await page.waitForURL(/\/uploaded/);
+
+    await page.goto('/');
+    await openOptions(page);
+    await expect(page.locator('input#email')).toHaveValue('sender@example.org');
+
+    fs.unlinkSync(testFilePath);
   });
 });

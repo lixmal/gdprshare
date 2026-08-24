@@ -44,6 +44,17 @@ const reencodableImages = [
     'image/avif',
 ]
 
+// Everything stripMetadata() can handle. A format it cannot handle is refused
+// rather than uploaded with its metadata still in it.
+const strippableTypes = ['application/pdf', 'image/gif'].concat(reencodableImages)
+
+// The image subset, in the form a file input's accept attribute wants.
+export const strippableImageTypes = ['image/gif'].concat(reencodableImages)
+
+export function canStrip(file) {
+    return !!file && strippableTypes.indexOf(file.type) !== -1
+}
+
 // Entries of the document information dictionary that carry identifying data.
 const infoKeys = ['Title', 'Author', 'Subject', 'Keywords', 'Creator', 'Producer', 'CreationDate', 'ModDate']
 

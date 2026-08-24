@@ -1,5 +1,10 @@
 # gdprshare
 
+<p align="center">
+  <img src="misc/screenshots/upload-light.png" alt="Sending a file, light theme" width="49%">
+  <img src="misc/screenshots/upload-dark.png" alt="Sending a file, dark theme" width="49%">
+</p>
+
 ## DESCRIPTION
 GDPRShare is a web application that was developed to aid in avoiding of sending sensitive data via email. Some issues with email are:
 
@@ -19,7 +24,8 @@ It does so by:
 * automatically deleting files after file was downloaded a specified amount of times
 * conviently notifies sender on each download
 * stripping metadata in the browser before upload: EXIF and GPS data from images (always for the image type, opt-in for the file type), comment and XMP blocks from GIFs without touching the animation, document info and XMP data from PDFs
-* localized download page in 20 languages, selected from the browser's language preferences. API errors carry a stable code so the recipient reads them in their own language
+* localized interface in 22 languages, selected from the browser's language preferences. API errors carry a stable code so the recipient reads them in their own language
+* the interface follows the system light/dark preference and can be switched by hand. Its fonts are served from the same host as the app, so no third party learns who is sending or downloading what
 
 See also [GDPR Art. 5 (2.)](https://gdpr-info.eu/art-5-gdpr/) and [GDPR Art. 24 (1.)](https://gdpr-info.eu/art-24-gdpr/) for the accountability aspects.
 

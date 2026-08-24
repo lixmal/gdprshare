@@ -43,7 +43,7 @@ test.describe('Prolong with owner token', () => {
     await upload(page, 'test-prolong.txt', '4', '2');
 
     const card = page.locator('.saved-files .card').first();
-    await expect(card.locator('.expiry')).toContainText('2 of 2 downloads left');
+    await expect(card.locator('.expiry')).toContainText('Downloads left: 2 of 2');
 
     await card.locator('button#prolong').click();
 
@@ -58,7 +58,7 @@ test.describe('Prolong with owner token', () => {
     await panel.locator('button.btn-primary').click();
 
     await expect(panel).toBeHidden();
-    await expect(card.locator('.expiry')).toContainText('4 of 4 downloads left');
+    await expect(card.locator('.expiry')).toContainText('Downloads left: 4 of 4');
 
     // the room left shrinks by what was just added
     await card.locator('button#prolong').click();
