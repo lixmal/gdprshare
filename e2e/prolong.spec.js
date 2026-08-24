@@ -74,3 +74,31 @@ test.describe('Prolong with owner token', () => {
     await expect(card.locator('button#prolong')).toBeDisabled();
   });
 });
+
+test.describe('Busy state', () => {
+  // Deleting or prolonging used to raise the upload form's spinner, which is
+  // the wrong card entirely.
+  test('a list action never masks the upload form', async ({ page }) => {
+    await page.goto('/');
+
+    const testFilePath = path.join(__dirname, 'test-busy.txt');
+    fs.writeFileSync(testFilePath, 'busy state check');
+    await page.locator('input#content').setInputFiles(testFilePath);
+    await openOptions(page);
+    await page.locator('select#geo-restriction').selectOption('none');
+    await page.locator('input[type="submit"]').click();
+    await page.waitForURL(/\/uploaded/);
+    await page.goto('/');
+
+    const uploadCard = page.locator('.app-outer').first();
+    const filesCard = page.locator('.files-card');
+    await expect(filesCard.locator('.file-item')).toHaveCount(1);
+
+    // the whole list is what waits on the server, the send form stays usable
+    await page.locator('button#delete').click();
+    await expect(uploadCard).not.toHaveClass(/loading-mask/);
+    await expect(filesCard.locator('.file-item')).toHaveCount(0);
+
+    fs.unlinkSync(testFilePath);
+  });
+});

@@ -59,6 +59,7 @@ gdprshare.displayErr = function (error, tone) {
         error: error.toString(),
         errorTone: tone || 'error',
         mask: false,
+        filesBusy: false,
         phase: null,
     })
 }
