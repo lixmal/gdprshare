@@ -1,5 +1,5 @@
 import React from 'react'
-import { AlertIcon } from './Icons'
+import { AlertIcon, Info } from './Icons'
 import { withTranslation } from 'react-i18next'
 
 class Alert extends React.Component {
@@ -8,7 +8,19 @@ class Alert extends React.Component {
     }
 
     render() {
-        return this.props.error ? (
+        if (!this.props.error)
+            return null
+
+        // an expected end state, like a link that ran out, is not a failure
+        if (this.props.tone === 'notice')
+            return (
+                <div className="alert alert-notice file-alert" role="status">
+                    <Info size="15" />
+                    <span>{this.props.error}</span>
+                </div>
+            )
+
+        return (
             <div className="alert alert-danger file-alert" role="alert">
                 <AlertIcon size="15" />
                 <span className="sr-only">
@@ -16,7 +28,7 @@ class Alert extends React.Component {
                 </span>
                 <span>{this.props.error}</span>
             </div>
-        ) : null
+        )
     }
 }
 

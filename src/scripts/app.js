@@ -11,7 +11,7 @@ import Uploaded from './Uploaded'
 import Download from './Download'
 
 import './Polyfills'
-import i18n, { initI18n, serverErrorText } from './i18n'
+import i18n, { initI18n, serverErrorText, serverErrorIsExpected } from './i18n'
 import { Tooltip } from 'react-tooltip'
 import * as Clipboard from "clipboard-polyfill/dist/clipboard-polyfill.promise"
 
@@ -53,13 +53,24 @@ gdprshare.loadConfig = async function () {
 
 gdprshare.serverErrorText = serverErrorText
 
-gdprshare.displayErr = function (error) {
+gdprshare.displayErr = function (error, tone) {
     console.log(error)
     this.setState({
         error: error.toString(),
+        errorTone: tone || 'error',
         mask: false,
         phase: null,
     })
+}
+
+// Reports a server error response, calling it a notice when it is one.
+gdprshare.displayServerErr = function (data) {
+    gdprshare.displayErr.call(
+        this,
+        serverErrorText(data),
+        serverErrorIsExpected(data) ? 'notice' : 'error',
+    )
+    this.setState({ errorCode: data && data.code })
 }
 
 gdprshare.asTextErr = async function (response, error) {

@@ -136,11 +136,14 @@
     --accent-soft: #edf1fc;
     --accent-border: #c3d0f2;
     --ok: #1c7a4e;
-    --ok-soft: #e9f5ee;
+    --ok-soft: #eaf4ee;
+    --ok-border: #b9dcc7;
     --warn: #8a5a00;
-    --warn-soft: #fbf2df;
+    --warn-soft: #fbf3e2;
+    --warn-border: #e6d3a8;
     --danger: #b3261e;
-    --danger-soft: #fbebe9;
+    --danger-soft: #fbecea;
+    --danger-border: #edc3bf;
     --radius: 8px;
     --radius-sm: 6px;
     --sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -166,11 +169,14 @@
         --accent-soft: #171d2b;
         --accent-border: #2b3654;
         --ok: #4cc38a;
-        --ok-soft: #12241b;
+        --ok-soft: #13251c;
+        --ok-border: #24493a;
         --warn: #e0b341;
         --warn-soft: #241f10;
+        --warn-border: #4a3d1c;
         --danger: #f0796f;
         --danger-soft: #2a1615;
+        --danger-border: #55302c;
     }
 }
 
@@ -190,11 +196,14 @@
     --accent-soft: #171d2b;
     --accent-border: #2b3654;
     --ok: #4cc38a;
-    --ok-soft: #12241b;
+    --ok-soft: #13251c;
+    --ok-border: #24493a;
     --warn: #e0b341;
     --warn-soft: #241f10;
+    --warn-border: #4a3d1c;
     --danger: #f0796f;
     --danger-soft: #2a1615;
+    --danger-border: #55302c;
 }
 
 /* -------------------------------------------------------------------- base */
@@ -904,6 +913,11 @@ textarea.form-control {
     color: var(--text);
 }
 
+.file-item-ended .file-name,
+.file-item-ended .file-id {
+    color: var(--text-faint);
+}
+
 .file-item.card {
     padding: 12px 14px;
     background: transparent;
@@ -941,21 +955,21 @@ textarea.form-control {
     height: 26px;
     padding: 0 10px;
     border-radius: 999px;
-    border: 1px solid var(--ok);
-    background: var(--ok-soft);
+    border: 1px solid var(--border);
+    background: var(--surface-2);
     font-size: 12px;
-    color: var(--ok);
+    color: var(--text-muted);
     white-space: nowrap;
 }
 
 .expiry-expired {
-    border-color: var(--warn);
-    background: var(--warn-soft);
-    color: var(--warn);
+    border-color: var(--border);
+    background: transparent;
+    color: var(--text-faint);
 }
 
 .expiry-error {
-    border-color: var(--danger);
+    border-color: var(--danger-border);
     background: var(--danger-soft);
     color: var(--danger);
 }
@@ -1014,7 +1028,7 @@ textarea.form-control {
     height: 28px;
     border-radius: 999px;
     background: var(--ok-soft);
-    border: 1px solid var(--ok);
+    border: 1px solid var(--ok-border);
     color: var(--ok);
 }
 
@@ -1041,15 +1055,25 @@ textarea.form-control {
 }
 
 .alert-danger {
-    border-color: var(--danger);
+    border-color: var(--danger-border);
     background: var(--danger-soft);
     color: var(--danger);
 }
 
 .alert-success {
-    border-color: var(--ok);
+    border-color: var(--ok-border);
     background: var(--ok-soft);
     color: var(--ok);
+}
+
+.alert-notice {
+    border-color: var(--border);
+    background: var(--surface-2);
+    color: var(--text-muted);
+}
+
+.alert-notice > svg {
+    color: var(--text-faint);
 }
 
 .alert > svg {
@@ -1241,7 +1265,7 @@ textarea.form-control {
     margin-top: 10px;
     padding: 0 10px;
     border-radius: 999px;
-    border: 1px solid var(--warn);
+    border: 1px solid var(--warn-border);
     background: var(--warn-soft);
     font-size: 12px;
     color: var(--warn);

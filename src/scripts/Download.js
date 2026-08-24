@@ -7,6 +7,10 @@ import Success from './Success'
 import Modal from 'react-modal'
 import { withTranslation } from 'react-i18next'
 
+// Server codes that mean the link itself is finished, as opposed to one that
+// works but not from here or not yet.
+const GONE_CODES = ['file_not_found', 'file_not_found_or_limit_exceeded', 'download_count_expired']
+
 // exported unwrapped for tests, the app uses the translated default export
 export class Download extends React.Component {
     constructor() {
@@ -249,7 +253,7 @@ export class Download extends React.Component {
                 } catch (error) {
                     return gdprshare.asTextErr.call(this, response, error)
                 }
-                return gdprshare.displayErr.call(this, gdprshare.serverErrorText(fetchData))
+                return gdprshare.displayServerErr.call(this, fetchData)
             }
 
             let type = response.headers.get('X-Type')
@@ -320,6 +324,9 @@ export class Download extends React.Component {
 
     render() {
         const t = this.props.t
+        const done = this.state.successful || this.state.imageReady
+        // the link ran out or was deleted: promising a shared file would be a lie
+        const gone = GONE_CODES.indexOf(this.state.errorCode) !== -1
 
         var form = (
             <form className="app-inner" onSubmit={this.handleDownload}>
@@ -364,15 +371,13 @@ export class Download extends React.Component {
                     {status}
                     <div className="app-inner">
                         <div className="d-flex align-items-center gap-3">
-                            <span className={this.state.successful || this.state.imageReady ? 'check-badge' : 'btn btn-icon'}
+                            <span className={done ? 'check-badge' : 'btn btn-icon'}
                                   style={{pointerEvents: 'none'}}>
-                                {this.state.successful || this.state.imageReady
-                                    ? <Check size="16" />
-                                    : <Lock size="15" />}
+                                {done ? <Check size="16" /> : <Lock size="15" />}
                             </span>
                             <div className="d-flex flex-column">
-                                <h4>{t('download.title')}</h4>
-                                <span className="hint">{t('download.subtitle')}</span>
+                                <h4>{gone ? t('download.goneTitle') : t('download.title')}</h4>
+                                {!gone && <span className="hint">{t('download.subtitle')}</span>}
                             </div>
                         </div>
 
@@ -398,7 +403,7 @@ export class Download extends React.Component {
                             </button>
                         )}
 
-                        <Alert error={this.state.error} />
+                        <Alert error={this.state.error} tone={this.state.errorTone} />
                     </div>
                 </div>
 

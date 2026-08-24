@@ -3,7 +3,7 @@
         "title": "Seseorang membagikan berkas untukmu",
         "password": "Kata sandi",
         "submit": "Unduh",
-        "success": "Berhasil diunduh, periksa folder unduhan Anda",
+        "success": "Tersimpan. Berkasnya ada di unduhanmu.",
         "viewImage": "Lihat gambar",
         "uploadLink": "Unggah berkas",
         "close": "Tutup",
@@ -13,6 +13,7 @@
             "decrypting": "Mendekripsi…"
         },
         "subtitle": "Berkas dibuka di perangkatmu sendiri",
+        "goneTitle": "Tautan ini sudah tidak berfungsi",
         "passwordHint": "Tautan yang kamu terima biasanya sudah mengisinya. Tempel di sini kalau dikirim terpisah."
     },
     "shell": {

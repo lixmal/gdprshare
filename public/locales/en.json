@@ -3,7 +3,7 @@
         "title": "Someone shared a file with you",
         "password": "Password",
         "submit": "Download",
-        "success": "Successfully downloaded, check your download folder",
+        "success": "Saved. You will find the file in your downloads.",
         "viewImage": "View Image",
         "uploadLink": "Upload a file",
         "close": "Close",
@@ -13,6 +13,7 @@
             "decrypting": "Decrypting…"
         },
         "subtitle": "The file is unlocked here on your device",
+        "goneTitle": "This link no longer works",
         "passwordHint": "The link you were sent usually fills this in. Paste it if the sender sent it separately."
     },
     "shell": {

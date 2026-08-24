@@ -3,7 +3,7 @@
         "title": "Quelqu’un a partagé un fichier avec vous",
         "password": "Mot de passe",
         "submit": "Télécharger",
-        "success": "Téléchargement réussi, vérifiez votre dossier de téléchargements",
+        "success": "Enregistré. Vous trouverez le fichier dans vos téléchargements.",
         "viewImage": "Afficher l'image",
         "uploadLink": "Envoyer un fichier",
         "close": "Fermer",
@@ -13,6 +13,7 @@
             "decrypting": "Déchiffrement en cours…"
         },
         "subtitle": "Le fichier est déchiffré ici, sur votre appareil",
+        "goneTitle": "Ce lien ne fonctionne plus",
         "passwordHint": "Le lien qu’on vous a envoyé le remplit d’habitude. Collez-le si l’expéditeur l’a envoyé à part."
     },
     "shell": {

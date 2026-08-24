@@ -3,7 +3,7 @@
         "title": "Ktoś udostępnił ci plik",
         "password": "Hasło",
         "submit": "Pobierz",
-        "success": "Pobrano pomyślnie, sprawdź folder pobranych plików",
+        "success": "Zapisano. Plik znajdziesz w swoich pobranych.",
         "viewImage": "Zobacz obraz",
         "uploadLink": "Prześlij plik",
         "close": "Zamknij",
@@ -13,6 +13,7 @@
             "decrypting": "Odszyfrowywanie…"
         },
         "subtitle": "Plik jest odszyfrowywany tutaj, na twoim urządzeniu",
+        "goneTitle": "Ten link już nie działa",
         "passwordHint": "Link, który dostałeś, zwykle wypełnia to sam. Wklej hasło, jeśli przyszło osobno."
     },
     "shell": {

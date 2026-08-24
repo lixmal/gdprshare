@@ -3,7 +3,7 @@
         "title": "Alguien ha compartido un archivo contigo",
         "password": "Contraseña",
         "submit": "Descargar",
-        "success": "Descarga completada, revisa tu carpeta de descargas",
+        "success": "Guardado. Encontrarás el archivo en tus descargas.",
         "viewImage": "Ver imagen",
         "uploadLink": "Subir un archivo",
         "close": "Cerrar",
@@ -13,6 +13,7 @@
             "decrypting": "Descifrando…"
         },
         "subtitle": "El archivo se descifra aquí, en tu dispositivo",
+        "goneTitle": "Este enlace ya no funciona",
         "passwordHint": "El enlace que recibiste normalmente lo rellena. Pégalo si te lo enviaron por separado."
     },
     "shell": {
