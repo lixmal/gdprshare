@@ -13,6 +13,11 @@
             "decrypting": "복호화 중…"
         }
     },
+    "shell": {
+        "tagline": "기기를 떠나기 전에 암호화됩니다",
+        "dark": "어두운 테마로 전환",
+        "light": "밝은 테마로 전환"
+    },
     "alert": {
         "errorLabel": "오류:"
     },

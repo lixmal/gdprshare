@@ -1,5 +1,5 @@
 import React from 'react'
-import Octicon, { Alert as AlertI } from '@primer/octicons-react'
+import { AlertIcon } from './Icons'
 import { withTranslation } from 'react-i18next'
 
 class Alert extends React.Component {
@@ -9,12 +9,12 @@ class Alert extends React.Component {
 
     render() {
         return this.props.error ? (
-            <div className="alert alert-danger alert-dismissible col-sm-12 file-alert text-center">
-                <Octicon icon={AlertI} />
+            <div className="alert alert-danger file-alert" role="alert">
+                <AlertIcon size="15" />
                 <span className="sr-only">
                     {this.props.t('alert.errorLabel')}
                 </span>
-                {this.props.error}
+                <span>{this.props.error}</span>
             </div>
         ) : null
     }

@@ -13,6 +13,11 @@
             "decrypting": "Odszyfrowywanie…"
         }
     },
+    "shell": {
+        "tagline": "Zaszyfrowane, zanim opuści Twoje urządzenie",
+        "dark": "Przełącz na ciemny motyw",
+        "light": "Przełącz na jasny motyw"
+    },
     "alert": {
         "errorLabel": "Błąd:"
     },

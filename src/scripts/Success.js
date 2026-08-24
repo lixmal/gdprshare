@@ -1,4 +1,5 @@
 import React from 'react'
+import { Check } from './Icons'
 
 export default class Success extends React.Component {
     constructor() {
@@ -7,10 +8,9 @@ export default class Success extends React.Component {
 
     render() {
         return this.props.message ? (
-            <div className="alert alert-success alert-dismissible col-sm-12 file-alert text-center">
-                <p>
-                    {this.props.message}
-                </p>
+            <div className="alert alert-success file-alert" role="status">
+                <Check size="15" />
+                <span>{this.props.message}</span>
             </div>
         ) : null
     }

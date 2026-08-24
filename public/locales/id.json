@@ -13,6 +13,11 @@
             "decrypting": "Mendekripsi…"
         }
     },
+    "shell": {
+        "tagline": "Dienkripsi sebelum meninggalkan perangkat Anda",
+        "dark": "Ganti ke tema gelap",
+        "light": "Ganti ke tema terang"
+    },
     "alert": {
         "errorLabel": "Kesalahan:"
     },

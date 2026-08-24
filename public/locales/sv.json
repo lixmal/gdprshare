@@ -13,6 +13,11 @@
             "decrypting": "Dekrypterar…"
         }
     },
+    "shell": {
+        "tagline": "Krypterat innan det lämnar din enhet",
+        "dark": "Byt till mörkt tema",
+        "light": "Byt till ljust tema"
+    },
     "alert": {
         "errorLabel": "Fel:"
     },

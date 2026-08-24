@@ -13,6 +13,11 @@
             "decrypting": "Descifrando…"
         }
     },
+    "shell": {
+        "tagline": "Cifrado antes de salir de tu dispositivo",
+        "dark": "Cambiar al tema oscuro",
+        "light": "Cambiar al tema claro"
+    },
     "alert": {
         "errorLabel": "Error:"
     },

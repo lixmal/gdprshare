@@ -13,8 +13,30 @@
         <meta name="twitter:description" content="An encrypted file has been shared with you. Click to decrypt and download." />
         <link rel="icon" type="image/png" href="/assets/img/favicon.png">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/react-tooltip@5/dist/react-tooltip.min.css" />
+        <script>
+            /* the remembered theme has to be on the element before the first paint */
+            (function () {
+                try {
+                    var theme = window.localStorage.getItem('theme')
+                    if (theme === 'light' || theme === 'dark')
+                        document.documentElement.setAttribute('data-theme', theme)
+                } catch (e) {}
+            })()
+        </script>
         <style>
             /* inline so it paints before any stylesheet or script arrives */
+            body {
+                margin: 0;
+                background: #fbfbfc;
+            }
+            html[data-theme="dark"] body {
+                background: #0e1013;
+            }
+            @media (prefers-color-scheme: dark) {
+                html:not([data-theme="light"]) body {
+                    background: #0e1013;
+                }
+            }
             .boot-loader {
                 display: flex;
                 align-items: center;

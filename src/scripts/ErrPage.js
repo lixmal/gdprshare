@@ -1,5 +1,4 @@
 import React from 'react'
-import Classnames from 'classnames'
 import Alert from './Alert'
 import { withTranslation } from 'react-i18next'
 
@@ -19,10 +18,13 @@ class ErrPage extends React.Component {
 
     render() {
         return (
-            <div className="container-fluid text-center col-sm-4">
-                <h4>{this.props.t('browser.title')}</h4>
-                <br />
-                <Alert error={this.props.t('browser.message')} />
+            <div className="container-fluid">
+                <div className="app-outer">
+                    <div className="app-inner">
+                        <h4>{this.props.t('browser.title')}</h4>
+                        <Alert error={this.props.t('browser.message')} />
+                    </div>
+                </div>
             </div>
         )
     }

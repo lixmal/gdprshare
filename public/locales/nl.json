@@ -13,6 +13,11 @@
             "decrypting": "Ontsleutelen…"
         }
     },
+    "shell": {
+        "tagline": "Versleuteld voordat het je apparaat verlaat",
+        "dark": "Overschakelen naar donker thema",
+        "light": "Overschakelen naar licht thema"
+    },
     "alert": {
         "errorLabel": "Fout:"
     },
