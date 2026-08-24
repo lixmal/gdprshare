@@ -13,6 +13,11 @@
             "decrypting": "Déchiffrement en cours…"
         }
     },
+    "shell": {
+        "tagline": "Chiffré avant de quitter votre appareil",
+        "dark": "Passer au thème sombre",
+        "light": "Passer au thème clair"
+    },
     "alert": {
         "errorLabel": "Erreur :"
     },

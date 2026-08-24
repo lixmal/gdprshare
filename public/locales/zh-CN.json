@@ -13,6 +13,11 @@
             "decrypting": "正在解密…"
         }
     },
+    "shell": {
+        "tagline": "在离开你的设备前就已加密",
+        "dark": "切换到深色主题",
+        "light": "切换到浅色主题"
+    },
     "alert": {
         "errorLabel": "错误："
     },

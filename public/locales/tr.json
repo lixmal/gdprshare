@@ -13,6 +13,11 @@
             "decrypting": "Şifre çözülüyor…"
         }
     },
+    "shell": {
+        "tagline": "Cihazınızdan ayrılmadan önce şifrelenir",
+        "dark": "Koyu temaya geç",
+        "light": "Açık temaya geç"
+    },
     "alert": {
         "errorLabel": "Hata:"
     },

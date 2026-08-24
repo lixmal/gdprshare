@@ -13,6 +13,11 @@
             "decrypting": "Đang giải mã…"
         }
     },
+    "shell": {
+        "tagline": "Được mã hóa trước khi rời khỏi thiết bị của bạn",
+        "dark": "Chuyển sang chủ đề tối",
+        "light": "Chuyển sang chủ đề sáng"
+    },
     "alert": {
         "errorLabel": "Lỗi:"
     },

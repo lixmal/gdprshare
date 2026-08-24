@@ -2,6 +2,14 @@ const { test, expect } = require('@playwright/test');
 const fs = require('fs');
 const path = require('path');
 
+// The advanced options live behind "More options" since the redesign.
+async function openOptions(page) {
+  const more = page.locator('button[aria-expanded="false"]');
+  if (await more.count() > 0)
+    await more.first().click();
+}
+
+
 const en = JSON.parse(
   fs.readFileSync(path.join(__dirname, '..', 'public', 'locales', 'en.json'), 'utf8'));
 
@@ -12,9 +20,11 @@ async function uploadSized(page, bytes, name) {
   fs.writeFileSync(filePath, Buffer.alloc(bytes, 'a'));
 
   await page.locator('input#content').setInputFiles(filePath);
+  await openOptions(page);
   await page.locator('input#count').fill('3');
+  await openOptions(page);
   await page.locator('select#geo-restriction').selectOption('none');
-  await page.locator('input[type="submit"][value="Upload"]').click();
+  await page.locator('input[type="submit"]').click();
   await page.waitForURL(/\/uploaded/);
 
   const url = await page.locator('input#link-key').inputValue();

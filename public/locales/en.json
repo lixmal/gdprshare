@@ -13,6 +13,11 @@
             "decrypting": "Decrypting…"
         }
     },
+    "shell": {
+        "tagline": "Encrypted before it leaves your device",
+        "dark": "Switch to the dark theme",
+        "light": "Switch to the light theme"
+    },
     "alert": {
         "errorLabel": "Error:"
     },

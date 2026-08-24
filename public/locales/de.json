@@ -13,6 +13,11 @@
             "decrypting": "Wird entschlüsselt…"
         }
     },
+    "shell": {
+        "tagline": "Verschlüsselt, bevor es dein Gerät verlässt",
+        "dark": "Zum dunklen Design wechseln",
+        "light": "Zum hellen Design wechseln"
+    },
     "alert": {
         "errorLabel": "Fehler:"
     },

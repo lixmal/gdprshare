@@ -2,6 +2,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import Classnames from 'classnames'
 import Alert from './Alert'
+import { Lock, ImageIcon, Timer } from './Icons'
 import Success from './Success'
 import Modal from 'react-modal'
 import { withTranslation } from 'react-i18next'
@@ -322,15 +323,12 @@ export class Download extends React.Component {
 
         var form = (
             <form className="app-inner" onSubmit={this.handleDownload}>
-                <div className="form-group row">
-                    <label htmlFor="password" className="col-sm-3 col-form-label">{t('download.password')}</label>
-                    <div className="col-sm-9">
-                        <input className="form-control" id="password" type="password" ref="password" placeholder={t('download.password')} maxLength="255" autoFocus required />
-                    </div>
+                <div className="field">
+                    <label htmlFor="password" className="lbl">{t('download.password')}</label>
+                    <input className="form-control mono-input" id="password" type="password" ref="password"
+                           placeholder={t('download.password')} maxLength="255" autoFocus required />
                 </div>
-                <div className="text-center col-sm-12">
-                    <input type="submit" className="btn btn-primary" value={t('download.submit')} />
-                </div>
+                <input type="submit" className="btn btn-primary btn-block" value={t('download.submit')} />
             </form>
         )
 
@@ -360,45 +358,54 @@ export class Download extends React.Component {
             + (this.state.imageHidden ? ' image-hidden' : '')
 
         return (
-            <div className="container-fluid col-sm-4">
+            <div className="container-fluid">
                 <div className={this.classes()}>
                     {status}
-                    <h4 className="text-center">{t('download.title')}</h4>
-                    {this.state.disableForm ? null : form}
-
-                    <br />
-                    {this.state.successful && <Success message={t('download.success')} />}
-                    {this.state.imageReady && !this.state.ephemeral && (
-                        <div className={imageModalClass}
-                             onContextMenu={function(e) { e.preventDefault() }}
-                             onDragStart={function(e) { e.preventDefault() }}>
-                            <div className="image-container">
-                                <img src={this.state.imageData} alt="" id="inline-image" draggable="false" />
-                                <div className="image-overlay" onClick={this.handleImageZoom}></div>
-                            </div>
+                    <div className="app-inner">
+                        <div className="d-flex align-items-center gap-3">
+                            <span className={this.state.successful || this.state.imageReady ? 'check-badge' : 'btn btn-icon'}
+                                  style={{pointerEvents: 'none'}}>
+                                <Lock size="15" />
+                            </span>
+                            <h4>{t('download.title')}</h4>
                         </div>
-                    )}
-                    {this.state.imageReady && this.state.ephemeral > 0 && !this.state.modalOpen && (
-                        <div className="text-center mb-3">
-                            <button className="btn btn-primary" id="view-image" onClick={this.handleViewImage}>
+
+                        {this.state.disableForm ? null : form}
+
+                        {this.state.successful && <Success message={t('download.success')} />}
+
+                        {this.state.imageReady && !this.state.ephemeral && (
+                            <div className={imageModalClass}
+                                 onContextMenu={function(e) { e.preventDefault() }}
+                                 onDragStart={function(e) { e.preventDefault() }}>
+                                <div className="image-container">
+                                    <img src={this.state.imageData} alt="" id="inline-image" draggable="false" />
+                                    <div className="image-overlay" onClick={this.handleImageZoom}></div>
+                                </div>
+                            </div>
+                        )}
+
+                        {this.state.imageReady && this.state.ephemeral > 0 && !this.state.modalOpen && (
+                            <button className="btn btn-primary btn-block" id="view-image" onClick={this.handleViewImage}>
+                                <ImageIcon size="15" />
                                 {t('download.viewImage')}
                             </button>
-                        </div>
-                    )}
-                    <Alert error={this.state.error} />
+                        )}
 
-                    <div className="text-center col-sm-12">
-                        <Link to="/">{t('download.uploadLink')}</Link>
+                        <Alert error={this.state.error} />
                     </div>
                 </div>
+
+                <div className="text-center" style={{marginTop: '16px'}}>
+                    <Link to="/">{t('download.uploadLink')}</Link>
+                </div>
+
                 <Modal isOpen={this.state.modalOpen}>
                     {this.state.modalContent && (
-                        <div className="card">
-                            <div className="card-body">
-                                <p className="r-modal">
-                                    {this.state.modalContent}
-                                </p>
-                            </div>
+                        <div className="app-outer">
+                            <p className="r-modal">
+                                {this.state.modalContent}
+                            </p>
                         </div>
                     )}
                     {this.state.imageData && this.state.ephemeral > 0 && (
@@ -411,18 +418,21 @@ export class Download extends React.Component {
                             </div>
                             {gdprshare.config.showCountdown && this.state.countdown > 0 && (
                                 <div className="countdown" id="countdown-timer">
+                                    <Timer size="13" />
                                     {t('download.closingIn', { count: this.state.countdown })}
                                 </div>
                             )}
                         </div>
                     )}
                     {this.state.modalContent && (
-                        <button className="col-sm-1 btn btn-primary mt-2" onClick={this.closeModal}>
-                            {t('download.close')}
-                        </button>
+                        <div className="text-center" style={{marginTop: '10px'}}>
+                            <button className="btn btn-primary" onClick={this.closeModal}>
+                                {t('download.close')}
+                            </button>
+                        </div>
                     )}
                 </Modal>
-            </div >
+            </div>
         )
     }
 }
