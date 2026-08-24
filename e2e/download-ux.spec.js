@@ -4,7 +4,7 @@ const path = require('path');
 
 // The advanced options live behind "More options" since the redesign.
 async function openOptions(page) {
-  const more = page.locator('button[aria-expanded="false"]');
+  const more = page.locator('.app-inner button[aria-expanded="false"]');
   if (await more.count() > 0)
     await more.first().click();
 }

@@ -39,6 +39,7 @@ class Upload extends React.Component {
         this.handleBrowse = this.handleBrowse.bind(this)
         this.handleClearFile = this.handleClearFile.bind(this)
         this.handleEmailChange = this.handleEmailChange.bind(this)
+        this.forgetFile = this.forgetFile.bind(this)
 
         this.state = {
             error: null,
@@ -366,6 +367,19 @@ class Upload extends React.Component {
         }
     }
 
+    // The server has nothing to delete for an entry it disowns or never heard
+    // of, and DELETE would answer 401 for the first, leaving the row stuck in
+    // the list forever. Dropping the local record is the whole job.
+    forgetFile(fileId, event) {
+        event.currentTarget.blur()
+
+        this.deleteFileId(fileId)
+
+        var fileInfo = Object.assign({}, this.state.fileInfo)
+        delete fileInfo[fileId]
+        this.setState({fileInfo: fileInfo})
+    }
+
     async handleDelete(fileID, event) {
         if (this.state.filesBusy)
             return
@@ -569,11 +583,11 @@ class Upload extends React.Component {
     }
 
     handleCountChange(value) {
-        this.setState({count: gdprshare.clamp(value, 1, 15)})
+        this.setState({count: gdprshare.clamp(value, 1, gdprshare.config.maxCount)})
     }
 
     handleExpiryChange(value) {
-        this.setState({expiry: gdprshare.clamp(value, 1, 14)})
+        this.setState({expiry: gdprshare.clamp(value, 1, gdprshare.config.maxExpiry)})
     }
 
     toggleOptions() {
@@ -870,6 +884,9 @@ class Upload extends React.Component {
         let state
         let canProlong = false
         let ended = false
+        // the server has no copy to delete: either it disowns the entry or it
+        // never heard of the file
+        let onlyLocal = !!file.error
 
         if (file.error) {
             console.log(file.error)
@@ -881,6 +898,7 @@ class Upload extends React.Component {
             let isExpired = isInitDate || file.count < 1 || Date.now() > expiryDate
 
             ended = isExpired
+            onlyLocal = isInitDate
             if (isExpired) {
                 state = (
                     <span className="expiry expiry-expired">
@@ -929,9 +947,15 @@ class Upload extends React.Component {
                             <MoreTime size="15" />
                         </button>
                         <button id="delete" className="btn btn-icon" type="button"
-                                onClick={function (e) { this.handleDelete(fileId, e) }.bind(this)}
-                                data-tooltip-id="tip" data-tooltip-content={t('files.delete')}
-                                aria-label={t('files.delete')}>
+                                onClick={function (e) {
+                                    if (onlyLocal)
+                                        this.forgetFile(fileId, e)
+                                    else
+                                        this.handleDelete(fileId, e)
+                                }.bind(this)}
+                                data-tooltip-id="tip"
+                                data-tooltip-content={onlyLocal ? t('files.forget') : t('files.delete')}
+                                aria-label={onlyLocal ? t('files.forget') : t('files.delete')}>
                             <Trash size="15" />
                         </button>
                     </div>
@@ -1043,11 +1067,11 @@ class Upload extends React.Component {
                 <div className="row g-3">
                     <div className="col-6 field">
                         <label htmlFor="count" className="lbl">{t('upload.downloads')}</label>
-                        {this.stepper('count', this.state.count, 1, 15, this.handleCountChange)}
+                        {this.stepper('count', this.state.count, 1, gdprshare.config.maxCount, this.handleCountChange)}
                     </div>
                     <div className="col-6 field">
                         <label htmlFor="expiry" className="lbl">{t('upload.expiry')}</label>
-                        {this.stepper('expiry', this.state.expiry, 1, 14, this.handleExpiryChange, t('upload.days'))}
+                        {this.stepper('expiry', this.state.expiry, 1, gdprshare.config.maxExpiry, this.handleExpiryChange, t('upload.days'))}
                     </div>
                 </div>
 

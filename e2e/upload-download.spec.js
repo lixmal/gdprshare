@@ -5,7 +5,7 @@ const { PDFDocument, PDFName } = require('pdf-lib');
 
 // The advanced options live behind "More options" since the redesign.
 async function openOptions(page) {
-  const more = page.locator('button[aria-expanded="false"]');
+  const more = page.locator('.app-inner button[aria-expanded="false"]');
   if (await more.count() > 0)
     await more.first().click();
 }
@@ -774,7 +774,7 @@ test.describe('Upload with the options panel closed', () => {
     fs.writeFileSync(testFilePath, 'uploaded with the options collapsed');
 
     await page.locator('input#content').setInputFiles(testFilePath);
-    await expect(page.locator('button[aria-expanded="false"]')).toBeVisible();
+    await expect(page.locator('.app-inner button[aria-expanded="false"]')).toBeVisible();
 
     await page.locator('input[type="submit"]').click();
 

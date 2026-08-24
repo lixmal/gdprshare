@@ -4,7 +4,7 @@ const path = require('path');
 
 // The advanced options live behind "More options" since the redesign.
 async function openOptions(page) {
-  const more = page.locator('button[aria-expanded="false"]');
+  const more = page.locator('.app-inner button[aria-expanded="false"]');
   if (await more.count() > 0)
     await more.first().click();
 }
@@ -140,6 +140,46 @@ test.describe('Dark theme', () => {
     expect(colours.card).toBe('rgb(21, 24, 29)');
     // and the text on that dark fill is light
     expect(colours.name).toBe('rgb(231, 233, 237)');
+
+    fs.unlinkSync(testFilePath);
+  });
+});
+
+test.describe('A share the server no longer has', () => {
+  // Deleting is not the right word for a row the server disowns, and DELETE
+  // answers 401 for it, which used to leave the row in the list for good.
+  test('is only removed from the list', async ({ page }) => {
+    await page.goto('/');
+
+    const testFilePath = path.join(__dirname, 'test-forget.txt');
+    fs.writeFileSync(testFilePath, 'forget me');
+    await page.locator('input#content').setInputFiles(testFilePath);
+    await openOptions(page);
+    await page.locator('select#geo-restriction').selectOption('none');
+    await page.locator('input[type="submit"]').click();
+    await page.waitForURL(/\/uploaded/);
+
+    // rewrite the owner token: the server now disowns the entry
+    await page.goto('/');
+    await page.evaluate(() => {
+      const files = JSON.parse(window.localStorage.getItem('savedFiles'));
+      Object.keys(files).forEach((id) => { files[id].ownerToken = 'not-the-owner-token'; });
+      window.localStorage.setItem('savedFiles', JSON.stringify(files));
+    });
+    await page.goto('/');
+
+    const en = JSON.parse(
+      fs.readFileSync(path.join(__dirname, '..', 'public', 'locales', 'en.json'), 'utf8'));
+
+    const row = page.locator('.file-item').first();
+    await expect(row.locator('.expiry-error')).toBeVisible();
+    await expect(row.locator('button#delete')).toHaveAttribute('aria-label', en.files.forget);
+
+    await row.locator('button#delete').click();
+    await expect(page.locator('.file-item')).toHaveCount(0);
+    // and it stays gone, rather than coming back on the next check
+    await page.goto('/');
+    await expect(page.locator('.file-item')).toHaveCount(0);
 
     fs.unlinkSync(testFilePath);
   });
