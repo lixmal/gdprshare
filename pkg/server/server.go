@@ -26,6 +26,11 @@ const (
 	// only this many refusals. Downloads that went through are bounded by the
 	// download count and need no cap.
 	MaxDeniedRecords = 50
+
+	// Error reports from the download page need no token, so the table they go
+	// into is bounded as well. Reports past that are dropped, and the ones kept
+	// go with the retention in the cleanup sweep.
+	MaxStatsRecords = 1000
 )
 
 type StoredFileInfo struct {

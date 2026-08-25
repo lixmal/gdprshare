@@ -139,6 +139,7 @@ const expectedStates = [
     'file_not_found',
     'file_not_found_or_limit_exceeded',
     'download_count_expired',
+    'file_expired',
     'file_not_yet_downloadable',
     'download_location_forbidden',
 ]

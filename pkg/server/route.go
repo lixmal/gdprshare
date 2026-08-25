@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 	uuid "github.com/nu7hatch/gouuid"
 	"gopkg.in/gomail.v2"
 
@@ -34,14 +35,15 @@ func (s *Server) getConfig(c *gin.Context) {
 	c.JSON(
 		http.StatusOK,
 		gin.H{
-			"maxFileSize":    s.config.MaxUploadSize,
-			"showCountdown":  s.config.ShowCountdown,
-			"maxExpiry":      MaxExpiryDays,
-			"maxCount":       MaxDownloadCount,
-			"saveClientInfo": s.config.SaveClientInfo,
-			"geoIP":          s.config.GeoIPPath != "",
-			"privacyUrl":     s.config.PrivacyURL,
-			"imprintUrl":     s.config.ImprintURL,
+			"maxFileSize":     s.config.MaxUploadSize,
+			"showCountdown":   s.config.ShowCountdown,
+			"maxExpiry":       MaxExpiryDays,
+			"maxCount":        MaxDownloadCount,
+			"saveClientInfo":  s.config.SaveClientInfo,
+			"reportRetention": int(misc.StatsRetention.Hours() / 24),
+			"geoIP":           s.config.GeoIPPath != "",
+			"privacyUrl":      s.config.PrivacyURL,
+			"imprintUrl":      s.config.ImprintURL,
 		},
 	)
 }
@@ -194,17 +196,31 @@ func (s *Server) downloadFile(c *gin.Context) {
 
 	storedFile, err := s.getStoredFile(fileId, c)
 	if err != nil {
-		fmt.Printf("Failed to retrieve file with ID %s: %s\n", fileId, err)
+		log.Printf("Failed to retrieve file with ID %s: %s\n", fileId, err)
+		return
+	}
+
+	// read before any refusal, so every attempt can be recorded and answered
+	// with the same TLS requirements
+	client := (*database.DstClient)(s.getClientInfo(c))
+	if client == nil {
+		return
+	}
+
+	if storedFile.Count < 1 {
+		s.refuse(c, storedFile, client, http.StatusNotFound, ErrCodeCountExpired, ErrCodeCountExpired, "download count expired")
+		return
+	}
+
+	// The share only lives for the days it was given. The cleanup sweep runs on
+	// its own interval and may be driven from outside entirely, so the expiry
+	// date has to be honoured here as well.
+	if time.Now().After(expiryDate(storedFile)) {
+		s.refuse(c, storedFile, client, http.StatusNotFound, ErrCodeFileExpired, ErrCodeFileExpired, "file expired")
 		return
 	}
 
 	path := filepath.Join(s.config.StorePath, storedFile.Name)
-
-	if storedFile.Count < 1 {
-		apiError(c, http.StatusNotFound, ErrCodeCountExpired, "download count expired")
-		return
-	}
-
 	if info, err := os.Stat(path); err != nil || info.IsDir() {
 		if err != nil {
 			log.Printf("Failed to access file with id %s: %s\n", fileId, err)
@@ -212,67 +228,101 @@ func (s *Server) downloadFile(c *gin.Context) {
 			log.Printf("File with id %s is a directory\n", fileId)
 		}
 
-		apiError(c, http.StatusNotFound, ErrCodeFileNotFound, "file not found")
+		s.refuse(c, storedFile, client, http.StatusNotFound, ErrCodeFileNotFound, ErrCodeFileNotFound, "file not found")
 		return
 	}
 
-	client := (*database.DstClient)(s.getClientInfo(c))
-	if client == nil {
+	if time.Now().Before(storedFile.CreatedAt.Add(time.Duration(storedFile.Delay) * time.Minute)) {
+		s.refuse(c, storedFile, client, http.StatusForbidden, ErrCodeNotYetDownloadble, ErrCodeNotYetDownloadble, "file not yet downloadable")
 		return
 	}
 
 	// The blocklist reads the header itself: with client info turned off the
 	// stored user agent is "none", which would quietly disable the check.
 	blockedAgent := s.isUserAgentDisallowed(sanitizeUserAgent(c.Request.Header.Get("User-Agent")))
-	allowed := s.isDownloadAllowed(storedFile, client) && !blockedAgent
-
-	if time.Now().Before(storedFile.CreatedAt.Add(time.Duration(storedFile.Delay) * time.Minute)) {
-		s.recordAttempt(storedFile, client, ErrCodeNotYetDownloadble)
-		apiError(c, http.StatusForbidden, ErrCodeNotYetDownloadble, "file not yet downloadable")
-	} else if !allowed {
+	if blockedAgent || !s.isDownloadAllowed(storedFile, client) {
 		log.Printf("Download from %s forbidden, user agent: %s\n", client.Addr, client.UserAgent)
 
 		reason := ErrCodeLocationForbidden
 		if blockedAgent {
 			reason = ErrCodeUserAgentBlocked
 		}
-		s.recordAttempt(storedFile, client, reason)
 
-		apiError(c, http.StatusForbidden, ErrCodeLocationForbidden, "download from this location forbidden")
-	} else {
-		storedFile.DstClients = append(
-			storedFile.DstClients,
-			client,
-		)
+		// a blocked user agent is not told what gave it away
+		s.refuse(c, storedFile, client, http.StatusForbidden, ErrCodeLocationForbidden, reason, "download from this location forbidden")
+		return
+	}
 
-		storedFile.Count--
-		if err := s.db.Save(&storedFile).Error; err != nil {
-			log.Printf("Failed to save decreased count on file with id %s: %s\n", fileId, err)
-		}
+	// Take the download before serving it: two requests arriving together on a
+	// share with one download left must not both be served, which a read,
+	// decrement and save would allow.
+	taken := s.db.Model(&database.StoredFile{}).
+		Where("id = ? AND count > 0", storedFile.ID).
+		Update("count", gorm.Expr("count - 1"))
+	if taken.Error != nil {
+		log.Printf("Failed to save decreased count on file with id %s: %s\n", fileId, taken.Error)
+		apiError(c, http.StatusInternalServerError, ErrCodeSaveFailed, "failed to save download count")
+		return
+	}
+	if taken.RowsAffected == 0 {
+		s.refuse(c, storedFile, client, http.StatusNotFound, ErrCodeCountExpired, ErrCodeCountExpired, "download count expired")
+		return
+	}
+	storedFile.Count--
 
-		var filename string
-		if storedFile.Filename != "" {
-			filename = storedFile.Filename
-		} else {
-			filename = storedFile.Name
-		}
-		c.Header("X-Filename", filename)
-		c.Header("X-Type", storedFile.Type)
-		c.Header("X-Ephemeral", strconv.FormatUint(uint64(storedFile.Ephemeral), 10))
-		c.FileAttachment(path, filename)
+	record := *client
+	record.StoredFileId = storedFile.ID
+	if err := s.db.Create(&record).Error; err != nil {
+		log.Printf("Failed to record the download of file with id %s: %s\n", fileId, err)
+	}
 
-		if storedFile.Count < 1 {
-			// Remove actual file only, db entry will be deleted on confirmation
-			if err := os.Remove(path); err != nil {
-				log.Printf("Failed to delete file with id %s from storage: %s\n", fileId, err)
-			}
+	filename := storedFile.Filename
+	if filename == "" {
+		filename = storedFile.Name
+	}
+	c.Header("X-Filename", filename)
+	c.Header("X-Type", storedFile.Type)
+	c.Header("X-Ephemeral", strconv.FormatUint(uint64(storedFile.Ephemeral), 10))
+	c.FileAttachment(path, filename)
+
+	if storedFile.Count < 1 {
+		// Remove actual file only, db entry will be deleted on confirmation
+		if err := os.Remove(path); err != nil {
+			log.Printf("Failed to delete file with id %s from storage: %s\n", fileId, err)
 		}
 	}
 
-	if storedFile.Email != "" {
-		if err := s.sendMail(s.config.Mail.Subject, storedFile, client, allowed); err != nil {
-			log.Printf("Failed to send access mail for ID %s: %s\n", fileId, err)
-		}
+	s.notify(storedFile, client, true)
+}
+
+// refuse answers a download attempt that will not go through. The attempt is
+// kept for the owner to see and, when they asked for mail, sent to them; the
+// recorded reason is not always the code the requester is told.
+func (s *Server) refuse(
+	c *gin.Context,
+	storedFile *database.StoredFile,
+	client *database.DstClient,
+	status int,
+	sent, recorded ErrorCode,
+	message string,
+) {
+	// the record is capped, and the notification follows it: a link someone
+	// keeps hammering must not turn into an unbounded stream of mail
+	if s.recordAttempt(storedFile, client, recorded) {
+		s.notify(storedFile, client, false)
+	}
+
+	apiError(c, status, sent, message)
+}
+
+// notify tells the owner about an attempt, if they left an address.
+func (s *Server) notify(storedFile *database.StoredFile, client *database.DstClient, allowed bool) {
+	if storedFile.Email == "" {
+		return
+	}
+
+	if err := s.sendMail(s.config.Mail.Subject, storedFile, client, allowed); err != nil {
+		log.Printf("Failed to send access mail for ID %s: %s\n", storedFile.FileId, err)
 	}
 }
 
@@ -341,7 +391,7 @@ func (s *Server) confirmReceipt(c *gin.Context) {
 
 	storedFile, err := s.getStoredFile(fileId, c)
 	if err != nil {
-		fmt.Printf("Failed to retrieve file with ID %s: %s\n", fileId, err)
+		log.Printf("Failed to retrieve file with ID %s: %s\n", fileId, err)
 		return
 	}
 
@@ -504,6 +554,20 @@ func (s *Server) setStats(c *gin.Context) {
 			return
 		}
 	}
+
+	// Anyone can post here, so the table is bounded. A dropped report is not an
+	// error the reporter can do anything about, and the answer stays the same.
+	if s.statsFull() {
+		c.JSON(
+			http.StatusOK,
+			gin.H{
+				"message": "stats saved",
+			},
+		)
+
+		return
+	}
+
 	if err := s.db.Save(&stats).Error; err != nil {
 		log.Printf("Failed to store stats: %s\n", err)
 		apiError(c, http.StatusInternalServerError, ErrCodeStatsFailed, "failed to store stats")
@@ -516,6 +580,19 @@ func (s *Server) setStats(c *gin.Context) {
 			"message": "stats saved",
 		},
 	)
+}
+
+// statsFull reports whether the error reports have reached their cap. An
+// unreadable table counts as full: a report is worth less than a database
+// growing unchecked.
+func (s *Server) statsFull() bool {
+	var stored int
+	if err := s.db.Model(&database.Stats{}).Count(&stored).Error; err != nil {
+		log.Printf("Failed to count stats: %s\n", err)
+		return true
+	}
+
+	return stored >= MaxStatsRecords
 }
 
 func (s *Server) getClientInfo(c *gin.Context) *database.Client {
@@ -719,17 +796,20 @@ func (s *Server) downloadRecords(c *gin.Context) {
 // recordAttempt keeps a refused download with the share it was aimed at, so its
 // owner sees the attempt and the reason. Capped: a blocked link can be hit as
 // often as someone likes, and the share must not grow without end.
-func (s *Server) recordAttempt(storedFile *database.StoredFile, client *database.DstClient, reason ErrorCode) {
+// recordAttempt keeps a refused attempt for the owner to see and reports
+// whether it was kept. The number of refusals per share is capped: a link
+// someone keeps trying must not grow the database without end.
+func (s *Server) recordAttempt(storedFile *database.StoredFile, client *database.DstClient, reason ErrorCode) bool {
 	var denied int
 	if err := s.db.Model(&database.DstClient{}).
 		Where("stored_file_id = ? AND denied = ?", storedFile.ID, true).
 		Count(&denied).Error; err != nil {
 		log.Printf("Failed to count refused attempts for id %s: %s\n", storedFile.FileId, err)
-		return
+		return false
 	}
 
 	if denied >= MaxDeniedRecords {
-		return
+		return false
 	}
 
 	attempt := *client
@@ -739,7 +819,10 @@ func (s *Server) recordAttempt(storedFile *database.StoredFile, client *database
 
 	if err := s.db.Create(&attempt).Error; err != nil {
 		log.Printf("Failed to record a refused attempt for id %s: %s\n", storedFile.FileId, err)
+		return false
 	}
+
+	return true
 }
 
 // The stored values come either from the TLS connection, as decimal numbers, or

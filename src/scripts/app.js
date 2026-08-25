@@ -23,6 +23,7 @@ gdprshare.config = {
     maxExpiry: 14,
     maxCount: 15,
     saveClientInfo: false,
+    reportRetention: 14,
     geoIP: false,
     privacyUrl: '',
     imprintUrl: '',

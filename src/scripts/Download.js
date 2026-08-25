@@ -9,7 +9,12 @@ import { withTranslation } from 'react-i18next'
 
 // Server codes that mean the link itself is finished, as opposed to one that
 // works but not from here or not yet.
-const GONE_CODES = ['file_not_found', 'file_not_found_or_limit_exceeded', 'download_count_expired']
+const GONE_CODES = [
+    'file_not_found',
+    'file_not_found_or_limit_exceeded',
+    'download_count_expired',
+    'file_expired',
+]
 
 // exported unwrapped for tests, the app uses the translated default export
 export class Download extends React.Component {

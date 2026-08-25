@@ -112,3 +112,30 @@ func TestCleanupIntervalValidation(t *testing.T) {
 	_, err = conf.CleanupInterval()
 	assert.Error(t, err)
 }
+
+// TestCleanupDropsOldStats lets an error report from the download page go the
+// way a share does. The rows carry an address and a user agent, so they are not
+// kept for good.
+func TestCleanupDropsOldStats(t *testing.T) {
+	db, conf := setup(t)
+
+	fresh := database.Stats{URL: "https://example.org/d/fresh"}
+	require.NoError(t, db.Create(&fresh).Error)
+
+	stale := database.Stats{URL: "https://example.org/d/stale"}
+	require.NoError(t, db.Create(&stale).Error)
+	require.NoError(t, db.Model(&stale).
+		UpdateColumn("created_at", time.Now().Add(-StatsRetention-time.Hour)).Error)
+
+	assert.Empty(t, Cleanup(db, conf))
+
+	var left []database.Stats
+	require.NoError(t, db.Find(&left).Error)
+	require.Len(t, left, 1)
+	assert.Equal(t, "https://example.org/d/fresh", left[0].URL)
+
+	// gone for good, not soft deleted: the point is that the data is not kept
+	var all int
+	require.NoError(t, db.Unscoped().Model(&database.Stats{}).Count(&all).Error)
+	assert.Equal(t, 1, all)
+}

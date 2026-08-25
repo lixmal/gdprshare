@@ -10,6 +10,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 	"time"
 
@@ -22,6 +23,23 @@ import (
 
 // setupTestServer creates a test server with an in-memory SQLite database
 func setupTestServer(t *testing.T) (*Server, func()) {
+	return newTestServer(t, ":memory:")
+}
+
+// setupConcurrentTestServer creates a test server backed by a database file. An
+// in-memory database belongs to the connection that opened it, so requests
+// running at the same time would each find an empty one.
+func setupConcurrentTestServer(t *testing.T) (*Server, func()) {
+	t.Helper()
+
+	dir, err := os.MkdirTemp("", "gdprshare-test-db-*")
+	require.NoError(t, err)
+	t.Cleanup(func() { os.RemoveAll(dir) })
+
+	return newTestServer(t, filepath.Join(dir, "test.db"))
+}
+
+func newTestServer(t *testing.T, dbArgs string) (*Server, func()) {
 	t.Helper()
 
 	tempDir, err := os.MkdirTemp("", "gdprshare-test-*")
@@ -29,7 +47,7 @@ func setupTestServer(t *testing.T) (*Server, func()) {
 
 	conf := config.Default()
 	conf.Database.Driver = "sqlite3"
-	conf.Database.Args = ":memory:"
+	conf.Database.Args = dbArgs
 	conf.StorePath = tempDir
 	conf.SaveClientInfo = false
 	conf.MaxUploadSize = 100
@@ -887,4 +905,191 @@ func TestLocationLookupIsCachedPerRequest(t *testing.T) {
 	require.Contains(t, seen, "203.0.113.7")
 	seen["203.0.113.7"] = "Berlin, Berlin, Germany"
 	assert.Equal(t, "Berlin, Berlin, Germany", srv.locationOf("203.0.113.7", seen))
+}
+
+// backdate moves a share's creation time, which is what its expiry is measured
+// from.
+func backdate(t *testing.T, srv *Server, fileId string, d time.Duration) {
+	t.Helper()
+
+	require.NoError(t, srv.db.Model(&database.StoredFile{}).
+		Where("file_id = ?", fileId).
+		Update("created_at", time.Now().Add(-d)).Error)
+}
+
+func downloadOnce(t *testing.T, srv *Server, fileId string) *httptest.ResponseRecorder {
+	t.Helper()
+
+	w := httptest.NewRecorder()
+	srv.Handler.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/api/v1/files/"+fileId, nil))
+
+	return w
+}
+
+func recordsOf(t *testing.T, srv *Server, fileId, ownerToken string) []DownloadRecord {
+	t.Helper()
+
+	w := downloadRecords(t, srv, fileId, ownerToken)
+	require.Equal(t, http.StatusOK, w.Code)
+
+	var resp struct {
+		Downloads []DownloadRecord `json:"downloads"`
+	}
+	require.NoError(t, json.NewDecoder(w.Body).Decode(&resp))
+
+	return resp.Downloads
+}
+
+// TestDownloadRefusedAfterExpiry stops a share at its expiry date rather than
+// at the next cleanup sweep, which runs on its own interval and may be driven
+// from outside the server entirely.
+func TestDownloadRefusedAfterExpiry(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	fileId, ownerToken := uploadTestFile(t, srv, map[string]string{
+		"expiry": "1",
+		"count":  "5",
+	})
+
+	// still within the day it was given
+	require.Equal(t, http.StatusOK, downloadOnce(t, srv, fileId).Code)
+
+	backdate(t, srv, fileId, 3*24*time.Hour)
+
+	w := downloadOnce(t, srv, fileId)
+	require.Equal(t, http.StatusNotFound, w.Code)
+	assert.Equal(t, string(ErrCodeFileExpired), decodeError(t, w).Code)
+
+	// the downloads it had left are not spendable either
+	var storedFile database.StoredFile
+	require.NoError(t, srv.db.Where(&database.StoredFile{FileId: fileId}).Find(&storedFile).Error)
+	assert.Equal(t, uint(4), storedFile.Count)
+
+	// and the owner sees that someone tried after the share had ended
+	records := recordsOf(t, srv, fileId, ownerToken)
+	require.Len(t, records, 2)
+	assert.True(t, records[1].Denied)
+	assert.Equal(t, string(ErrCodeFileExpired), records[1].Reason)
+}
+
+// TestDownloadAttemptAfterCountRecorded keeps an attempt on a spent share: the
+// owner wants to see that the link was tried again after the last download.
+func TestDownloadAttemptAfterCountRecorded(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	fileId, ownerToken := uploadTestFile(t, srv, map[string]string{"count": "1"})
+
+	require.Equal(t, http.StatusOK, downloadOnce(t, srv, fileId).Code)
+
+	w := downloadOnce(t, srv, fileId)
+	require.Equal(t, http.StatusNotFound, w.Code)
+	assert.Equal(t, string(ErrCodeCountExpired), decodeError(t, w).Code)
+
+	records := recordsOf(t, srv, fileId, ownerToken)
+	require.Len(t, records, 2)
+	assert.False(t, records[0].Denied, "the download that went through")
+	assert.True(t, records[1].Denied)
+	assert.Equal(t, string(ErrCodeCountExpired), records[1].Reason)
+}
+
+// TestDownloadAttemptOnMissingFileRecorded covers the share whose database row
+// outlived the file itself.
+func TestDownloadAttemptOnMissingFileRecorded(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	fileId, ownerToken := uploadTestFile(t, srv, map[string]string{"count": "3"})
+
+	var storedFile database.StoredFile
+	require.NoError(t, srv.db.Where(&database.StoredFile{FileId: fileId}).Find(&storedFile).Error)
+	require.NoError(t, os.Remove(filepath.Join(srv.config.StorePath, storedFile.Name)))
+
+	w := downloadOnce(t, srv, fileId)
+	require.Equal(t, http.StatusNotFound, w.Code)
+	assert.Equal(t, string(ErrCodeFileNotFound), decodeError(t, w).Code)
+
+	records := recordsOf(t, srv, fileId, ownerToken)
+	require.Len(t, records, 1)
+	assert.Equal(t, string(ErrCodeFileNotFound), records[0].Reason)
+}
+
+// TestConcurrentDownloadsSpendEachCountOnce holds the download count to what it
+// says: requests arriving together must not each be served off the same read.
+func TestConcurrentDownloadsSpendEachCountOnce(t *testing.T) {
+	srv, cleanup := setupConcurrentTestServer(t)
+	defer cleanup()
+
+	fileId, _ := uploadTestFile(t, srv, map[string]string{"count": "3"})
+
+	var mu sync.Mutex
+	served := 0
+	var wg sync.WaitGroup
+
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+
+			w := downloadOnce(t, srv, fileId)
+
+			mu.Lock()
+			defer mu.Unlock()
+			if w.Code == http.StatusOK {
+				served++
+			}
+		}()
+	}
+	wg.Wait()
+
+	assert.Equal(t, 3, served, "a share with three downloads was served three times")
+
+	var storedFile database.StoredFile
+	require.NoError(t, srv.db.Where(&database.StoredFile{FileId: fileId}).Find(&storedFile).Error)
+	assert.Equal(t, uint(0), storedFile.Count)
+}
+
+// postStats reports a broken link the way the download page does.
+func postStats(t *testing.T, srv *Server, url string) *httptest.ResponseRecorder {
+	t.Helper()
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/stats?url="+url, nil)
+	w := httptest.NewRecorder()
+	srv.Handler.ServeHTTP(w, req)
+
+	return w
+}
+
+// TestStatsAreBounded holds the error reports to a cap. The endpoint needs no
+// token, so anyone who finds it could otherwise fill the database.
+func TestStatsAreBounded(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	for i := 0; i < MaxStatsRecords; i++ {
+		require.NoError(t, srv.db.Create(&database.Stats{URL: "https://example.org/d/full"}).Error)
+	}
+
+	// the report is dropped, and the reporter is told nothing it could act on
+	w := postStats(t, srv, "https://example.org/d/dropped")
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var stored int
+	require.NoError(t, srv.db.Model(&database.Stats{}).Count(&stored).Error)
+	assert.Equal(t, MaxStatsRecords, stored)
+}
+
+// TestStatsAreStoredBelowTheCap covers the ordinary report, so the cap test
+// cannot pass by the endpoint being broken.
+func TestStatsAreStoredBelowTheCap(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	require.Equal(t, http.StatusOK, postStats(t, srv, "https://example.org/d/broken").Code)
+
+	var stored []database.Stats
+	require.NoError(t, srv.db.Find(&stored).Error)
+	require.Len(t, stored, 1)
+	assert.Equal(t, "https://example.org/d/broken", stored[0].URL)
 }

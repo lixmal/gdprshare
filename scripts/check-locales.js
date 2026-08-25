@@ -147,8 +147,12 @@ const sourceFiles = []
 })(sourceDir)
 
 const usedKeys = new Set()
+// keys the code names without calling t() on the spot, such as a lookup table
+// mapping a server error code to its key
+const referencedKeys = new Set()
 sourceFiles.forEach(function (file) {
     const source = fs.readFileSync(file, 'utf8')
+
     const pattern = /\bt\(\s*'([A-Za-z][\w.]*)'/g
     let match
     while ((match = pattern.exec(source)) !== null) {
@@ -156,6 +160,12 @@ sourceFiles.forEach(function (file) {
         if (match[1].endsWith('.'))
             continue
         usedKeys.add(match[1] + '\u0000' + path.basename(file))
+    }
+
+    const literal = /'([A-Za-z][\w]*(?:\.[\w]+)+)'/g
+    while ((match = literal.exec(source)) !== null) {
+        if (base[match[1]] !== undefined)
+            referencedKeys.add(match[1])
     }
 })
 
@@ -169,7 +179,8 @@ usedKeys.forEach(function (entry) {
 baseKeys.filter(function (k) {
     if (usedKeys.size === 0)
         return false
-    const used = Array.from(usedKeys).some(function (e) { return e.split('\u0000')[0] === k })
+    const used = referencedKeys.has(k) ||
+        Array.from(usedKeys).some(function (e) { return e.split('\u0000')[0] === k })
     const dynamic = dynamicPrefixes.some(function (prefix) { return k.indexOf(prefix) === 0 })
     return !used && !dynamic
 }).forEach(function (k) {

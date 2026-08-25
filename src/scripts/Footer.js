@@ -34,6 +34,10 @@ class Footer extends React.Component {
         if (config.geoIP)
             facts.push(t('footer.keptLocation'))
 
+        // a report carries nothing about the visitor unless client info is kept
+        if (config.saveClientInfo)
+            facts.push(t('footer.keptReport', { days: config.reportRetention }))
+
         facts.push(t('footer.operator'))
 
         return facts

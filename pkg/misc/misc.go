@@ -14,6 +14,11 @@ import (
 	"github.com/lixmal/gdprshare/pkg/database"
 )
 
+// StatsRetention is how long an error report from the download page is kept.
+// The rows carry the address and user agent of whoever hit a broken link, so
+// they go the way a share does rather than sitting there for good.
+const StatsRetention = 14 * 24 * time.Hour
+
 // GenToken generates a cryptographically secure random token of the specified length.
 func GenToken(length int) (string, error) {
 	buf := make([]byte, length)
@@ -43,10 +48,17 @@ func DeleteStoredFile(f *database.StoredFile, db *database.Database, config *con
 	return errors
 }
 
-// Cleanup removes expired files from the database and filesystem.
+// Cleanup removes expired files from the database and filesystem, and drops
+// error reports that are past their retention.
 func Cleanup(db *database.Database, config *config.Config) []error {
 	now := time.Now()
 	var errors []error
+
+	if err := db.Unscoped().
+		Where("created_at < ?", now.Add(-StatsRetention)).
+		Delete(&database.Stats{}).Error; err != nil {
+		errors = append(errors, fmt.Errorf("delete expired stats: %w", err))
+	}
 
 	var files []database.StoredFile
 	if err := db.Find(&files).Error; err != nil && !db.IsRecordNotFoundError(err) {

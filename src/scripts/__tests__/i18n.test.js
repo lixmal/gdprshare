@@ -4,7 +4,7 @@
 
 import fs from 'fs'
 import path from 'path'
-import i18n, { detectLocale, isRtl, serverErrorText, supportedLocales } from '../i18n'
+import i18n, { detectLocale, isRtl, serverErrorIsExpected, serverErrorText, supportedLocales } from '../i18n'
 
 const localeDir = path.join(__dirname, '..', '..', '..', 'public', 'locales')
 
@@ -96,6 +96,32 @@ describe('serverErrorText', () => {
     test('does not throw on an empty response body', () => {
         expect(serverErrorText(null)).toBe('')
         expect(serverErrorText({})).toBe('')
+    })
+})
+
+describe('serverErrorIsExpected', () => {
+    // an end state the link reached on its own reads as a notice, not as
+    // something that went wrong
+    test.each([
+        'file_not_found',
+        'download_count_expired',
+        'file_expired',
+        'file_not_yet_downloadable',
+        'download_location_forbidden',
+    ])('%s is an expected end state', (code) => {
+        expect(serverErrorIsExpected({ code })).toBe(true)
+    })
+
+    test.each(['file_retrieval_failed', 'tls_requirements_not_met', 'something_new'])(
+        '%s is a real error',
+        (code) => {
+            expect(serverErrorIsExpected({ code })).toBe(false)
+        },
+    )
+
+    test('does not throw on an empty response body', () => {
+        expect(serverErrorIsExpected(null)).toBe(false)
+        expect(serverErrorIsExpected({})).toBe(false)
     })
 })
 

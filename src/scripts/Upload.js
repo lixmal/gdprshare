@@ -8,6 +8,17 @@ import { withRouter } from './withRouter'
 import { withTranslation } from 'react-i18next'
 import { stripMetadata, loadPdfLib, canStrip, strippableImageTypes } from './strip'
 
+// Why a refused attempt did not go through, worded for the owner reading their
+// own record rather than for the visitor who was turned away.
+const REASON_KEYS = {
+    download_location_forbidden: 'files.reasonLocation',
+    file_not_yet_downloadable: 'files.reasonTooEarly',
+    user_agent_blocked: 'files.reasonBrowser',
+    download_count_expired: 'files.reasonSpent',
+    file_expired: 'files.reasonExpired',
+    file_not_found: 'files.reasonMissing',
+}
+
 class Upload extends React.Component {
     constructor() {
         super()
@@ -449,19 +460,14 @@ class Upload extends React.Component {
                     ].filter(function (part) { return part && part !== 'none' })
 
                     // the record is read by the owner, so a refusal is worded
-                    // from that side rather than from the refused visitor's
+                    // from that side rather than from the refused visitor's. a
+                    // server newer than this build still says something, even
+                    // if only its own code
                     var reason = null
-                    if (record.denied) {
-                        if (record.reason === 'download_location_forbidden')
-                            reason = t('files.reasonLocation')
-                        else if (record.reason === 'file_not_yet_downloadable')
-                            reason = t('files.reasonTooEarly')
-                        else if (record.reason === 'user_agent_blocked')
-                            reason = t('files.reasonBrowser')
-                        else
-                            // a server newer than this build still says something
-                            reason = record.reason
-                    }
+                    if (record.denied)
+                        reason = REASON_KEYS[record.reason]
+                            ? t(REASON_KEYS[record.reason])
+                            : record.reason
 
                     return (
                         <div className="record-line" key={index}>

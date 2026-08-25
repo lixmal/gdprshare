@@ -42,6 +42,8 @@ aspects.
 ### Limits on a share
 
 * 1 to 15 downloads and 1 to 14 days, whichever runs out first
+* both are enforced when the file is asked for, so a share stops on its last day
+  rather than at the next cleanup sweep
 * the sender can add days or downloads afterwards, never beyond what a fresh
   upload is allowed
 * a link can be held back for a while before it starts working
@@ -68,6 +70,10 @@ as it is.
 * the same record is readable in the app: one line per attempt, refusals
   included, with the reason a refused one did not go through. It lives as long
   as the share does and goes with it
+* every attempt is kept, including the ones on a link that ran out, expired or
+  whose file is gone. A share keeps at most 50 refusals, and the notifications
+  stop with them, so a link someone keeps hammering cannot grow the database or
+  the sender's mailbox without end
 
 ### What the visitor is told
 
@@ -78,8 +84,11 @@ the data, why it is processed and when it goes. It cites
 [Art. 5 (1) e](https://gdpr-info.eu/art-5-gdpr/) for the automatic deletion,
 [Art. 32 (1) a](https://gdpr-info.eu/art-32-gdpr/) for the encryption, and
 Art. 5 (2) with [Art. 24 (1)](https://gdpr-info.eu/art-24-gdpr/) for the
-download records. `privacyurl` and `imprinturl` add links to the operator's own
-pages; without them the footer says the rest is up to whoever runs the server.
+download records. It also covers the error reports the download page
+sends when a link fails to open, which are dropped after two weeks and capped in
+number, since that endpoint needs no token. `privacyurl` and `imprinturl` add
+links to the operator's own pages; without them the footer says the rest is up to
+whoever runs the server.
 
 ### The interface
 
@@ -145,9 +154,11 @@ gdprshare looks for a `config.yml` in its working directory; `gdprshare -config
 <config file>` points it somewhere else.
 
 Expired files are deleted by the server itself, every `cleanup.interval`
-(1 hour by default), which is one less moving part in a container. Set
-`cleanup.enabled: false` to drive it from outside instead: `gdprshare -cleanup`
-sweeps once and exits, and `misc/crontab` has an example entry.
+(1 hour by default), which is one less moving part in a container. The sweep
+erases what is left behind; a download is already refused from the moment a
+share expires, whether or not a sweep has run. Set `cleanup.enabled: false` to
+drive it from outside instead: `gdprshare -cleanup` sweeps once and exits, and
+`misc/crontab` has an example entry.
 `misc/gdprshare.service` is an example systemd unit.
 
 Alternatively run the [docker image](https://ghcr.io/lixmal/gdprshare):
