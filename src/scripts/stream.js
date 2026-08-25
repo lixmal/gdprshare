@@ -25,6 +25,9 @@ export const headerLength = 1 + 4 + nonceBaseLength
 // 4 MiB keeps the number of Web Crypto calls low without pinning much memory
 export const recordSize = 4 * 1024 * 1024
 
+// how many records may wait on the heap before they are folded into the Blob
+const foldEvery = 8
+
 // what a header is allowed to ask of us, so a file that is not in this format
 // cannot talk us into absurd allocations
 export const minRecordSize = 64 * 1024
@@ -156,7 +159,12 @@ export async function encryptBlob(file, key, onProgress, size) {
 export async function decryptStream(stream, key, onProgress, total) {
     const reader = stream.getReader()
     const cryptoKey = await importKey(key, 'decrypt')
-    const parts = []
+
+    // Records are folded into a Blob as they add up, so the plaintext waiting to
+    // be written sits where the browser keeps blobs rather than on the heap.
+    // Folding a Blob into a larger one does not copy what is already in it.
+    var kept = new Blob([])
+    var parts = []
 
     var buffered = new Uint8Array(0)
     var counter = 0
@@ -187,6 +195,11 @@ export async function decryptStream(stream, key, onProgress, total) {
 
         parts.push(new Uint8Array(plain))
         counter++
+
+        if (parts.length >= foldEvery) {
+            kept = new Blob([kept].concat(parts))
+            parts = []
+        }
     }
 
     for (;;) {
@@ -227,5 +240,5 @@ export async function decryptStream(stream, key, onProgress, total) {
         }
     }
 
-    return new Blob(parts)
+    return new Blob([kept].concat(parts))
 }
