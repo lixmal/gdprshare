@@ -10,11 +10,14 @@
         "closingIn": "{{count}}초 후 닫힘",
         "status": {
             "downloading": "다운로드 중…",
-            "decrypting": "복호화 중…"
+            "decrypting": "복호화 중…",
+            "unlocking": "비밀번호를 확인하고 있습니다…"
         },
         "subtitle": "파일은 이 기기에서 복호화됩니다",
         "goneTitle": "이 링크는 더 이상 열리지 않습니다",
-        "passwordHint": "받은 링크에 보통 들어 있습니다. 따로 받았다면 여기에 붙여 넣으세요."
+        "passwordHint": "받은 링크에 보통 들어 있습니다. 따로 받았다면 여기에 붙여 넣으세요.",
+        "senderPassword": "보낸 사람이 설정한 비밀번호",
+        "senderPasswordHint": "보낸 사람이 이 파일을 비밀번호로 잠갔습니다. 링크에는 들어 있지 않으니 보낸 사람에게 문의하세요."
     },
     "shell": {
         "tagline": "기기를 떠나기 전에 암호화됩니다",
@@ -100,6 +103,9 @@
         "email": "이메일로 알리기",
         "emailPlaceholder": "you@example.org (선택)",
         "emailHint": "누군가 링크를 열 때마다 이메일 한 통",
+        "password": "비밀번호 (선택)",
+        "passwordHint": "링크에 더해지는 두 번째 잠금입니다. 다른 방법으로 전달하세요. 복구할 수 없습니다.",
+        "chipPassword": "비밀번호",
         "strip": "숨은 정보 지우기",
         "stripHint": "위치, 카메라, 작성자 정보를 먼저 없앱니다. GIF 말고는 다시 인코딩하고, 다른 형식은 받지 않습니다.",
         "ephemeral": "사라지는 시간",
@@ -157,6 +163,7 @@
         "title": "업로드했습니다",
         "linkLabel": "다운로드 링크",
         "linkHint": "비밀번호가 링크 안에 들어 있으니 그대로 보내세요.",
+        "passwordNotice": "링크는 그대로 보내고 비밀번호는 다른 방법으로 전달하세요. 둘 중 하나만으로는 파일이 열리지 않습니다.",
         "qr": "QR 코드 보기",
         "share": "공유",
         "note": "이 링크를 받은 사람은 누구나 파일을 열 수 있으니 받는 사람만 읽을 수 있는 곳으로 보내세요.",

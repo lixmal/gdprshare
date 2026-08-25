@@ -10,11 +10,14 @@
         "closingIn": "{{count}} 秒後關閉",
         "status": {
             "downloading": "正在下載…",
-            "decrypting": "正在解密…"
+            "decrypting": "正在解密…",
+            "unlocking": "正在檢查密碼…"
         },
         "subtitle": "檔案在您自己的裝置上解密",
         "goneTitle": "這個連結已經失效",
-        "passwordHint": "您收到的連結通常已經帶著它。如果是另外傳來的，就貼到這裡。"
+        "passwordHint": "您收到的連結通常已經帶著它。如果是另外傳來的，就貼到這裡。",
+        "senderPassword": "傳送者設定的密碼",
+        "senderPasswordHint": "傳送者為這個檔案加了密碼。密碼不在連結裡，請向傳送者索取。"
     },
     "shell": {
         "tagline": "在離開您的裝置前就已加密",
@@ -100,6 +103,9 @@
         "email": "用電子郵件通知我",
         "emailPlaceholder": "you@example.org（選填）",
         "emailHint": "每次有人開啟連結就寄一封信",
+        "password": "密碼（選填）",
+        "passwordHint": "在連結之外再加一道鎖。請用其他方式轉告，密碼無法找回。",
+        "chipPassword": "密碼",
         "strip": "去掉隱藏資訊",
         "stripHint": "先去掉位置、相機和作者資訊。除 GIF 以外的圖片會重新編碼，其他檔案類型會被拒絕。",
         "ephemeral": "多久後消失",
@@ -157,6 +163,7 @@
         "title": "已上傳",
         "linkLabel": "下載連結",
         "linkHint": "密碼就在連結裡，請原樣傳送。",
+        "passwordNotice": "連結照原樣傳送，密碼用其他方式轉告。只有其中一個都打不開檔案。",
         "qr": "顯示 QR 碼",
         "share": "分享",
         "note": "拿到這個連結的人都能開啟檔案，所以只傳到只有收件人看得到的地方。",

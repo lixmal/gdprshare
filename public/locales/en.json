@@ -10,11 +10,14 @@
         "closingIn": "Closing in {{count}}s",
         "status": {
             "downloading": "Downloading…",
-            "decrypting": "Decrypting…"
+            "decrypting": "Decrypting…",
+            "unlocking": "Checking the password…"
         },
         "subtitle": "The file is unlocked here on your device",
         "goneTitle": "This link no longer works",
-        "passwordHint": "The link you were sent usually fills this in. Paste it if the sender sent it separately."
+        "passwordHint": "The link you were sent usually fills this in. Paste it if the sender sent it separately.",
+        "senderPassword": "Password from the sender",
+        "senderPasswordHint": "The sender locked this file with a password. It is not part of the link, so ask them for it."
     },
     "shell": {
         "tagline": "Encrypted before it leaves your device",
@@ -100,6 +103,9 @@
         "email": "Notify by email",
         "emailPlaceholder": "you@example.org (optional)",
         "emailHint": "One email each time someone opens the link",
+        "password": "Password (optional)",
+        "passwordHint": "A second lock on top of the link. Pass it on another way; it cannot be recovered.",
+        "chipPassword": "Password",
         "strip": "Remove hidden data",
         "stripHint": "Location, camera and author details are taken out first. Pictures other than GIFs are re-encoded, other file types are refused.",
         "ephemeral": "Disappears after",
@@ -157,6 +163,7 @@
         "title": "Uploaded",
         "linkLabel": "Download link",
         "linkHint": "The password is built into the link, so send it exactly as it is.",
+        "passwordNotice": "Send the link as it is, and the password another way. Neither one opens the file alone.",
         "qr": "Show the QR code",
         "share": "Share",
         "note": "Anyone who gets this link can open the file, so send it somewhere only the recipient can read.",

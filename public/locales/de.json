@@ -10,11 +10,14 @@
         "closingIn": "Schließt in {{count}} s",
         "status": {
             "downloading": "Wird heruntergeladen…",
-            "decrypting": "Wird entschlüsselt…"
+            "decrypting": "Wird entschlüsselt…",
+            "unlocking": "Passwort wird geprüft…"
         },
         "subtitle": "Die Datei wird hier auf Ihrem Gerät entschlüsselt",
         "goneTitle": "Dieser Link funktioniert nicht mehr",
-        "passwordHint": "Der Link, den Sie bekommen haben, füllt das normalerweise aus. Fügen Sie es ein, wenn es separat geschickt wurde."
+        "passwordHint": "Der Link, den Sie bekommen haben, füllt das normalerweise aus. Fügen Sie es ein, wenn es separat geschickt wurde.",
+        "senderPassword": "Passwort des Absenders",
+        "senderPasswordHint": "Der Absender hat diese Datei mit einem Passwort geschützt. Es steht nicht im Link, fragen Sie also danach."
     },
     "shell": {
         "tagline": "Verschlüsselt, bevor es Ihr Gerät verlässt",
@@ -100,6 +103,9 @@
         "email": "Per E-Mail benachrichtigen",
         "emailPlaceholder": "name@example.org (optional)",
         "emailHint": "Eine E-Mail, sobald jemand den Link öffnet",
+        "password": "Passwort (optional)",
+        "passwordHint": "Ein zweites Schloss zusätzlich zum Link. Geben Sie es auf einem anderen Weg weiter; es lässt sich nicht wiederherstellen.",
+        "chipPassword": "Passwort",
         "strip": "Verborgene Daten entfernen",
         "stripHint": "Ort, Kamera und Autor werden vorher entfernt. Bilder außer GIFs werden neu kodiert, andere Dateitypen abgelehnt.",
         "ephemeral": "Verschwindet nach",
@@ -157,6 +163,7 @@
         "title": "Hochgeladen",
         "linkLabel": "Download-Link",
         "linkHint": "Das Passwort steckt im Link, schicke ihn also genau so, wie er ist.",
+        "passwordNotice": "Senden Sie den Link so, wie er ist, und das Passwort auf einem anderen Weg. Keines von beiden öffnet die Datei allein.",
         "qr": "QR-Code zeigen",
         "share": "Teilen",
         "note": "Wer diesen Link bekommt, kann die Datei öffnen. Schicken Sie ihn also nur dorthin, wo ihn nur der Empfänger liest.",

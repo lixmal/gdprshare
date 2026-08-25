@@ -10,11 +10,14 @@
         "closingIn": "Chiusura tra {{count}} s",
         "status": {
             "downloading": "Download in corso…",
-            "decrypting": "Decifratura in corso…"
+            "decrypting": "Decifratura in corso…",
+            "unlocking": "Verifica della password…"
         },
         "subtitle": "Il file viene decifrato qui, sul tuo dispositivo",
         "goneTitle": "Questo link non funziona più",
-        "passwordHint": "Il link che hai ricevuto di solito lo compila. Incollalo se te l’hanno mandato a parte."
+        "passwordHint": "Il link che hai ricevuto di solito lo compila. Incollalo se te l’hanno mandato a parte.",
+        "senderPassword": "Password del mittente",
+        "senderPasswordHint": "Il mittente ha protetto questo file con una password. Non fa parte del link, quindi chiedila a lui."
     },
     "shell": {
         "tagline": "Cifrato prima di lasciare il tuo dispositivo",
@@ -100,6 +103,9 @@
         "email": "Avvisami per e-mail",
         "emailPlaceholder": "tu@example.org (facoltativo)",
         "emailHint": "Una e-mail ogni volta che qualcuno apre il link",
+        "password": "Password (facoltativa)",
+        "passwordHint": "Una seconda serratura oltre al link. Comunicala per un’altra via; non può essere recuperata.",
+        "chipPassword": "Password",
         "strip": "Togli i dati nascosti",
         "stripHint": "Luogo, fotocamera e autore vengono tolti prima. Le immagini tranne i GIF sono ricodificate, gli altri tipi rifiutati.",
         "ephemeral": "Scompare dopo",
@@ -157,6 +163,7 @@
         "title": "Caricato",
         "linkLabel": "Link per il download",
         "linkHint": "La password è dentro il link, quindi mandalo esattamente così com’è.",
+        "passwordNotice": "Invia il link così com’è e la password per un’altra via. Nessuno dei due apre il file da solo.",
         "qr": "Mostra il codice QR",
         "share": "Condividi",
         "note": "Chi riceve questo link può aprire il file, quindi mandalo solo dove lo legge soltanto il destinatario.",

@@ -10,11 +10,14 @@
         "closingIn": "Se cierra en {{count}} s",
         "status": {
             "downloading": "Descargando…",
-            "decrypting": "Descifrando…"
+            "decrypting": "Descifrando…",
+            "unlocking": "Comprobando la contraseña…"
         },
         "subtitle": "El archivo se descifra aquí, en tu dispositivo",
         "goneTitle": "Este enlace ya no funciona",
-        "passwordHint": "El enlace que recibiste normalmente lo rellena. Pégalo si te lo enviaron por separado."
+        "passwordHint": "El enlace que recibiste normalmente lo rellena. Pégalo si te lo enviaron por separado.",
+        "senderPassword": "Contraseña del remitente",
+        "senderPasswordHint": "El remitente protegió este archivo con una contraseña. No forma parte del enlace, así que pídasela."
     },
     "shell": {
         "tagline": "Cifrado antes de salir de tu dispositivo",
@@ -100,6 +103,9 @@
         "email": "Avisarme por correo",
         "emailPlaceholder": "tu@example.org (opcional)",
         "emailHint": "Un correo cada vez que alguien abre el enlace",
+        "password": "Contraseña (opcional)",
+        "passwordHint": "Un segundo cierre además del enlace. Pásela por otra vía; no se puede recuperar.",
+        "chipPassword": "Contraseña",
         "strip": "Quitar los datos ocultos",
         "stripHint": "La ubicación, la cámara y el autor se quitan primero. Las imágenes salvo los GIF se recodifican, otros tipos se rechazan.",
         "ephemeral": "Desaparece tras",
@@ -157,6 +163,7 @@
         "title": "Subido",
         "linkLabel": "Enlace de descarga",
         "linkHint": "La contraseña va dentro del enlace, así que envíalo exactamente como está.",
+        "passwordNotice": "Envíe el enlace tal cual y la contraseña por otra vía. Ninguno de los dos abre el archivo por sí solo.",
         "qr": "Mostrar el código QR",
         "share": "Compartir",
         "note": "Cualquiera que reciba este enlace puede abrir el archivo, así que mándalo solo donde lo lea únicamente quien lo recibe.",

@@ -10,11 +10,14 @@
         "closingIn": "Sluit over {{count}} s",
         "status": {
             "downloading": "Downloaden…",
-            "decrypting": "Ontsleutelen…"
+            "decrypting": "Ontsleutelen…",
+            "unlocking": "Wachtwoord wordt gecontroleerd…"
         },
         "subtitle": "Het bestand wordt hier op je apparaat ontsleuteld",
         "goneTitle": "Deze link werkt niet meer",
-        "passwordHint": "De link die je kreeg vult dit meestal in. Plak het als de afzender het apart heeft gestuurd."
+        "passwordHint": "De link die je kreeg vult dit meestal in. Plak het als de afzender het apart heeft gestuurd.",
+        "senderPassword": "Wachtwoord van de afzender",
+        "senderPasswordHint": "De afzender heeft dit bestand met een wachtwoord beveiligd. Het staat niet in de link, dus vraag ernaar."
     },
     "shell": {
         "tagline": "Versleuteld voordat het je apparaat verlaat",
@@ -100,6 +103,9 @@
         "email": "Mail me",
         "emailPlaceholder": "jij@example.org (optioneel)",
         "emailHint": "Eén mail elke keer dat iemand de link opent",
+        "password": "Wachtwoord (optioneel)",
+        "passwordHint": "Een tweede slot naast de link. Geef het via een andere weg door; het is niet terug te halen.",
+        "chipPassword": "Wachtwoord",
         "strip": "Verborgen gegevens verwijderen",
         "stripHint": "Locatie, camera en auteur gaan er eerst uit. Foto’s behalve GIFs worden opnieuw opgeslagen, andere bestandstypen geweigerd.",
         "ephemeral": "Verdwijnt na",
@@ -157,6 +163,7 @@
         "title": "Geüpload",
         "linkLabel": "Downloadlink",
         "linkHint": "Het wachtwoord zit in de link, stuur hem dus precies zoals hij is.",
+        "passwordNotice": "Stuur de link zoals hij is en het wachtwoord via een andere weg. Geen van beide opent het bestand alleen.",
         "qr": "QR-code tonen",
         "share": "Delen",
         "note": "Wie deze link krijgt, kan het bestand openen. Stuur hem dus alleen ergens waar alleen de ontvanger meeleest.",

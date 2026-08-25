@@ -10,11 +10,14 @@
         "closingIn": "Zamknięcie za {{count}} s",
         "status": {
             "downloading": "Pobieranie…",
-            "decrypting": "Odszyfrowywanie…"
+            "decrypting": "Odszyfrowywanie…",
+            "unlocking": "Sprawdzanie hasła…"
         },
         "subtitle": "Plik jest odszyfrowywany tutaj, na twoim urządzeniu",
         "goneTitle": "Ten link już nie działa",
-        "passwordHint": "Link, który dostałeś, zwykle wypełnia to sam. Wklej hasło, jeśli przyszło osobno."
+        "passwordHint": "Link, który dostałeś, zwykle wypełnia to sam. Wklej hasło, jeśli przyszło osobno.",
+        "senderPassword": "Hasło od nadawcy",
+        "senderPasswordHint": "Nadawca zabezpieczył ten plik hasłem. Nie ma go w linku, więc poproś o nie nadawcę."
     },
     "shell": {
         "tagline": "Zaszyfrowane, zanim opuści Twoje urządzenie",
@@ -100,6 +103,9 @@
         "email": "Powiadom e-mailem",
         "emailPlaceholder": "ty@example.org (opcjonalnie)",
         "emailHint": "Jeden e-mail za każdym otwarciem linku",
+        "password": "Hasło (opcjonalnie)",
+        "passwordHint": "Druga blokada obok linku. Przekaż je inną drogą; nie da się go odzyskać.",
+        "chipPassword": "Hasło",
         "strip": "Usuń ukryte dane",
         "stripHint": "Miejsce, aparat i autor są usuwane najpierw. Zdjęcia poza GIF-ami są przekodowywane, inne typy plików odrzucane.",
         "ephemeral": "Znika po",
@@ -157,6 +163,7 @@
         "title": "Wysłano",
         "linkLabel": "Link do pobrania",
         "linkHint": "Hasło jest częścią linku, więc wyślij go dokładnie tak, jak jest.",
+        "passwordNotice": "Wyślij link bez zmian, a hasło inną drogą. Żadne z nich nie otworzy pliku samodzielnie.",
         "qr": "Pokaż kod QR",
         "share": "Udostępnij",
         "note": "Każdy, kto dostanie ten link, może otworzyć plik, więc wyślij go tylko tam, gdzie przeczyta go wyłącznie odbiorca.",

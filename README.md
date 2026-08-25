@@ -34,6 +34,11 @@ aspects.
 * files are encrypted in the browser (AES-GCM), so nothing has to be shredded
   on the server after deletion
 * the key lives in the link fragment and never reaches the server
+* the sender can add a password: the file is then encrypted under a key derived
+  from the secret in the link and the password together (PBKDF2-SHA256), so a
+  link that goes astray on its own opens nothing. The link carries a marker so
+  the download page knows to ask, and the server never learns that a password is
+  in play
 * shredding the stored file as well is not implemented yet
 * the web client cannot protect against a contaminated server or a malicious
   operator: the code doing the encrypting is served by that same server on every
@@ -103,10 +108,18 @@ whoever runs the server.
 ### Handing over a share
 
 Anyone holding the whole link can open the file, so treat the link as the file
-itself. For something sensitive, split it: everything after the `#` is the
-password, so send the link without that part and pass it on by another route,
-for example the link by email and the password by phone. The download page asks
-for the password when the link does not carry it.
+itself. There are two ways to keep the two halves apart:
+
+* set a password on the upload. The link stays complete, but it no longer opens
+  anything by itself, and the password never touches this server. It cannot be
+  recovered, so a lost password is a lost file
+* or split the link: everything after the `#` is the secret, so send the link
+  without that part and pass it on by another route, for example the link by
+  email and the secret by phone
+
+The download page asks for whichever half is missing. Both can be combined: a
+split link to a share that also has a password asks for the secret first and the
+password after it.
 
 ## REQUIREMENTS
 

@@ -44,6 +44,10 @@ export class Download extends React.Component {
             countdown: 0,
             phase: null,
             progress: null,
+            // the link carried a secret that only opens the file together with
+            // a password the sender passed on some other way
+            needsPassword: false,
+            secret: null,
         }
         this.countdownTimer = null
     }
@@ -71,15 +75,26 @@ export class Download extends React.Component {
         window.addEventListener('blur', this.handleVisibilityChange)
         window.addEventListener('focus', this.handleVisibilityChange)
 
-        let key = window.location.hash.substring(1)
+        const link = gdprshare.readFragment(window.location.hash.substring(1))
+
+        // half of what is needed: ask for the password before spending a
+        // download on a key that cannot open the file
+        if (link.needsPassword) {
+            this.setState({
+                needsPassword: true,
+                secret: link.secret,
+            })
+
+            return
+        }
 
         // don't render password field
-        if (key) {
+        if (link.secret) {
             this.setState({
                 disableForm: true,
             })
 
-            this.handleDownload(null, gdprshare.keyFromB64(key))
+            this.handleDownload(null, link.secret)
         }
     }
 
@@ -238,7 +253,29 @@ export class Download extends React.Component {
             return
 
         if (!key) {
-            key = gdprshare.keyFromB64(this.passwordInput.current.value)
+            const typed = this.passwordInput.current.value
+
+            if (this.state.needsPassword) {
+                // deriving takes long enough to be felt on a phone
+                this.setState({error: null, mask: true, phase: 'unlocking', progress: null})
+                key = await gdprshare.deriveKey(this.state.secret, typed)
+            } else {
+                const link = gdprshare.readFragment(typed)
+
+                // a secret pasted by hand says just as well that a password
+                // belongs with it
+                if (link.needsPassword) {
+                    this.passwordInput.current.value = ''
+                    this.setState({
+                        needsPassword: true,
+                        secret: link.secret,
+                    })
+
+                    return
+                }
+
+                key = link.secret
+            }
         }
 
         this.setState({
@@ -337,13 +374,19 @@ export class Download extends React.Component {
         // the link ran out or was deleted: promising a shared file would be a lie
         const gone = GONE_CODES.indexOf(this.state.errorCode) !== -1
 
+        // one field, two things it can hold: the secret from the link when the
+        // link was split, or the password the sender set on top of it
+        const asking = this.state.needsPassword
+            ? {label: t('download.senderPassword'), hint: t('download.senderPasswordHint')}
+            : {label: t('download.password'), hint: t('download.passwordHint')}
+
         var form = (
             <form className="app-inner" onSubmit={this.handleDownload}>
                 <div className="field">
-                    <label htmlFor="password" className="lbl">{t('download.password')}</label>
+                    <label htmlFor="password" className="lbl">{asking.label}</label>
                     <input className="form-control mono-input" id="password" type="password" ref={this.passwordInput}
-                           placeholder={t('download.password')} maxLength="255" autoFocus required />
-                    <span className="hint">{t('download.passwordHint')}</span>
+                           placeholder={asking.label} maxLength="255" autoFocus required />
+                    <span className="hint">{asking.hint}</span>
                 </div>
                 <input type="submit" className="btn btn-primary btn-block" value={t('download.submit')} />
             </form>

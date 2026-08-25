@@ -10,11 +10,14 @@
         "closingIn": "A fechar em {{count}} s",
         "status": {
             "downloading": "A transferir…",
-            "decrypting": "A desencriptar…"
+            "decrypting": "A desencriptar…",
+            "unlocking": "A verificar a palavra-passe…"
         },
         "subtitle": "O ficheiro é decifrado aqui, no seu dispositivo",
         "goneTitle": "Este link já não funciona",
-        "passwordHint": "O link que recebeu normalmente preenche isto. Cole-o se lhe foi enviado em separado."
+        "passwordHint": "O link que recebeu normalmente preenche isto. Cole-o se lhe foi enviado em separado.",
+        "senderPassword": "Palavra-passe do remetente",
+        "senderPasswordHint": "O remetente protegeu este ficheiro com uma palavra-passe. Não faz parte da ligação, por isso peça-lha."
     },
     "shell": {
         "tagline": "Cifrado antes de sair do seu dispositivo",
@@ -100,6 +103,9 @@
         "email": "Avisar-me por e-mail",
         "emailPlaceholder": "nome@example.org (opcional)",
         "emailHint": "Um e-mail cada vez que alguém abre o link",
+        "password": "Palavra-passe (opcional)",
+        "passwordHint": "Um segundo fecho além da ligação. Transmita-a por outra via; não é possível recuperá-la.",
+        "chipPassword": "Palavra-passe",
         "strip": "Remover dados escondidos",
         "stripHint": "Local, câmara e autor saem primeiro. As imagens, tirando os GIF, são recodificadas; outros tipos são recusados.",
         "ephemeral": "Desaparece depois de",
@@ -157,6 +163,7 @@
         "title": "Enviado",
         "linkLabel": "Link de transferência",
         "linkHint": "A palavra-passe faz parte do link, por isso envie-o exactamente como está.",
+        "passwordNotice": "Envie a ligação como está e a palavra-passe por outra via. Nenhuma das duas abre o ficheiro sozinha.",
         "qr": "Mostrar o código QR",
         "share": "Partilhar",
         "note": "Quem receber este link pode abrir o ficheiro, por isso envie-o só para onde apenas o destinatário o lê.",

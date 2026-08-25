@@ -28,6 +28,7 @@ const sharedWithEnglish = {
     'upload.regionEea': ['hi', 'ja', 'ko', 'th', 'vi'],
     'upload.typeText': ['de', 'sv'],
     'upload.typeFile': ['it'],
+    'upload.chipPassword': ['it'],
     'upload.typeImage': ['fr'],
     'uploaded.mailSubject': ['de', 'nl'],
     'duration.m1': ['fr'],

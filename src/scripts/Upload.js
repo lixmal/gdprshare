@@ -57,6 +57,7 @@ class Upload extends React.Component {
         this.handleBrowse = this.handleBrowse.bind(this)
         this.handleClearFile = this.handleClearFile.bind(this)
         this.handleEmailChange = this.handleEmailChange.bind(this)
+        this.handlePasswordChange = this.handlePasswordChange.bind(this)
         this.forgetFile = this.forgetFile.bind(this)
         this.toggleRecord = this.toggleRecord.bind(this)
 
@@ -64,6 +65,7 @@ class Upload extends React.Component {
             error: null,
             mask: false,
             filesBusy: false,
+            password: '',
             copy: null,
             fileInfo: null,
             type: 'file',
@@ -198,7 +200,7 @@ class Upload extends React.Component {
         })
     }
 
-    async uploadFile(key, data, encFilename, plainFilename) {
+    async uploadFile(fragment, data, encFilename, plainFilename) {
         var formData = new FormData()
         var file = new File(
             [data],
@@ -256,13 +258,12 @@ class Upload extends React.Component {
 
 
         const loc = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + response.headers.get('Location')
-        const b64Key = gdprshare.keyToB64(key)
         if (gdprshare.config.saveFiles) {
             files[fetchData.fileId] = {
                 filename: plainFilename,
                 fileId: fetchData.fileId,
                 ownerToken: fetchData.ownerToken,
-                location: loc + '#' + b64Key,
+                location: loc + '#' + fragment,
                 totalCount: parseInt(this.state.count, 10) || 1,
             }
 
@@ -285,7 +286,7 @@ class Upload extends React.Component {
                 location: loc,
                 // unencrypted filename
                 filename: plainFilename,
-                key: b64Key,
+                key: fragment,
                 count: this.state.count,
                 expiry: this.state.expiry,
                 region: regionLabels[this.state.geoRestriction],
@@ -322,7 +323,14 @@ class Upload extends React.Component {
             mask: true,
         })
 
-        const key = window.crypto.getRandomValues(new Uint8Array(gdprshare.config.keyLength))
+        // The link carries the secret. With a password the file is encrypted
+        // under both, so a link that goes astray on its own opens nothing.
+        const secret = window.crypto.getRandomValues(new Uint8Array(gdprshare.config.keyLength))
+        const password = this.state.password
+        const key = password ? await gdprshare.deriveKey(secret, password) : secret
+        const fragment = password
+            ? gdprshare.passwordPrefix + gdprshare.keyToB64(secret)
+            : gdprshare.keyToB64(secret)
 
 
         let file
@@ -361,7 +369,7 @@ class Upload extends React.Component {
                     // encryption of file
                     const cipherText = await gdprshare.encrypt(event.target.result, key)
 
-                    await this.uploadFile(key, cipherText, filename, file.name)
+                    await this.uploadFile(fragment, cipherText, filename, file.name)
                 } catch (error) {
                     gdprshare.displayErr.call(this, error)
                 }
@@ -713,6 +721,10 @@ class Upload extends React.Component {
         this.setState({picked: null})
     }
 
+    handlePasswordChange(event) {
+        this.setState({password: event.target.value})
+    }
+
     handleEmailChange(event) {
         this.setState({email: event.target.value})
     }
@@ -895,6 +907,8 @@ class Upload extends React.Component {
                 : t('upload.chipStartsIn', {delay: this.delayLabel(this.state.delay)}),
         ]
 
+        if (this.state.password)
+            chips.push(t('upload.chipPassword'))
         if (this.state.type === 'image' || this.state.strip)
             chips.push(t('upload.chipMetadata'))
         if (this.state.type === 'image' && this.state.ephemeral !== '0')
@@ -1288,6 +1302,15 @@ class Upload extends React.Component {
                         }.bind(this))}
                     </select>
                     <span className="hint">{t('upload.delayHint')}</span>
+                </div>
+
+                <div className="field">
+                    <label htmlFor="password" className="lbl">{t('upload.password')}</label>
+                    <input className="form-control" id="password" type="password"
+                           placeholder={t('upload.password')} maxLength="255"
+                           autoComplete="new-password"
+                           value={this.state.password} onChange={this.handlePasswordChange} />
+                    <span className="hint">{t('upload.passwordHint')}</span>
                 </div>
 
                 <div className="field">

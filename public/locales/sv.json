@@ -10,11 +10,14 @@
         "closingIn": "Stänger om {{count}} s",
         "status": {
             "downloading": "Laddar ner…",
-            "decrypting": "Dekrypterar…"
+            "decrypting": "Dekrypterar…",
+            "unlocking": "Kontrollerar lösenordet…"
         },
         "subtitle": "Filen låses upp här på din enhet",
         "goneTitle": "Den här länken fungerar inte längre",
-        "passwordHint": "Länken du fick fyller vanligtvis i detta. Klistra in det om avsändaren skickade det separat."
+        "passwordHint": "Länken du fick fyller vanligtvis i detta. Klistra in det om avsändaren skickade det separat.",
+        "senderPassword": "Lösenord från avsändaren",
+        "senderPasswordHint": "Avsändaren har låst den här filen med ett lösenord. Det ingår inte i länken, så fråga efter det."
     },
     "shell": {
         "tagline": "Krypterat innan det lämnar din enhet",
@@ -100,6 +103,9 @@
         "email": "Meddela via e-post",
         "emailPlaceholder": "du@example.org (valfritt)",
         "emailHint": "Ett mejl varje gång någon öppnar länken",
+        "password": "Lösenord (valfritt)",
+        "passwordHint": "Ett andra lås utöver länken. Skicka det på annat sätt; det går inte att återskapa.",
+        "chipPassword": "Lösenord",
         "strip": "Ta bort dolda data",
         "stripHint": "Plats, kamera och upphovsman tas bort först. Bilder utom GIF kodas om, andra filtyper nekas.",
         "ephemeral": "Försvinner efter",
@@ -157,6 +163,7 @@
         "title": "Uppladdad",
         "linkLabel": "Nedladdningslänk",
         "linkHint": "Lösenordet ligger i länken, så skicka den precis som den är.",
+        "passwordNotice": "Skicka länken som den är och lösenordet på annat sätt. Ingen av dem öppnar filen på egen hand.",
         "qr": "Visa QR-koden",
         "share": "Dela",
         "note": "Den som får länken kan öppna filen, så skicka den bara någonstans där bara mottagaren läser.",

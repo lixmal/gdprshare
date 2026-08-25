@@ -10,11 +10,14 @@
         "closingIn": "Fechando em {{count}} s",
         "status": {
             "downloading": "Baixando…",
-            "decrypting": "Descriptografando…"
+            "decrypting": "Descriptografando…",
+            "unlocking": "Verificando a senha…"
         },
         "subtitle": "O arquivo é descriptografado aqui, no seu dispositivo",
         "goneTitle": "Este link não funciona mais",
-        "passwordHint": "O link que você recebeu normalmente preenche isso. Cole se ele foi enviado separadamente."
+        "passwordHint": "O link que você recebeu normalmente preenche isso. Cole se ele foi enviado separadamente.",
+        "senderPassword": "Senha do remetente",
+        "senderPasswordHint": "O remetente protegeu este arquivo com uma senha. Ela não faz parte do link, então peça a ele."
     },
     "shell": {
         "tagline": "Criptografado antes de sair do seu dispositivo",
@@ -100,6 +103,9 @@
         "email": "Avisar-me por e-mail",
         "emailPlaceholder": "voce@example.org (opcional)",
         "emailHint": "Um e-mail cada vez que alguém abre o link",
+        "password": "Senha (opcional)",
+        "passwordHint": "Uma segunda tranca além do link. Passe-a por outro meio; não é possível recuperá-la.",
+        "chipPassword": "Senha",
         "strip": "Remover dados ocultos",
         "stripHint": "Local, câmera e autor saem primeiro. As imagens, exceto GIFs, são recodificadas; outros tipos são recusados.",
         "ephemeral": "Desaparece depois de",
@@ -157,6 +163,7 @@
         "title": "Enviado",
         "linkLabel": "Link de download",
         "linkHint": "A senha faz parte do link, então envie exatamente como está.",
+        "passwordNotice": "Envie o link como está e a senha por outro meio. Nenhum dos dois abre o arquivo sozinho.",
         "qr": "Mostrar o código QR",
         "share": "Compartilhar",
         "note": "Quem receber este link pode abrir o arquivo, então mande só para onde apenas o destinatário lê.",

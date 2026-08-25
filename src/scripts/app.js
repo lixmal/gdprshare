@@ -15,6 +15,7 @@ import Download from './Download'
 
 import './Polyfills'
 import i18n, { initI18n, serverErrorText, serverErrorIsExpected } from './i18n'
+import * as keys from './keys'
 import { Tooltip } from 'react-tooltip'
 import * as Clipboard from "clipboard-polyfill/dist/clipboard-polyfill.promise"
 
@@ -203,14 +204,13 @@ gdprshare.clamp = function (value, min, max) {
     return Math.min(Math.max(number, min), max)
 }
 
-gdprshare.keyToB64 = function (key) {
-    const b64 = Buffer.from(key).toString('base64')
-    return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
-}
+gdprshare.keyToB64 = keys.keyToB64
+gdprshare.keyFromB64 = keys.keyFromB64
+gdprshare.passwordPrefix = keys.passwordPrefix
+gdprshare.readFragment = keys.readFragment
 
-gdprshare.keyFromB64 = function (b64) {
-    const key = b64.replace(/-/g, '+').replace(/_/g, '/')
-    return Buffer.from(key, 'base64')
+gdprshare.deriveKey = function (secret, password) {
+    return keys.deriveKey(secret, password, gdprshare.config.keyLength)
 }
 
 gdprshare.copyHandler = function (event) {

@@ -131,7 +131,11 @@ class Uploaded extends React.Component {
                                     <Share size="15" />
                                 </button>
                             </div>
-                            <span id="link-key-help" className="hint">{t('uploaded.linkHint')}</span>
+                            <span id="link-key-help" className="hint">
+                                {state.key.indexOf(gdprshare.passwordPrefix) === 0
+                                    ? t('uploaded.passwordNotice')
+                                    : t('uploaded.linkHint')}
+                            </span>
                         </div>
 
                         {this.state.dialogOpen && (

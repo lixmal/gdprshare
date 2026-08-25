@@ -10,11 +10,14 @@
         "closingIn": "{{count}} 秒后关闭",
         "status": {
             "downloading": "正在下载…",
-            "decrypting": "正在解密…"
+            "decrypting": "正在解密…",
+            "unlocking": "正在检查密码…"
         },
         "subtitle": "文件在您自己的设备上解密",
         "goneTitle": "这个链接已经失效",
-        "passwordHint": "您收到的链接通常已经带上了它。如果是单独发来的，就粘贴到这里。"
+        "passwordHint": "您收到的链接通常已经带上了它。如果是单独发来的，就粘贴到这里。",
+        "senderPassword": "发送者设置的密码",
+        "senderPasswordHint": "发送者给这个文件加了密码。密码不在链接里，请向发送者索取。"
     },
     "shell": {
         "tagline": "在离开您的设备前就已加密",
@@ -100,6 +103,9 @@
         "email": "用邮件通知我",
         "emailPlaceholder": "you@example.org（可选）",
         "emailHint": "每次有人打开链接就发一封邮件",
+        "password": "密码（可选）",
+        "passwordHint": "在链接之外再加一道锁。请用其他方式转告，密码无法找回。",
+        "chipPassword": "密码",
         "strip": "去掉隐藏信息",
         "stripHint": "先去掉位置、相机和作者信息。除 GIF 之外的图片会重新编码，其他文件类型会被拒绝。",
         "ephemeral": "多久后消失",
@@ -157,6 +163,7 @@
         "title": "已上传",
         "linkLabel": "下载链接",
         "linkHint": "密码就在链接里，请原样发送。",
+        "passwordNotice": "链接照原样发送，密码用其他方式转告。只有其中一个都打不开文件。",
         "qr": "显示二维码",
         "share": "分享",
         "note": "拿到这个链接的人都能打开文件，所以只发到只有收件人能看到的地方。",

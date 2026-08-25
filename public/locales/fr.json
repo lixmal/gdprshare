@@ -10,11 +10,14 @@
         "closingIn": "Fermeture dans {{count}} s",
         "status": {
             "downloading": "Téléchargement en cours…",
-            "decrypting": "Déchiffrement en cours…"
+            "decrypting": "Déchiffrement en cours…",
+            "unlocking": "Vérification du mot de passe…"
         },
         "subtitle": "Le fichier est déchiffré ici, sur votre appareil",
         "goneTitle": "Ce lien ne fonctionne plus",
-        "passwordHint": "Le lien qu’on vous a envoyé le remplit d’habitude. Collez-le si l’expéditeur l’a envoyé à part."
+        "passwordHint": "Le lien qu’on vous a envoyé le remplit d’habitude. Collez-le si l’expéditeur l’a envoyé à part.",
+        "senderPassword": "Mot de passe de l’expéditeur",
+        "senderPasswordHint": "L’expéditeur a protégé ce fichier par un mot de passe. Il ne fait pas partie du lien : demandez-le-lui."
     },
     "shell": {
         "tagline": "Chiffré avant de quitter votre appareil",
@@ -100,6 +103,9 @@
         "email": "M’avertir par e-mail",
         "emailPlaceholder": "vous@example.org (facultatif)",
         "emailHint": "Un e-mail chaque fois que quelqu’un ouvre le lien",
+        "password": "Mot de passe (facultatif)",
+        "passwordHint": "Un second verrou en plus du lien. Transmettez-le par un autre moyen ; il ne peut pas être récupéré.",
+        "chipPassword": "Mot de passe",
         "strip": "Retirer les données cachées",
         "stripHint": "Lieu, appareil et auteur sont retirés d’abord. Les images sauf les GIF sont réencodées, les autres types refusés.",
         "ephemeral": "Disparaît après",
@@ -157,6 +163,7 @@
         "title": "Envoyé",
         "linkLabel": "Lien de téléchargement",
         "linkHint": "Le mot de passe fait partie du lien, envoyez-le donc exactement tel quel.",
+        "passwordNotice": "Envoyez le lien tel quel et le mot de passe par un autre moyen. Aucun des deux n’ouvre le fichier seul.",
         "qr": "Afficher le QR code",
         "share": "Partager",
         "note": "Quiconque reçoit ce lien peut ouvrir le fichier, envoyez-le donc là où seul le destinataire peut le lire.",

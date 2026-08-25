@@ -10,11 +10,14 @@
         "closingIn": "Đóng sau {{count}} giây",
         "status": {
             "downloading": "Đang tải xuống…",
-            "decrypting": "Đang giải mã…"
+            "decrypting": "Đang giải mã…",
+            "unlocking": "Đang kiểm tra mật khẩu…"
         },
         "subtitle": "Tệp được giải mã ngay trên máy của bạn",
         "goneTitle": "Liên kết này không còn dùng được",
-        "passwordHint": "Liên kết bạn nhận được thường đã có sẵn. Dán vào đây nếu người gửi gửi riêng."
+        "passwordHint": "Liên kết bạn nhận được thường đã có sẵn. Dán vào đây nếu người gửi gửi riêng.",
+        "senderPassword": "Mật khẩu từ người gửi",
+        "senderPasswordHint": "Người gửi đã khóa tệp này bằng mật khẩu. Mật khẩu không nằm trong liên kết, hãy hỏi người gửi."
     },
     "shell": {
         "tagline": "Được mã hóa trước khi rời khỏi thiết bị của bạn",
@@ -100,6 +103,9 @@
         "email": "Báo qua email",
         "emailPlaceholder": "ban@example.org (không bắt buộc)",
         "emailHint": "Một email mỗi lần có người mở liên kết",
+        "password": "Mật khẩu (không bắt buộc)",
+        "passwordHint": "Một lớp khóa thứ hai bên cạnh liên kết. Hãy chuyển bằng cách khác; không thể lấy lại được.",
+        "chipPassword": "Mật khẩu",
         "strip": "Bỏ dữ liệu ẩn",
         "stripHint": "Vị trí, máy ảnh và tác giả được bỏ trước. Ảnh ngoài GIF sẽ được mã hóa lại, các loại tệp khác bị từ chối.",
         "ephemeral": "Biến mất sau",
@@ -157,6 +163,7 @@
         "title": "Đã tải lên",
         "linkLabel": "Liên kết tải về",
         "linkHint": "Mật khẩu nằm ngay trong liên kết, nên hãy gửi đúng như nó vốn có.",
+        "passwordNotice": "Gửi liên kết như hiện có, và mật khẩu bằng cách khác. Chỉ một trong hai thì không mở được tệp.",
         "qr": "Hiện mã QR",
         "share": "Chia sẻ",
         "note": "Ai nhận được liên kết này đều mở được tệp, nên chỉ gửi tới nơi mà chỉ người nhận đọc được.",

@@ -10,11 +10,14 @@
         "closingIn": "Menutup dalam {{count}} dtk",
         "status": {
             "downloading": "Mengunduh…",
-            "decrypting": "Mendekripsi…"
+            "decrypting": "Mendekripsi…",
+            "unlocking": "Memeriksa kata sandi…"
         },
         "subtitle": "Berkas dibuka di perangkat Anda sendiri",
         "goneTitle": "Tautan ini sudah tidak berfungsi",
-        "passwordHint": "Tautan yang Anda terima biasanya sudah mengisinya. Tempel di sini kalau dikirim terpisah."
+        "passwordHint": "Tautan yang Anda terima biasanya sudah mengisinya. Tempel di sini kalau dikirim terpisah.",
+        "senderPassword": "Kata sandi dari pengirim",
+        "senderPasswordHint": "Pengirim melindungi berkas ini dengan kata sandi. Kata sandi tidak ada di dalam tautan, jadi mintalah kepada pengirim."
     },
     "shell": {
         "tagline": "Dienkripsi sebelum meninggalkan perangkat Anda",
@@ -100,6 +103,9 @@
         "email": "Kabari lewat email",
         "emailPlaceholder": "nama@example.org (opsional)",
         "emailHint": "Satu email setiap kali ada yang membuka tautannya",
+        "password": "Kata sandi (opsional)",
+        "passwordHint": "Kunci kedua selain tautan. Sampaikan melalui cara lain; kata sandi tidak dapat dipulihkan.",
+        "chipPassword": "Kata sandi",
         "strip": "Buang data tersembunyi",
         "stripHint": "Lokasi, kamera, dan penulis dibuang lebih dulu. Gambar selain GIF dikodekan ulang, jenis berkas lain ditolak.",
         "ephemeral": "Hilang setelah",
@@ -157,6 +163,7 @@
         "title": "Terunggah",
         "linkLabel": "Tautan unduhan",
         "linkHint": "Kata sandinya ada di dalam tautan, jadi kirim apa adanya.",
+        "passwordNotice": "Kirim tautan apa adanya, dan kata sandi melalui cara lain. Keduanya tidak dapat membuka berkas sendiri-sendiri.",
         "qr": "Tampilkan kode QR",
         "share": "Bagikan",
         "note": "Siapa pun yang mendapat tautan ini bisa membuka berkasnya, jadi kirim hanya ke tempat yang cuma bisa dibaca penerimanya.",
