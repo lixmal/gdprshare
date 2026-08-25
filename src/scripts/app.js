@@ -16,6 +16,7 @@ import Download from './Download'
 import './Polyfills'
 import i18n, { initI18n, serverErrorText, serverErrorIsExpected } from './i18n'
 import * as keys from './keys'
+import * as stream from './stream'
 import { Tooltip } from 'react-tooltip'
 import * as Clipboard from "clipboard-polyfill/dist/clipboard-polyfill.promise"
 
@@ -125,6 +126,68 @@ gdprshare.encrypt = async function (clearText, key) {
     return Buffer.concat([iv, Buffer.from(cipherText)])
 }
 
+gdprshare.encryptBlob = function (file, key, onProgress) {
+    return stream.encryptBlob(file, key, onProgress)
+}
+
+// Opens a response body as records arrive, so the file is never held whole. A
+// share written before the record format existed is one nonce and one
+// ciphertext, which has to be read whole to be opened at all.
+gdprshare.decryptResponse = async function (response, key, onProgress) {
+    const total = parseInt(response.headers.get('Content-Length') || '0', 10)
+    const reader = response.body.getReader()
+
+    var prefix = new Uint8Array(0)
+    const add = function (chunk) {
+        const grown = new Uint8Array(prefix.length + chunk.length)
+        grown.set(prefix, 0)
+        grown.set(chunk, prefix.length)
+        prefix = grown
+    }
+
+    // enough of the start to tell the two formats apart
+    while (prefix.length < stream.headerLength + stream.tagLength) {
+        const step = await reader.read()
+        if (step.done)
+            break
+
+        add(step.value)
+    }
+
+    if (!stream.looksStreamed(prefix)) {
+        for (;;) {
+            const step = await reader.read()
+            if (step.done)
+                break
+
+            add(step.value)
+            if (onProgress)
+                onProgress(prefix.length, total)
+        }
+
+        return new Blob([await gdprshare.decrypt(prefix.buffer, key)])
+    }
+
+    const body = new ReadableStream({
+        start: function (controller) {
+            controller.enqueue(prefix)
+        },
+        pull: async function (controller) {
+            const step = await reader.read()
+            if (step.done)
+                controller.close()
+            else
+                controller.enqueue(step.value)
+        },
+    })
+
+    try {
+        return await stream.decryptStream(body, key, onProgress, total)
+    } catch (error) {
+        throw gdprshare.decryptionError(error)
+    }
+}
+
 gdprshare.decrypt = async function (data, key) {
     const iv = data.slice(0, 12)
     const cipherText = data.slice(12)
@@ -138,13 +201,20 @@ gdprshare.decrypt = async function (data, key) {
 
         return await window.crypto.subtle.decrypt(gcmParams, cryptoKey, cipherText)
     } catch (error) {
-        if (error instanceof DOMException)
-            error = i18n.t('errors.invalidPassword')
-        else if (error.name === 'OperationError')
-            error = i18n.t('errors.decryptionFailed')
-
-        throw error
+        throw gdprshare.decryptionError(error)
     }
+}
+
+// What to tell someone whose file did not open. A failed tag check is what a
+// wrong key or password looks like, so that is the first reading.
+gdprshare.decryptionError = function (error) {
+    if (error instanceof DOMException)
+        return i18n.t('errors.invalidPassword')
+
+    if (error.name === 'OperationError')
+        return i18n.t('errors.decryptionFailed')
+
+    return error
 }
 
 // The API sends country codes with English names. The browser already knows

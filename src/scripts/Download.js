@@ -28,6 +28,7 @@ export class Download extends React.Component {
         this.handleViewImage = this.handleViewImage.bind(this)
         this.handleImageZoom = this.handleImageZoom.bind(this)
         this.handleVisibilityChange = this.handleVisibilityChange.bind(this)
+        this.reportProgress = this.reportProgress.bind(this)
 
         this.state = {
             error: null,
@@ -207,6 +208,14 @@ export class Download extends React.Component {
         return true
     }
 
+    // Without a Content-Length there is no percentage to show and the phase
+    // label stays indeterminate.
+    reportProgress(received, total) {
+        this.setState({
+            progress: total > 0 ? Math.min(100, Math.round((received / total) * 100)) : null,
+        })
+    }
+
     // Reads the response body in chunks so the visitor sees the transfer move.
     // Falls back to a plain buffer read when the browser has no streaming
     // support, in which case there is nothing to report but the phase.
@@ -307,15 +316,22 @@ export class Download extends React.Component {
 
             var filename = Buffer.from(response.headers.get('X-Filename'), 'base64')
 
-            const file = await this.readWithProgress(response)
+            // Records are opened as they arrive, so the file is never held
+            // whole. A browser without streaming reads it in one piece, which
+            // is all it can do.
+            var fileClearText
+            if (response.body && response.body.getReader) {
+                fileClearText = await gdprshare.decryptResponse(response, key, this.reportProgress)
+            } else {
+                const whole = await this.readWithProgress(response)
+                fileClearText = new Blob([await gdprshare.decrypt(whole, key)])
+            }
 
             this.setState({ phase: 'decrypting', progress: null })
 
-            // decryption of file
-            const fileClearText = await gdprshare.decrypt(file, key)
             if (type === 'text') {
                 this.setState({
-                    modalContent: new TextDecoder().decode(fileClearText),
+                    modalContent: await fileClearText.text(),
                     modalOpen: true,
                     mask: false,
                     phase: null,
@@ -326,8 +342,7 @@ export class Download extends React.Component {
             }
             else if (type === 'image') {
                 var URL = window.URL || window.webkitURL
-                var blob = new Blob([fileClearText])
-                var imageUrl = URL.createObjectURL(blob)
+                var imageUrl = URL.createObjectURL(fileClearText)
 
                 this.setState({
                     imageData: imageUrl,

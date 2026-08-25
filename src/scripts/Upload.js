@@ -361,23 +361,11 @@ class Upload extends React.Component {
 
             var filename = Buffer.from(cipherText).toString('base64')
 
-            var reader = new FileReader()
-            reader.onload = async function (event) {
-                // the outer catch cannot see this callback's rejections, and a
-                // silent one would leave the form masked forever
-                try {
-                    // encryption of file
-                    const cipherText = await gdprshare.encrypt(event.target.result, key)
+            // a record at a time, so a large file is never held whole, neither
+            // as plaintext nor as ciphertext
+            const sealed = await gdprshare.encryptBlob(file, key)
 
-                    await this.uploadFile(fragment, cipherText, filename, file.name)
-                } catch (error) {
-                    gdprshare.displayErr.call(this, error)
-                }
-            }.bind(this)
-            reader.onerror = function () {
-                gdprshare.displayErr.call(this, reader.error || 'could not read the file')
-            }.bind(this)
-            reader.readAsArrayBuffer(file)
+            await this.uploadFile(fragment, sealed, filename, file.name)
         } catch (error) {
             gdprshare.displayErr.call(this, error)
         }

@@ -31,8 +31,11 @@ aspects.
 
 ### Encryption
 
-* files are encrypted in the browser (AES-GCM), so nothing has to be shredded
-  on the server after deletion
+* files are encrypted in the browser (AES-GCM) in fixed-size records, so a large
+  file is never held whole, neither as plaintext nor as ciphertext. The record
+  number is authenticated and the last record says that it is the last, so a
+  stream that was reordered or cut short fails instead of decrypting to
+  something. Nothing has to be shredded on the server after deletion
 * the key lives in the link fragment and never reaches the server
 * the sender can add a password: the file is then encrypted under a key derived
   from the secret in the link and the password together (PBKDF2-SHA256), so a
