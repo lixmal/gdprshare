@@ -83,7 +83,7 @@
         "dropImage": "여기에 사진을 놓으세요",
         "dropAnywhere": "아무 곳에나 놓으세요",
         "browse": "고르기",
-        "sizeLimit": "최대 {{size}} MB",
+        "sizeLimit": "최대 {{size}}",
         "encrypted": "업로드 전에 암호화됨",
         "removeFile": "파일 빼기",
         "moreOptions": "옵션 더 보기",
@@ -123,7 +123,7 @@
         "chipStartsIn": "{{delay}} 뒤에 시작",
         "chipMetadata": "숨은 정보 지움",
         "chipDisappears": "{{duration}} 뒤에 사라짐",
-        "tooBig": "파일이 너무 큽니다. 이 서버는 최대 {{size}} MiB까지 받습니다.",
+        "tooBig": "파일이 너무 큽니다. 이 서버는 최대 {{size}}까지 받습니다.",
         "stripFailed": "숨은 정보를 지우지 못했습니다: {{message}}",
         "notStrippable": "{{type}}에서는 숨은 정보를 지울 수 없어 사진으로 보낼 수 없습니다. 파일로 보내세요.",
         "unknownType": "이 형식"

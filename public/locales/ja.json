@@ -83,7 +83,7 @@
         "dropImage": "ここに画像をドロップ",
         "dropAnywhere": "どこにでもドロップできます",
         "browse": "選ぶ",
-        "sizeLimit": "{{size}} MB まで",
+        "sizeLimit": "{{size}} まで",
         "encrypted": "アップロード前に暗号化されます",
         "removeFile": "ファイルを外す",
         "moreOptions": "詳細設定を開く",
@@ -123,7 +123,7 @@
         "chipStartsIn": "{{delay}}後に開始",
         "chipMetadata": "隠れたデータを削除",
         "chipDisappears": "{{duration}}で消える",
-        "tooBig": "ファイルが大きすぎます。このサーバーの上限は {{size}} MiB です。",
+        "tooBig": "ファイルが大きすぎます。このサーバーの上限は {{size}} です。",
         "stripFailed": "隠れたデータを消せませんでした: {{message}}",
         "notStrippable": "{{type}} からは隠れたデータを消せないため、画像としては送れません。ファイルとして送ってください。",
         "unknownType": "この形式"

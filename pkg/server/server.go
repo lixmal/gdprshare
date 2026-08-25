@@ -31,6 +31,11 @@ const (
 	// into is bounded as well. Reports past that are dropped, and the ones kept
 	// go with the retention in the cleanup sweep.
 	MaxStatsRecords = 1000
+
+	// How much more often than an ordinary request a piece of a file may
+	// arrive. A record is 4 MiB, so even the ordinary limit times this is far
+	// more throughput than a link is worth.
+	ChunkRateFactor = 20
 )
 
 type StoredFileInfo struct {
@@ -134,9 +139,22 @@ func setupRoutes(router *gin.Engine, srv *Server) {
 
 	v1 := router.Group("/api/v1")
 
+	// A file arriving in pieces is many requests by design: hundreds of them for
+	// a large one, which the ordinary limit would throttle to a crawl. The
+	// pieces get a limit of their own, high enough that a real upload never
+	// meets it, and what actually bounds them is the size of the whole file and
+	// the owner token, both checked on every chunk.
+	chunks := router.Group("/api/v1")
+
 	if srv.config.RateLimit.Enabled {
 		limiter := newRateLimiter(srv.config.RateLimit.RPS, srv.config.RateLimit.Burst)
 		v1.Use(limiter.middleware())
+
+		perChunk := newRateLimiter(
+			srv.config.RateLimit.RPS*ChunkRateFactor,
+			srv.config.RateLimit.Burst*ChunkRateFactor,
+		)
+		chunks.Use(perChunk.middleware())
 	}
 
 	v1.POST("/stats", srv.setStats)
@@ -144,7 +162,7 @@ func setupRoutes(router *gin.Engine, srv *Server) {
 	v1.GET("/countries", srv.getCountries)
 	v1.POST("/files", srv.uploadFile)
 	v1.POST("/uploads", srv.beginUpload)
-	v1.POST("/uploads/:fileId", srv.appendUpload)
+	chunks.POST("/uploads/:fileId", srv.appendUpload)
 	v1.POST("/uploads/:fileId/finish", srv.finishUpload)
 	v1.GET("/files/:fileId", srv.downloadFile)
 	v1.HEAD("/files/:fileId", srv.headFile)

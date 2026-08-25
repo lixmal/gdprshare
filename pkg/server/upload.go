@@ -94,6 +94,13 @@ func (s *Server) appendUpload(c *gin.Context) {
 		return
 	}
 
+	// a chunk that carries nothing moves the upload nowhere, and a sender
+	// looping over them would be doing it for no reason
+	if c.Request.ContentLength == 0 {
+		apiError(c, http.StatusBadRequest, ErrCodeInvalidUpload, "the chunk is empty")
+		return
+	}
+
 	limit := s.config.MaxUploadSize * 1024 * 1024
 	if info.Size() >= limit {
 		apiError(c, http.StatusRequestEntityTooLarge, ErrCodeUploadTooLarge, "the file is too large")

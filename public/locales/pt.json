@@ -83,7 +83,7 @@
         "dropImage": "Arraste uma imagem para aqui",
         "dropAnywhere": "Largue em qualquer parte",
         "browse": "Escolher",
-        "sizeLimit": "até {{size}} MB",
+        "sizeLimit": "até {{size}}",
         "encrypted": "cifrado antes do envio",
         "removeFile": "Remover o ficheiro",
         "moreOptions": "Mais opções",
@@ -123,7 +123,7 @@
         "chipStartsIn": "Começa dentro de {{delay}}",
         "chipMetadata": "Dados escondidos removidos",
         "chipDisappears": "Desaparece depois de {{duration}}",
-        "tooBig": "O ficheiro é demasiado grande. Este servidor aceita no máximo {{size}} MiB.",
+        "tooBig": "O ficheiro é demasiado grande. Este servidor aceita no máximo {{size}}.",
         "stripFailed": "Não foi possível remover os dados escondidos: {{message}}",
         "notStrippable": "Os dados escondidos não podem ser removidos de {{type}}, por isso não pode ir como imagem. Envia-o como ficheiro.",
         "unknownType": "este formato"

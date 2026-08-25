@@ -39,7 +39,13 @@ func setupConcurrentTestServer(t *testing.T) (*Server, func()) {
 	return newTestServer(t, filepath.Join(dir, "test.db"))
 }
 
-func newTestServer(t *testing.T, dbArgs string) (*Server, func()) {
+// setupTestServerWith is for a test that needs the configuration changed before
+// the server reads it, such as one about rate limiting.
+func setupTestServerWith(t *testing.T, adjust func(*config.Config)) (*Server, func()) {
+	return newTestServer(t, ":memory:", adjust)
+}
+
+func newTestServer(t *testing.T, dbArgs string, adjust ...func(*config.Config)) (*Server, func()) {
 	t.Helper()
 
 	tempDir, err := os.MkdirTemp("", "gdprshare-test-*")
@@ -52,6 +58,10 @@ func newTestServer(t *testing.T, dbArgs string) (*Server, func()) {
 	conf.SaveClientInfo = false
 	conf.MaxUploadSize = 100
 	conf.IDLength = 20
+
+	for _, change := range adjust {
+		change(conf)
+	}
 
 	db, err := database.New(conf)
 	require.NoError(t, err)

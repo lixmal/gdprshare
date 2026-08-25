@@ -83,7 +83,7 @@
         "dropImage": "Przeciągnij tu zdjęcie",
         "dropAnywhere": "Upuść gdziekolwiek",
         "browse": "Wybierz",
-        "sizeLimit": "do {{size}} MB",
+        "sizeLimit": "do {{size}}",
         "encrypted": "zaszyfrowany przed wysłaniem",
         "removeFile": "Usuń plik",
         "moreOptions": "Więcej opcji",
@@ -123,7 +123,7 @@
         "chipStartsIn": "Zacznie działać za {{delay}}",
         "chipMetadata": "Ukryte dane usunięte",
         "chipDisappears": "Znika po {{duration}}",
-        "tooBig": "Plik jest za duży. Ten serwer przyjmuje najwyżej {{size}} MiB.",
+        "tooBig": "Plik jest za duży. Ten serwer przyjmuje najwyżej {{size}}.",
         "stripFailed": "Nie udało się usunąć ukrytych danych: {{message}}",
         "notStrippable": "Z {{type}} nie da się usunąć ukrytych danych, więc nie pójdzie jako zdjęcie. Wyślij to jako plik.",
         "unknownType": "tego formatu"

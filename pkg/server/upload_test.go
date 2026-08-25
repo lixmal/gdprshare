@@ -17,6 +17,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lixmal/gdprshare/pkg/config"
 	"github.com/lixmal/gdprshare/pkg/database"
 )
 
@@ -226,4 +227,56 @@ func TestUploadBeginCoversTheForm(t *testing.T) {
 
 	assert.ElementsMatch(t, want, got,
 		fmt.Sprintf("UploadBegin has %v, StoredFile takes %v", got, want))
+}
+
+// TestChunkedUploadOutlivesTheOrdinaryRateLimit covers what a large file
+// actually does: hundreds of requests in a row. Under the ordinary limit it
+// would throttle itself to a halt.
+func TestChunkedUploadOutlivesTheOrdinaryRateLimit(t *testing.T) {
+	srv, cleanup := setupTestServerWith(t, func(conf *config.Config) {
+		conf.RateLimit.Enabled = true
+		conf.RateLimit.RPS = 2
+		conf.RateLimit.Burst = 2
+	})
+	defer cleanup()
+
+	fileId, token := begin(t, srv, nil)
+
+	// well past the ordinary burst of two
+	chunk := []byte("a piece of the file")
+	for i := 0; i < 20; i++ {
+		w := appendChunk(t, srv, fileId, token, i*len(chunk), chunk)
+		require.Equal(t, http.StatusOK, w.Code, "chunk %d: %s", i, w.Body.String())
+	}
+
+	// every piece landed, in order
+	var storedFile database.StoredFile
+	require.NoError(t, srv.db.Where(&database.StoredFile{FileId: fileId}).Find(&storedFile).Error)
+	stored, err := os.ReadFile(filepath.Join(srv.config.StorePath, storedFile.Name))
+	require.NoError(t, err)
+	assert.Equal(t, bytes.Repeat(chunk, 20), stored)
+
+	// the pieces have a limit of their own: they do not lift the one on
+	// everything else
+	var limited bool
+	for i := 0; i < 10; i++ {
+		if downloadOnce(t, srv, fileId).Code == http.StatusTooManyRequests {
+			limited = true
+			break
+		}
+	}
+	assert.True(t, limited, "an ordinary endpoint was never rate limited")
+}
+
+// TestChunkedUploadRefusesAnEmptyChunk keeps a sender from looping over chunks
+// that move the upload nowhere.
+func TestChunkedUploadRefusesAnEmptyChunk(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	fileId, token := begin(t, srv, nil)
+
+	w := appendChunk(t, srv, fileId, token, 0, nil)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Equal(t, string(ErrCodeInvalidUpload), decodeError(t, w).Code)
 }

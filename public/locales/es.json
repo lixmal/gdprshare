@@ -83,7 +83,7 @@
         "dropImage": "Suelta una imagen aquí",
         "dropAnywhere": "Suéltalo donde quieras",
         "browse": "Elegir",
-        "sizeLimit": "hasta {{size}} MB",
+        "sizeLimit": "hasta {{size}}",
         "encrypted": "cifrado antes de subirlo",
         "removeFile": "Quitar el archivo",
         "moreOptions": "Más opciones",
@@ -123,7 +123,7 @@
         "chipStartsIn": "Empieza en {{delay}}",
         "chipMetadata": "Datos ocultos quitados",
         "chipDisappears": "Desaparece tras {{duration}}",
-        "tooBig": "El archivo es demasiado grande. Este servidor acepta como máximo {{size}} MiB.",
+        "tooBig": "El archivo es demasiado grande. Este servidor acepta como máximo {{size}}.",
         "stripFailed": "No se pudieron quitar los datos ocultos: {{message}}",
         "notStrippable": "Los datos ocultos no se pueden quitar de {{type}}, así que no puede ir como imagen. Envíalo como archivo.",
         "unknownType": "este formato"

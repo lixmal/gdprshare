@@ -83,7 +83,7 @@
         "dropImage": "أفلت صورة هنا",
         "dropAnywhere": "أفلته في أي مكان",
         "browse": "اختيار",
-        "sizeLimit": "حتى {{size}} م.ب",
+        "sizeLimit": "حتى {{size}}",
         "encrypted": "مشفَّر قبل الرفع",
         "removeFile": "إزالة الملف",
         "moreOptions": "خيارات أكثر",
@@ -123,7 +123,7 @@
         "chipStartsIn": "يبدأ بعد {{delay}}",
         "chipMetadata": "أُزيلت البيانات الخفية",
         "chipDisappears": "تختفي بعد {{duration}}",
-        "tooBig": "الملف كبير جدًا. أقصى ما يقبله هذا الخادم {{size}} م.ي.ب.",
+        "tooBig": "الملف كبير جدًا. أقصى ما يقبله هذا الخادم {{size}}.",
         "stripFailed": "تعذّرت إزالة البيانات الخفية: {{message}}",
         "notStrippable": "لا يمكن إزالة البيانات الخفية من {{type}}، لذا لا يصلح إرساله كصورة. أرسله كملف.",
         "unknownType": "هذه الصيغة"

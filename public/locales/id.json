@@ -83,7 +83,7 @@
         "dropImage": "Taruh gambar di sini",
         "dropAnywhere": "Taruh di mana saja",
         "browse": "Pilih",
-        "sizeLimit": "sampai {{size}} MB",
+        "sizeLimit": "sampai {{size}}",
         "encrypted": "dienkripsi sebelum diunggah",
         "removeFile": "Buang berkasnya",
         "moreOptions": "Opsi lain",
@@ -123,7 +123,7 @@
         "chipStartsIn": "Mulai dalam {{delay}}",
         "chipMetadata": "Data tersembunyi dibuang",
         "chipDisappears": "Hilang setelah {{duration}}",
-        "tooBig": "Berkasnya terlalu besar. Server ini paling banyak menerima {{size}} MiB.",
+        "tooBig": "Berkasnya terlalu besar. Server ini paling banyak menerima {{size}}.",
         "stripFailed": "Gagal membuang data tersembunyi: {{message}}",
         "notStrippable": "Data tersembunyi tidak bisa dibuang dari {{type}}, jadi tidak bisa dikirim sebagai gambar. Kirim sebagai berkas.",
         "unknownType": "format ini"

@@ -83,7 +83,7 @@
         "dropImage": "Sleep een foto hierheen",
         "dropAnywhere": "Laat het hier vallen",
         "browse": "Kiezen",
-        "sizeLimit": "tot {{size}} MB",
+        "sizeLimit": "tot {{size}}",
         "encrypted": "versleuteld voor het uploaden",
         "removeFile": "Bestand verwijderen",
         "moreOptions": "Meer opties",
@@ -123,7 +123,7 @@
         "chipStartsIn": "Begint over {{delay}}",
         "chipMetadata": "Verborgen gegevens verwijderd",
         "chipDisappears": "Verdwijnt na {{duration}}",
-        "tooBig": "Het bestand is te groot. Deze server neemt maximaal {{size}} MiB.",
+        "tooBig": "Het bestand is te groot. Deze server neemt maximaal {{size}}.",
         "stripFailed": "Kon de verborgen gegevens niet verwijderen: {{message}}",
         "notStrippable": "Uit {{type}} kunnen de verborgen gegevens niet weg, dus het kan niet als foto. Stuur het als bestand.",
         "unknownType": "dit formaat"

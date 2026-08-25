@@ -83,7 +83,7 @@
         "dropImage": "Drop a picture here",
         "dropAnywhere": "Drop it anywhere",
         "browse": "Browse",
-        "sizeLimit": "up to {{size}} MB",
+        "sizeLimit": "up to {{size}}",
         "encrypted": "encrypted before upload",
         "removeFile": "Remove the file",
         "moreOptions": "More options",
@@ -123,7 +123,7 @@
         "chipStartsIn": "Starts in {{delay}}",
         "chipMetadata": "Hidden data removed",
         "chipDisappears": "Disappears after {{duration}}",
-        "tooBig": "The file is too big. The most this server takes is {{size}} MiB.",
+        "tooBig": "The file is too big. The most this server takes is {{size}}.",
         "stripFailed": "Could not remove the hidden data: {{message}}",
         "notStrippable": "Hidden data cannot be removed from {{type}}, so it cannot be sent as a picture. Send it as a file instead.",
         "unknownType": "this format"

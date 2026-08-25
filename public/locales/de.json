@@ -83,7 +83,7 @@
         "dropImage": "Bild hier ablegen",
         "dropAnywhere": "Einfach hier ablegen",
         "browse": "Durchsuchen",
-        "sizeLimit": "bis zu {{size}} MB",
+        "sizeLimit": "bis zu {{size}}",
         "encrypted": "vor dem Upload verschlüsselt",
         "removeFile": "Datei entfernen",
         "moreOptions": "Mehr Optionen",
@@ -123,7 +123,7 @@
         "chipStartsIn": "Beginnt in {{delay}}",
         "chipMetadata": "Verborgene Daten entfernt",
         "chipDisappears": "Verschwindet nach {{duration}}",
-        "tooBig": "Die Datei ist zu groß. Dieser Server nimmt höchstens {{size}} MiB.",
+        "tooBig": "Die Datei ist zu groß. Dieser Server nimmt höchstens {{size}}.",
         "stripFailed": "Verborgene Daten konnten nicht entfernt werden: {{message}}",
         "notStrippable": "Aus {{type}} lassen sich die verborgenen Daten nicht entfernen, deshalb geht es nicht als Bild. Senden Sie es als Datei.",
         "unknownType": "diesem Format"

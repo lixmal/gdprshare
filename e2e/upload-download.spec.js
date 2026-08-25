@@ -804,6 +804,24 @@ test.describe('Upload with the options panel closed', () => {
   });
 });
 
+test.describe('The size limit', () => {
+  // the server reports it as a count of MiB, which is not how a person reads a
+  // limit of two thousand of them
+  test('reads as a size rather than a number of megabytes', async ({ page }) => {
+    await page.goto('/');
+
+    const limit = await page.evaluate(() => window.gdprshare.config.maxFileSize);
+    const shown = await page.locator('.app-inner').first().innerText();
+
+    if (limit >= 1024) {
+      expect(shown).toContain('GB');
+      expect(shown).not.toContain(String(limit) + ' MB');
+    } else {
+      expect(shown).toContain('MB');
+    }
+  });
+});
+
 test.describe('Icon buttons', () => {
   // The icons carry no words, so hovering has to say what they do. The markup
   // used to carry react-tooltip v4 attributes, which v5 ignores entirely.

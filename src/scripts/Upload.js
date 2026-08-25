@@ -438,14 +438,24 @@ class Upload extends React.Component {
             pending = []
             pendingSize = 0
 
-            const stored = await this.post(chunkTo, {
+            const options = {
                 body: chunk,
                 headers: {
                     'Content-Type': 'application/octet-stream',
                     'X-Owner-Token': opened.ownerToken,
                     'X-Upload-Offset': String(offset),
                 },
-            })
+            }
+
+            // A server that answers "too many requests" is asking to be given a
+            // moment, not failing. The offset is checked on every chunk, so
+            // sending the same one again cannot land it twice.
+            var stored = await this.post(chunkTo, options, true)
+            for (var attempt = 0; !stored && attempt < 3; attempt++) {
+                await new Promise(function (done) { window.setTimeout(done, 1000 * (attempt + 1)) })
+                stored = await this.post(chunkTo, options, attempt < 2)
+            }
+
             if (!stored)
                 return false
 
@@ -488,12 +498,14 @@ class Upload extends React.Component {
     // One request of the upload, with the server's answer read the same way
     // everywhere. Reports the failure itself and answers null, so a caller only
     // has to stop.
-    async post(url, options) {
+    async post(url, options, quiet) {
         let response
         try {
             response = await window.fetch(url, Object.assign({method: 'POST'}, options))
         } catch (error) {
-            gdprshare.displayErr.call(this, error)
+            if (!quiet)
+                gdprshare.displayErr.call(this, error)
+
             return null
         }
 
@@ -501,12 +513,16 @@ class Upload extends React.Component {
         try {
             data = await response.clone().json()
         } catch (error) {
-            gdprshare.asTextErr.call(this, response, error)
+            if (!quiet)
+                gdprshare.asTextErr.call(this, response, error)
+
             return null
         }
 
         if (!response.ok) {
-            gdprshare.displayServerErr.call(this, data)
+            if (!quiet)
+                gdprshare.displayServerErr.call(this, data)
+
             return null
         }
 
@@ -880,7 +896,9 @@ class Upload extends React.Component {
 
         if (file.size > allowedSize * 1024 * 1024) {
             this.setState({
-                error: this.props.t('upload.tooBig', {size: allowedSize}),
+                error: this.props.t('upload.tooBig', {
+                    size: gdprshare.formatSize(allowedSize * 1024 * 1024),
+                }),
             })
             var input = this.pickedFileInput()
             if (input) input.value = null
@@ -1424,7 +1442,9 @@ class Upload extends React.Component {
                 </span>
                 <span className="hint">
                     <span className="drop-browse">{t('upload.browse')}</span>
-                    &nbsp;·&nbsp; {t('upload.sizeLimit', {size: gdprshare.config.maxFileSize})}
+                    &nbsp;·&nbsp; {t('upload.sizeLimit', {
+                        size: gdprshare.formatSize(gdprshare.config.maxFileSize * 1024 * 1024),
+                    })}
                 </span>
             </div>
         )

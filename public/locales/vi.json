@@ -83,7 +83,7 @@
         "dropImage": "Kéo ảnh vào đây",
         "dropAnywhere": "Thả ở đâu cũng được",
         "browse": "Chọn tệp",
-        "sizeLimit": "tối đa {{size}} MB",
+        "sizeLimit": "tối đa {{size}}",
         "encrypted": "đã mã hóa trước khi tải lên",
         "removeFile": "Bỏ tệp ra",
         "moreOptions": "Thêm tùy chọn",
@@ -123,7 +123,7 @@
         "chipStartsIn": "Bắt đầu sau {{delay}}",
         "chipMetadata": "Đã bỏ dữ liệu ẩn",
         "chipDisappears": "Biến mất sau {{duration}}",
-        "tooBig": "Tệp quá lớn. Máy chủ này nhận tối đa {{size}} MiB.",
+        "tooBig": "Tệp quá lớn. Máy chủ này nhận tối đa {{size}}.",
         "stripFailed": "Không bỏ được dữ liệu ẩn: {{message}}",
         "notStrippable": "Không bỏ được dữ liệu ẩn khỏi {{type}}, nên không gửi được dưới dạng ảnh. Hãy gửi như một tệp.",
         "unknownType": "định dạng này"

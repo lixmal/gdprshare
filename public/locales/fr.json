@@ -83,7 +83,7 @@
         "dropImage": "Déposez une image ici",
         "dropAnywhere": "Déposez-le n’importe où",
         "browse": "Parcourir",
-        "sizeLimit": "jusqu’à {{size}} Mo",
+        "sizeLimit": "jusqu’à {{size}}",
         "encrypted": "chiffré avant l’envoi",
         "removeFile": "Retirer le fichier",
         "moreOptions": "Plus d’options",
@@ -123,7 +123,7 @@
         "chipStartsIn": "Commence dans {{delay}}",
         "chipMetadata": "Données cachées retirées",
         "chipDisappears": "Disparaît après {{duration}}",
-        "tooBig": "Le fichier est trop gros. Ce serveur accepte au plus {{size}} Mio.",
+        "tooBig": "Le fichier est trop gros. Ce serveur accepte au plus {{size}}.",
         "stripFailed": "Impossible de retirer les données cachées : {{message}}",
         "notStrippable": "Les données cachées ne peuvent pas être retirées de {{type}}, donc l’envoi comme image est impossible. Envoyez-le comme fichier.",
         "unknownType": "ce format"

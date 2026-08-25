@@ -83,7 +83,7 @@
         "dropImage": "把圖片拖到這裡",
         "dropAnywhere": "隨便放到哪裡都行",
         "browse": "選擇",
-        "sizeLimit": "最多 {{size}} MB",
+        "sizeLimit": "最多 {{size}}",
         "encrypted": "上傳前已加密",
         "removeFile": "移除檔案",
         "moreOptions": "更多選項",
@@ -123,7 +123,7 @@
         "chipStartsIn": "{{delay}}後開始",
         "chipMetadata": "已去掉隱藏資訊",
         "chipDisappears": "{{duration}}後消失",
-        "tooBig": "檔案太大了。這台伺服器最多接受 {{size}} MiB。",
+        "tooBig": "檔案太大了。這台伺服器最多接受 {{size}}。",
         "stripFailed": "無法去掉隱藏資訊：{{message}}",
         "notStrippable": "{{type}} 裡的隱藏資訊去不掉，所以不能當圖片傳送。請當成檔案傳送。",
         "unknownType": "這種格式"

@@ -83,7 +83,7 @@
         "dropImage": "Resmi buraya bırak",
         "dropAnywhere": "Nereye olursa bırak",
         "browse": "Seç",
-        "sizeLimit": "en fazla {{size}} MB",
+        "sizeLimit": "en fazla {{size}}",
         "encrypted": "yüklemeden önce şifrelendi",
         "removeFile": "Dosyayı kaldır",
         "moreOptions": "Daha fazla seçenek",
@@ -123,7 +123,7 @@
         "chipStartsIn": "{{delay}} sonra başlar",
         "chipMetadata": "Gizli veriler kaldırıldı",
         "chipDisappears": "{{duration}} sonra kaybolur",
-        "tooBig": "Dosya çok büyük. Bu sunucu en fazla {{size}} MiB alıyor.",
+        "tooBig": "Dosya çok büyük. Bu sunucu en fazla {{size}} alıyor.",
         "stripFailed": "Gizli veriler kaldırılamadı: {{message}}",
         "notStrippable": "{{type}} biçiminden gizli veriler kaldırılamıyor, bu yüzden resim olarak gönderilemez. Dosya olarak gönderin.",
         "unknownType": "bu biçim"

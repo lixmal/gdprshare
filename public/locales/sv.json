@@ -83,7 +83,7 @@
         "dropImage": "Släpp en bild här",
         "dropAnywhere": "Släpp den var som helst",
         "browse": "Välj fil",
-        "sizeLimit": "upp till {{size}} MB",
+        "sizeLimit": "upp till {{size}}",
         "encrypted": "krypterad före uppladdningen",
         "removeFile": "Ta bort filen",
         "moreOptions": "Fler alternativ",
@@ -123,7 +123,7 @@
         "chipStartsIn": "Börjar om {{delay}}",
         "chipMetadata": "Dolda data borttagna",
         "chipDisappears": "Försvinner efter {{duration}}",
-        "tooBig": "Filen är för stor. Den här servern tar högst {{size}} MiB.",
+        "tooBig": "Filen är för stor. Den här servern tar högst {{size}}.",
         "stripFailed": "Kunde inte ta bort dolda data: {{message}}",
         "notStrippable": "Dolda data går inte att ta bort från {{type}}, så det kan inte skickas som bild. Skicka det som fil.",
         "unknownType": "det här formatet"

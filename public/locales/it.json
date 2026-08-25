@@ -83,7 +83,7 @@
         "dropImage": "Trascina qui un’immagine",
         "dropAnywhere": "Lascialo dove vuoi",
         "browse": "Scegli",
-        "sizeLimit": "fino a {{size}} MB",
+        "sizeLimit": "fino a {{size}}",
         "encrypted": "cifrato prima del caricamento",
         "removeFile": "Togli il file",
         "moreOptions": "Altre opzioni",
@@ -123,7 +123,7 @@
         "chipStartsIn": "Inizia tra {{delay}}",
         "chipMetadata": "Dati nascosti tolti",
         "chipDisappears": "Scompare dopo {{duration}}",
-        "tooBig": "Il file è troppo grande. Questo server accetta al massimo {{size}} MiB.",
+        "tooBig": "Il file è troppo grande. Questo server accetta al massimo {{size}}.",
         "stripFailed": "Non è stato possibile togliere i dati nascosti: {{message}}",
         "notStrippable": "Da {{type}} i dati nascosti non si possono togliere, quindi non può andare come immagine. Mandalo come file.",
         "unknownType": "questo formato"
