@@ -19,7 +19,7 @@
         "senderPassword": "Mật khẩu từ người gửi",
         "senderPasswordHint": "Người gửi đã khóa tệp này bằng mật khẩu. Mật khẩu không nằm trong liên kết, hãy hỏi người gửi.",
         "save": "Lưu tệp ({{size}})",
-        "saveHint": "Đủ lớn để được ghi thẳng xuống đĩa. Trình duyệt sẽ hỏi bạn muốn lưu ở đâu."
+        "saveHint": "Bạn sẽ được hỏi nơi lưu tệp."
     },
     "shell": {
         "tagline": "Được mã hóa trước khi rời khỏi thiết bị của bạn",

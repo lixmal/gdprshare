@@ -19,7 +19,7 @@
         "senderPassword": "Password from the sender",
         "senderPasswordHint": "The sender locked this file with a password. It is not part of the link, so ask them for it.",
         "save": "Save the file ({{size}})",
-        "saveHint": "Large enough to be written straight to disk. Your browser will ask where to put it."
+        "saveHint": "You will be asked where to save it."
     },
     "shell": {
         "tagline": "Encrypted before it leaves your device",

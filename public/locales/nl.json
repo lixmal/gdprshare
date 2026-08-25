@@ -19,7 +19,7 @@
         "senderPassword": "Wachtwoord van de afzender",
         "senderPasswordHint": "De afzender heeft dit bestand met een wachtwoord beveiligd. Het staat niet in de link, dus vraag ernaar.",
         "save": "Bestand opslaan ({{size}})",
-        "saveHint": "Groot genoeg om rechtstreeks naar schijf te worden geschreven. Uw browser vraagt waar."
+        "saveHint": "U wordt gevraagd waar u het wilt opslaan."
     },
     "shell": {
         "tagline": "Versleuteld voordat het je apparaat verlaat",

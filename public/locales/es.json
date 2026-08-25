@@ -19,7 +19,7 @@
         "senderPassword": "Contraseña del remitente",
         "senderPasswordHint": "El remitente protegió este archivo con una contraseña. No forma parte del enlace, así que pídasela.",
         "save": "Guardar el archivo ({{size}})",
-        "saveHint": "Lo bastante grande para escribirse directamente en el disco. Su navegador le preguntará dónde ponerlo."
+        "saveHint": "Se le preguntará dónde guardarlo."
     },
     "shell": {
         "tagline": "Cifrado antes de salir de tu dispositivo",

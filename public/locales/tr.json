@@ -19,7 +19,7 @@
         "senderPassword": "Gönderenin parolası",
         "senderPasswordHint": "Gönderen bu dosyayı bir parolayla kilitledi. Parola bağlantıda yer almaz, bu yüzden gönderenden isteyin.",
         "save": "Dosyayı kaydet ({{size}})",
-        "saveHint": "Doğrudan diske yazılacak kadar büyük. Tarayıcınız nereye koyacağınızı soracak."
+        "saveHint": "Nereye kaydedileceği sorulacak."
     },
     "shell": {
         "tagline": "Cihazınızdan ayrılmadan önce şifrelenir",

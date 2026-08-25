@@ -19,7 +19,7 @@
         "senderPassword": "发送者设置的密码",
         "senderPasswordHint": "发送者给这个文件加了密码。密码不在链接里，请向发送者索取。",
         "save": "保存文件（{{size}}）",
-        "saveHint": "文件够大，会直接写入磁盘。浏览器会询问保存位置。"
+        "saveHint": "系统会询问保存位置。"
     },
     "shell": {
         "tagline": "在离开您的设备前就已加密",

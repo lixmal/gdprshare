@@ -19,7 +19,7 @@
         "senderPassword": "Passwort des Absenders",
         "senderPasswordHint": "Der Absender hat diese Datei mit einem Passwort geschützt. Es steht nicht im Link, fragen Sie also danach.",
         "save": "Datei speichern ({{size}})",
-        "saveHint": "Groß genug, um direkt auf die Festplatte geschrieben zu werden. Ihr Browser fragt, wohin."
+        "saveHint": "Sie werden gefragt, wo die Datei gespeichert werden soll."
     },
     "shell": {
         "tagline": "Verschlüsselt, bevor es Ihr Gerät verlässt",

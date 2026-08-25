@@ -19,7 +19,7 @@
         "senderPassword": "Hasło od nadawcy",
         "senderPasswordHint": "Nadawca zabezpieczył ten plik hasłem. Nie ma go w linku, więc poproś o nie nadawcę.",
         "save": "Zapisz plik ({{size}})",
-        "saveHint": "Na tyle duży, że zostanie zapisany wprost na dysk. Przeglądarka zapyta, gdzie go umieścić."
+        "saveHint": "Zostaniesz zapytany, gdzie go zapisać."
     },
     "shell": {
         "tagline": "Zaszyfrowane, zanim opuści Twoje urządzenie",

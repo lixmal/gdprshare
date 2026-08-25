@@ -19,7 +19,7 @@
         "senderPassword": "Kata sandi dari pengirim",
         "senderPasswordHint": "Pengirim melindungi berkas ini dengan kata sandi. Kata sandi tidak ada di dalam tautan, jadi mintalah kepada pengirim.",
         "save": "Simpan berkas ({{size}})",
-        "saveHint": "Cukup besar untuk ditulis langsung ke disk. Peramban akan menanyakan tempat menyimpannya."
+        "saveHint": "Anda akan ditanya lokasi penyimpanannya."
     },
     "shell": {
         "tagline": "Dienkripsi sebelum meninggalkan perangkat Anda",

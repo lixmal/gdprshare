@@ -19,7 +19,7 @@
         "senderPassword": "Mot de passe de l’expéditeur",
         "senderPasswordHint": "L’expéditeur a protégé ce fichier par un mot de passe. Il ne fait pas partie du lien : demandez-le-lui.",
         "save": "Enregistrer le fichier ({{size}})",
-        "saveHint": "Assez volumineux pour être écrit directement sur le disque. Votre navigateur vous demandera où le mettre."
+        "saveHint": "Il vous sera demandé où l’enregistrer."
     },
     "shell": {
         "tagline": "Chiffré avant de quitter votre appareil",

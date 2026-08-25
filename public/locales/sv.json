@@ -19,7 +19,7 @@
         "senderPassword": "Lösenord från avsändaren",
         "senderPasswordHint": "Avsändaren har låst den här filen med ett lösenord. Det ingår inte i länken, så fråga efter det.",
         "save": "Spara filen ({{size}})",
-        "saveHint": "Tillräckligt stor för att skrivas direkt till disk. Din webbläsare frågar var den ska ligga."
+        "saveHint": "Du får välja var filen ska sparas."
     },
     "shell": {
         "tagline": "Krypterat innan det lämnar din enhet",
