@@ -23,6 +23,13 @@ class Upload extends React.Component {
     constructor() {
         super()
 
+        // the file and image inputs are rendered one at a time, so only the one
+        // matching the picked type ever holds a node
+        this.fileInput = React.createRef()
+        this.imageInput = React.createRef()
+        this.textInput = React.createRef()
+        this.submitButton = React.createRef()
+
         this.copyHandler = gdprshare.copyHandler.bind(this)
         this.encrypt = gdprshare.encrypt.bind(this)
         this.handleFile = this.handleFile.bind(this)
@@ -298,10 +305,10 @@ class Upload extends React.Component {
         if (!this.checkFileSize(files[0], event))
             return
 
-        var ref = this.state.type === 'image' ? this.refs.image : this.refs.file
-        if (ref) ref.files = files
+        var input = this.pickedFileInput()
+        if (input) input.files = files
         this.setState({picked: {name: files[0].name, size: files[0].size}})
-        this.refs.submit.click()
+        this.submitButton.current.click()
     }
 
 
@@ -320,12 +327,12 @@ class Upload extends React.Component {
 
         let file
         if (this.state.type === 'text') {
-            let text = this.refs.text.value
+            let text = this.textInput.current.value
             // using first few chars as filename for recognizability
             // TODO: sanitize for usage in file names
             file = new File([text], text.slice(0, 21) + '.txt', {type: 'text/plain'})
         } else {
-            file = this.state.type === 'image' ? this.refs.image.files[0] : this.refs.file.files[0]
+            file = this.pickedFileInput().files[0]
 
             // images are always stripped, other files only on request
             if (this.state.type === 'image' || this.state.strip) {
@@ -649,8 +656,8 @@ class Upload extends React.Component {
             this.setState({
                 error: this.props.t('upload.tooBig', {size: allowedSize}),
             })
-            var ref = this.state.type === 'image' ? this.refs.image : this.refs.file
-            if (ref) ref.value = null
+            var input = this.pickedFileInput()
+            if (input) input.value = null
             this.setState({picked: null})
             return false
         }
@@ -681,20 +688,28 @@ class Upload extends React.Component {
         })
     }
 
+    // The file and image inputs are rendered one at a time, so the node belongs
+    // to whichever one the picked type put there.
+    pickedFileInput() {
+        return this.state.type === 'image'
+            ? this.imageInput.current
+            : this.fileInput.current
+    }
+
     handleBrowse(event) {
         // the hidden input sits inside the drop area: a click on it already
         // opens the picker, forwarding it again would open a second dialog
         if (event && event.target && event.target.tagName === 'INPUT')
             return
 
-        var ref = this.state.type === 'image' ? this.refs.image : this.refs.file
-        if (ref) ref.click()
+        var input = this.pickedFileInput()
+        if (input) input.click()
     }
 
     handleClearFile(event) {
         event.stopPropagation()
-        var ref = this.state.type === 'image' ? this.refs.image : this.refs.file
-        if (ref) ref.value = null
+        var input = this.pickedFileInput()
+        if (input) input.value = null
         this.setState({picked: null})
     }
 
@@ -747,8 +762,8 @@ class Upload extends React.Component {
 
         // fetch the pdf bundle now so the upload does not have to wait for it,
         // failures are reported when stripping actually runs
-        if (strip && this.refs.file && this.refs.file.files[0] &&
-            this.refs.file.files[0].type === 'application/pdf')
+        var picked = this.fileInput.current && this.fileInput.current.files[0]
+        if (strip && picked && picked.type === 'application/pdf')
             loadPdfLib().catch(function (err) {
                 console.log('preloading pdf support:', err)
             })
@@ -845,7 +860,7 @@ class Upload extends React.Component {
                             disabled={value <= min} aria-label={this.props.t('files.less')}>
                         <Minus size="14" />
                     </button>
-                    <input className="form-control" id={id} type="number" ref={id}
+                    <input className="form-control" id={id} type="number"
                            min={min} max={max} value={value} required
                            onChange={function (e) { onChange(e.target.value) }} />
                     <button type="button" className="step-btn" onClick={step(1)}
@@ -1137,16 +1152,16 @@ class Upload extends React.Component {
 
         if (this.state.type === 'text')
             return (
-                <textarea className="form-control" id="text" ref="text" rows="4" minLength="3"
+                <textarea className="form-control" id="text" ref={this.textInput} rows="4" minLength="3"
                           maxLength={gdprshare.config.contentMaxLength} required autoFocus
                           aria-label={t('upload.titleText')} />
             )
 
         var isImage = this.state.type === 'image'
         var input = isImage
-            ? <input className="drop-file" id="image-content" type="file" ref="image"
+            ? <input className="drop-file" id="image-content" type="file" ref={this.imageInput}
                      accept={strippableImageTypes.join(',')} onChange={this.handleFile} required />
-            : <input className="drop-file" id="content" type="file" ref="file"
+            : <input className="drop-file" id="content" type="file" ref={this.fileInput}
                      onChange={this.handleFile} required />
 
         if (this.state.picked)
@@ -1277,7 +1292,7 @@ class Upload extends React.Component {
 
                 <div className="field">
                     <label htmlFor="email" className="lbl">{t('upload.email')}</label>
-                    <input className="form-control" id="email" type="email" ref="email"
+                    <input className="form-control" id="email" type="email"
                            placeholder={t('upload.emailPlaceholder')} maxLength="255" minLength="6"
                            value={this.state.email} onChange={this.handleEmailChange} />
                     <span className="hint">{t('upload.emailHint')}</span>
@@ -1347,7 +1362,7 @@ class Upload extends React.Component {
                     <UploadIcon size="26" stroke="1.3" />
                     <span className="drop-title">{t('upload.dropAnywhere')}</span>
                 </div>
-                <form ref="form" className={this.innerClasses()} onSubmit={this.handleUpload}>
+                <form className={this.innerClasses()} onSubmit={this.handleUpload}>
                     <div className="row-between">
                         <h4>{t({file: 'upload.titleFile', text: 'upload.titleText', image: 'upload.titleImage'}[this.state.type])}</h4>
                         {this.typePicker()}
@@ -1364,7 +1379,7 @@ class Upload extends React.Component {
 
                     {this.state.optionsOpen && this.options()}
 
-                    <input type="submit" ref="submit" className="btn btn-primary btn-block"
+                    <input type="submit" ref={this.submitButton} className="btn btn-primary btn-block"
                            value={t('upload.submit')}
                            disabled={this.state.geoRestriction !== 'none' && this.state.selectedCountries.length === 0} />
                     <span className="hint text-center">{t('upload.submitHint')}</span>

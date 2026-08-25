@@ -55,11 +55,11 @@
         "i18next": "^26.4.0",
         "pdf-lib": "^1.17.1",
         "qrcode.react": "^4.2.0",
-        "react": "^18.3.1",
-        "react-dom": "^18.3.1",
+        "react": "^19.2.8",
+        "react-dom": "^19.2.8",
         "react-i18next": "^17.0.12",
         "react-modal": "^3.16.3",
-        "react-router-dom": "^6.30.5",
+        "react-router": "^7.18.2",
         "react-tooltip": "^5.30.0"
     },
     "browserify-css": {
