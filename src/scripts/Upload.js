@@ -542,6 +542,9 @@ class Upload extends React.Component {
             isDragOver: false
         })
 
+        if (this.state.mask)
+            return
+
         var files = event.dataTransfer.files
         if (!this.checkFileSize(files[0], event))
             return
@@ -941,6 +944,9 @@ class Upload extends React.Component {
     }
 
     handleBrowse(event) {
+        if (this.state.mask)
+            return
+
         // the hidden input sits inside the drop area: a click on it already
         // opens the picker, forwarding it again would open a second dialog
         if (event && event.target && event.target.tagName === 'INPUT')
@@ -952,6 +958,9 @@ class Upload extends React.Component {
 
     handleClearFile(event) {
         event.stopPropagation()
+
+        if (this.state.mask)
+            return
         var input = this.pickedFileInput()
         if (input) input.value = null
         this.setState({picked: null})
@@ -1624,6 +1633,9 @@ class Upload extends React.Component {
                     <span className="drop-title">{t('upload.dropAnywhere')}</span>
                 </div>
                 <form className={this.innerClasses()} onSubmit={this.handleUpload}>
+                    {/* while a file is on its way, the options that describe it
+                        are settled: changing them would apply to nothing */}
+                    <fieldset className="form-fields" disabled={this.state.mask}>
                     <div className="row-between">
                         <h4>{t({file: 'upload.titleFile', text: 'upload.titleText', image: 'upload.titleImage'}[this.state.type])}</h4>
                         {this.typePicker()}
@@ -1645,6 +1657,7 @@ class Upload extends React.Component {
                            value={t('upload.submit')}
                            disabled={this.state.geoRestriction !== 'none' && this.state.selectedCountries.length === 0} />
                     <span className="hint text-center">{t('upload.submitHint')}</span>
+                    </fieldset>
                     <Alert error={this.state.error} tone={this.state.errorTone} />
                 </form>
             </div>

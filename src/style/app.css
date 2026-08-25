@@ -379,6 +379,18 @@ small.form-text {
     max-width: none;
 }
 
+/* the form's fields, grouped so they can be switched off while a file is on its
+   way. A fieldset brings its own box, which the layout does not want. */
+.form-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    border: 0;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+}
+
 .stack {
     display: flex;
     flex-direction: column;
