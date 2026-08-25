@@ -49,7 +49,22 @@
             "invalid_file_id": "此下载链接无效。",
             "tls_requirements_not_met": "您的连接未达到所需的安全级别。",
             "invalid_request": "请求无效。",
-            "user_agent_blocked": "用来下载的浏览器在这里不被允许。"
+            "user_agent_blocked": "用来下载的浏览器在这里不被允许。",
+            "invalid_upload": "服务器拒绝了这次上传。请检查选项后重试。",
+            "upload_too_large": "文件超过了这台服务器接受的大小。",
+            "upload_not_found": "找不到这次上传，可能已经中断，请重新开始。",
+            "upload_already_finished": "这次上传已经完成。",
+            "upload_offset_mismatch": "上传的位置对不上，请重新开始。",
+            "temp_filename_failed": "服务器无法准备上传，请重试。",
+            "file_id_failed": "服务器无法准备上传，请重试。",
+            "owner_token_failed": "服务器无法准备上传，请重试。",
+            "store_failed": "服务器无法保存文件，请重试。",
+            "save_failed": "服务器无法保存文件，请重试。",
+            "owner_token_mismatch": "此浏览器不是该分享的拥有者。",
+            "file_deletion_failed": "服务器无法删除文件。",
+            "prolong_limit_exceeded": "超过了这台服务器允许的范围。",
+            "file_prolong_failed": "服务器无法延长这次分享。",
+            "stats_store_failed": "报告发送失败。"
         }
     },
     "common": {

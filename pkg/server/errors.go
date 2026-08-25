@@ -17,7 +17,6 @@ const (
 	ErrCodeTempFilename     ErrorCode = "temp_filename_failed"
 	ErrCodeFileIDFailed     ErrorCode = "file_id_failed"
 	ErrCodeOwnerTokenFailed ErrorCode = "owner_token_failed"
-	ErrCodeTransactionStart ErrorCode = "transaction_start_failed"
 	ErrCodeStoreFailed      ErrorCode = "store_failed"
 	ErrCodeSaveFailed       ErrorCode = "save_failed"
 
@@ -31,11 +30,10 @@ const (
 	ErrCodeRetrievalFailed   ErrorCode = "file_retrieval_failed"
 
 	// chunked upload
-	ErrCodeUploadNotFound  ErrorCode = "upload_not_found"
-	ErrCodeUploadFinished  ErrorCode = "upload_already_finished"
-	ErrCodeUploadOffset    ErrorCode = "upload_offset_mismatch"
-	ErrCodeUploadTooLarge  ErrorCode = "upload_too_large"
-	ErrCodeUploadIncapable ErrorCode = "upload_not_accepted"
+	ErrCodeUploadNotFound ErrorCode = "upload_not_found"
+	ErrCodeUploadFinished ErrorCode = "upload_already_finished"
+	ErrCodeUploadOffset   ErrorCode = "upload_offset_mismatch"
+	ErrCodeUploadTooLarge ErrorCode = "upload_too_large"
 
 	// deletion
 	ErrCodeOwnerTokenMismatch ErrorCode = "owner_token_mismatch"

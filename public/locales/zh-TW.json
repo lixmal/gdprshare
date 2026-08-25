@@ -49,7 +49,22 @@
             "invalid_file_id": "此下載連結無效。",
             "tls_requirements_not_met": "您的連線未達所需的安全等級。",
             "invalid_request": "請求無效。",
-            "user_agent_blocked": "用來下載的瀏覽器在這裡不被允許。"
+            "user_agent_blocked": "用來下載的瀏覽器在這裡不被允許。",
+            "invalid_upload": "伺服器拒絕了這次上傳。請檢查選項後重試。",
+            "upload_too_large": "檔案超過了這台伺服器接受的大小。",
+            "upload_not_found": "找不到這次上傳，可能已經中斷，請重新開始。",
+            "upload_already_finished": "這次上傳已經完成。",
+            "upload_offset_mismatch": "上傳的位置對不上，請重新開始。",
+            "temp_filename_failed": "伺服器無法準備上傳，請重試。",
+            "file_id_failed": "伺服器無法準備上傳，請重試。",
+            "owner_token_failed": "伺服器無法準備上傳，請重試。",
+            "store_failed": "伺服器無法儲存檔案，請重試。",
+            "save_failed": "伺服器無法儲存檔案，請重試。",
+            "owner_token_mismatch": "此瀏覽器不是該分享的擁有者。",
+            "file_deletion_failed": "伺服器無法刪除檔案。",
+            "prolong_limit_exceeded": "超過了這台伺服器允許的範圍。",
+            "file_prolong_failed": "伺服器無法延長這次分享。",
+            "stats_store_failed": "報告傳送失敗。"
         }
     },
     "common": {

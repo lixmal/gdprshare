@@ -49,7 +49,22 @@
             "invalid_file_id": "このダウンロードリンクは無効です。",
             "tls_requirements_not_met": "接続が必要なセキュリティレベルを満たしていません。",
             "invalid_request": "リクエストが無効です。",
-            "user_agent_blocked": "ダウンロードに使われたブラウザーはここでは許可されていません。"
+            "user_agent_blocked": "ダウンロードに使われたブラウザーはここでは許可されていません。",
+            "invalid_upload": "サーバーがアップロードを拒否しました。設定を確認してやり直してください。",
+            "upload_too_large": "このサーバーが受け付ける大きさを超えています。",
+            "upload_not_found": "アップロードが見つかりません。中断された可能性があります。最初からやり直してください。",
+            "upload_already_finished": "アップロードはすでに完了しています。",
+            "upload_offset_mismatch": "アップロードの位置が合いません。最初からやり直してください。",
+            "temp_filename_failed": "サーバーがアップロードを準備できませんでした。やり直してください。",
+            "file_id_failed": "サーバーがアップロードを準備できませんでした。やり直してください。",
+            "owner_token_failed": "サーバーがアップロードを準備できませんでした。やり直してください。",
+            "store_failed": "サーバーがファイルを保存できませんでした。やり直してください。",
+            "save_failed": "サーバーがファイルを保存できませんでした。やり直してください。",
+            "owner_token_mismatch": "このブラウザーはその共有の持ち主ではありません。",
+            "file_deletion_failed": "サーバーがファイルを削除できませんでした。",
+            "prolong_limit_exceeded": "このサーバーが許す範囲を超えています。",
+            "file_prolong_failed": "サーバーが共有を延長できませんでした。",
+            "stats_store_failed": "報告を送信できませんでした。"
         }
     },
     "common": {

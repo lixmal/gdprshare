@@ -49,7 +49,22 @@
             "invalid_file_id": "This download link is not valid.",
             "tls_requirements_not_met": "Your connection does not meet the required security level.",
             "invalid_request": "The request was not valid.",
-            "user_agent_blocked": "The browser used for the download is not allowed here."
+            "user_agent_blocked": "The browser used for the download is not allowed here.",
+            "invalid_upload": "The server rejected the upload. Check the options and try again.",
+            "upload_too_large": "The file is larger than this server accepts.",
+            "upload_not_found": "The upload was not found. It may have been abandoned; start it again.",
+            "upload_already_finished": "The upload is already finished.",
+            "upload_offset_mismatch": "The upload lost its place. Please start it again.",
+            "temp_filename_failed": "The server could not prepare the upload. Please try again.",
+            "file_id_failed": "The server could not prepare the upload. Please try again.",
+            "owner_token_failed": "The server could not prepare the upload. Please try again.",
+            "store_failed": "The server could not store the file. Please try again.",
+            "save_failed": "The server could not store the file. Please try again.",
+            "owner_token_mismatch": "This browser is not the owner of that share.",
+            "file_deletion_failed": "The server could not delete the file.",
+            "prolong_limit_exceeded": "That is more than this server allows.",
+            "file_prolong_failed": "The server could not extend the share.",
+            "stats_store_failed": "The report could not be sent."
         }
     },
     "common": {

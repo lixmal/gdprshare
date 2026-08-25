@@ -49,7 +49,22 @@
             "invalid_file_id": "Den här nedladdningslänken är ogiltig.",
             "tls_requirements_not_met": "Din anslutning uppfyller inte den säkerhetsnivå som krävs.",
             "invalid_request": "Begäran var ogiltig.",
-            "user_agent_blocked": "Webbläsaren som användes för nedladdningen är inte tillåten här."
+            "user_agent_blocked": "Webbläsaren som användes för nedladdningen är inte tillåten här.",
+            "invalid_upload": "Servern avvisade uppladdningen. Kontrollera alternativen och försök igen.",
+            "upload_too_large": "Filen är större än vad den här servern tar emot.",
+            "upload_not_found": "Uppladdningen hittades inte. Den kan ha avbrutits; börja om.",
+            "upload_already_finished": "Uppladdningen är redan klar.",
+            "upload_offset_mismatch": "Uppladdningen tappade platsen. Börja om.",
+            "temp_filename_failed": "Servern kunde inte förbereda uppladdningen. Försök igen.",
+            "file_id_failed": "Servern kunde inte förbereda uppladdningen. Försök igen.",
+            "owner_token_failed": "Servern kunde inte förbereda uppladdningen. Försök igen.",
+            "store_failed": "Servern kunde inte spara filen. Försök igen.",
+            "save_failed": "Servern kunde inte spara filen. Försök igen.",
+            "owner_token_mismatch": "Den här webbläsaren äger inte den delningen.",
+            "file_deletion_failed": "Servern kunde inte ta bort filen.",
+            "prolong_limit_exceeded": "Det är mer än den här servern tillåter.",
+            "file_prolong_failed": "Servern kunde inte förlänga delningen.",
+            "stats_store_failed": "Rapporten kunde inte skickas."
         }
     },
     "common": {

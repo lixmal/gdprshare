@@ -49,7 +49,22 @@
             "invalid_file_id": "Ce lien de téléchargement n'est pas valide.",
             "tls_requirements_not_met": "Votre connexion ne répond pas au niveau de sécurité requis.",
             "invalid_request": "La requête n'était pas valide.",
-            "user_agent_blocked": "Le navigateur utilisé pour le téléchargement n’est pas autorisé ici."
+            "user_agent_blocked": "Le navigateur utilisé pour le téléchargement n’est pas autorisé ici.",
+            "invalid_upload": "Le serveur a refusé l’envoi. Vérifiez les options et réessayez.",
+            "upload_too_large": "Le fichier est plus gros que ce que ce serveur accepte.",
+            "upload_not_found": "L’envoi est introuvable. Il a peut-être été abandonné ; recommencez.",
+            "upload_already_finished": "L’envoi est déjà terminé.",
+            "upload_offset_mismatch": "L’envoi a perdu sa place. Veuillez recommencer.",
+            "temp_filename_failed": "Le serveur n’a pas pu préparer l’envoi. Veuillez réessayer.",
+            "file_id_failed": "Le serveur n’a pas pu préparer l’envoi. Veuillez réessayer.",
+            "owner_token_failed": "Le serveur n’a pas pu préparer l’envoi. Veuillez réessayer.",
+            "store_failed": "Le serveur n’a pas pu enregistrer le fichier. Veuillez réessayer.",
+            "save_failed": "Le serveur n’a pas pu enregistrer le fichier. Veuillez réessayer.",
+            "owner_token_mismatch": "Ce navigateur n’est pas le propriétaire de ce partage.",
+            "file_deletion_failed": "Le serveur n’a pas pu supprimer le fichier.",
+            "prolong_limit_exceeded": "C’est plus que ce que ce serveur autorise.",
+            "file_prolong_failed": "Le serveur n’a pas pu prolonger le partage.",
+            "stats_store_failed": "Le rapport n’a pas pu être envoyé."
         }
     },
     "common": {

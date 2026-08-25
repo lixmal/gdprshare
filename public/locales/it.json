@@ -49,7 +49,22 @@
             "invalid_file_id": "Questo link per il download non è valido.",
             "tls_requirements_not_met": "La tua connessione non soddisfa il livello di sicurezza richiesto.",
             "invalid_request": "La richiesta non era valida.",
-            "user_agent_blocked": "Il browser usato per il download non è ammesso qui."
+            "user_agent_blocked": "Il browser usato per il download non è ammesso qui.",
+            "invalid_upload": "Il server ha rifiutato l’invio. Controlla le opzioni e riprova.",
+            "upload_too_large": "Il file è più grande di quanto questo server accetti.",
+            "upload_not_found": "Invio non trovato. Potrebbe essere stato abbandonato; ricomincia.",
+            "upload_already_finished": "L’invio è già terminato.",
+            "upload_offset_mismatch": "L’invio ha perso il segno. Ricomincia.",
+            "temp_filename_failed": "Il server non ha potuto preparare l’invio. Riprova.",
+            "file_id_failed": "Il server non ha potuto preparare l’invio. Riprova.",
+            "owner_token_failed": "Il server non ha potuto preparare l’invio. Riprova.",
+            "store_failed": "Il server non ha potuto salvare il file. Riprova.",
+            "save_failed": "Il server non ha potuto salvare il file. Riprova.",
+            "owner_token_mismatch": "Questo browser non è il proprietario di quell’invio.",
+            "file_deletion_failed": "Il server non ha potuto eliminare il file.",
+            "prolong_limit_exceeded": "È più di quanto questo server permetta.",
+            "file_prolong_failed": "Il server non ha potuto prolungare l’invio.",
+            "stats_store_failed": "Non è stato possibile inviare la segnalazione."
         }
     },
     "common": {

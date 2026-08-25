@@ -49,7 +49,22 @@
             "invalid_file_id": "이 다운로드 링크는 유효하지 않습니다.",
             "tls_requirements_not_met": "연결이 요구되는 보안 수준을 충족하지 않습니다.",
             "invalid_request": "잘못된 요청입니다.",
-            "user_agent_blocked": "내려받기에 사용된 브라우저는 여기서 허용되지 않습니다."
+            "user_agent_blocked": "내려받기에 사용된 브라우저는 여기서 허용되지 않습니다.",
+            "invalid_upload": "서버가 업로드를 거부했습니다. 옵션을 확인하고 다시 시도하세요.",
+            "upload_too_large": "이 서버가 받는 크기보다 큽니다.",
+            "upload_not_found": "업로드를 찾을 수 없습니다. 중단되었을 수 있으니 다시 시작하세요.",
+            "upload_already_finished": "업로드가 이미 완료되었습니다.",
+            "upload_offset_mismatch": "업로드 위치가 맞지 않습니다. 다시 시작하세요.",
+            "temp_filename_failed": "서버가 업로드를 준비하지 못했습니다. 다시 시도하세요.",
+            "file_id_failed": "서버가 업로드를 준비하지 못했습니다. 다시 시도하세요.",
+            "owner_token_failed": "서버가 업로드를 준비하지 못했습니다. 다시 시도하세요.",
+            "store_failed": "서버가 파일을 저장하지 못했습니다. 다시 시도하세요.",
+            "save_failed": "서버가 파일을 저장하지 못했습니다. 다시 시도하세요.",
+            "owner_token_mismatch": "이 브라우저는 해당 공유의 소유자가 아닙니다.",
+            "file_deletion_failed": "서버가 파일을 삭제하지 못했습니다.",
+            "prolong_limit_exceeded": "이 서버가 허용하는 범위를 넘습니다.",
+            "file_prolong_failed": "서버가 공유를 연장하지 못했습니다.",
+            "stats_store_failed": "보고를 보내지 못했습니다."
         }
     },
     "common": {

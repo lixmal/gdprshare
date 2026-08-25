@@ -49,7 +49,22 @@
             "invalid_file_id": "Tautan unduhan ini tidak valid.",
             "tls_requirements_not_met": "Koneksi Anda tidak memenuhi tingkat keamanan yang diperlukan.",
             "invalid_request": "Permintaan tidak valid.",
-            "user_agent_blocked": "Peramban yang dipakai untuk mengunduh tidak diizinkan di sini."
+            "user_agent_blocked": "Peramban yang dipakai untuk mengunduh tidak diizinkan di sini.",
+            "invalid_upload": "Server menolak unggahan. Periksa opsinya dan coba lagi.",
+            "upload_too_large": "Berkas lebih besar daripada yang diterima server ini.",
+            "upload_not_found": "Unggahan tidak ditemukan. Mungkin ditinggalkan; mulai lagi.",
+            "upload_already_finished": "Unggahan sudah selesai.",
+            "upload_offset_mismatch": "Unggahan kehilangan posisinya. Silakan mulai lagi.",
+            "temp_filename_failed": "Server tidak dapat menyiapkan unggahan. Silakan coba lagi.",
+            "file_id_failed": "Server tidak dapat menyiapkan unggahan. Silakan coba lagi.",
+            "owner_token_failed": "Server tidak dapat menyiapkan unggahan. Silakan coba lagi.",
+            "store_failed": "Server tidak dapat menyimpan berkas. Silakan coba lagi.",
+            "save_failed": "Server tidak dapat menyimpan berkas. Silakan coba lagi.",
+            "owner_token_mismatch": "Peramban ini bukan pemilik kiriman tersebut.",
+            "file_deletion_failed": "Server tidak dapat menghapus berkas.",
+            "prolong_limit_exceeded": "Itu lebih banyak daripada yang diizinkan server ini.",
+            "file_prolong_failed": "Server tidak dapat memperpanjang kiriman.",
+            "stats_store_failed": "Laporan tidak dapat dikirim."
         }
     },
     "common": {

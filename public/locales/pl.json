@@ -49,7 +49,22 @@
             "invalid_file_id": "Ten link do pobierania jest nieprawidłowy.",
             "tls_requirements_not_met": "Twoje połączenie nie spełnia wymaganego poziomu bezpieczeństwa.",
             "invalid_request": "Żądanie było nieprawidłowe.",
-            "user_agent_blocked": "Przeglądarka użyta do pobrania nie jest tu dozwolona."
+            "user_agent_blocked": "Przeglądarka użyta do pobrania nie jest tu dozwolona.",
+            "invalid_upload": "Serwer odrzucił wysyłkę. Sprawdź opcje i spróbuj ponownie.",
+            "upload_too_large": "Plik jest większy, niż przyjmuje ten serwer.",
+            "upload_not_found": "Nie znaleziono wysyłki. Mogła zostać przerwana; zacznij od nowa.",
+            "upload_already_finished": "Wysyłka została już zakończona.",
+            "upload_offset_mismatch": "Wysyłka zgubiła miejsce. Zacznij od nowa.",
+            "temp_filename_failed": "Serwer nie mógł przygotować wysyłki. Spróbuj ponownie.",
+            "file_id_failed": "Serwer nie mógł przygotować wysyłki. Spróbuj ponownie.",
+            "owner_token_failed": "Serwer nie mógł przygotować wysyłki. Spróbuj ponownie.",
+            "store_failed": "Serwer nie mógł zapisać pliku. Spróbuj ponownie.",
+            "save_failed": "Serwer nie mógł zapisać pliku. Spróbuj ponownie.",
+            "owner_token_mismatch": "Ta przeglądarka nie jest właścicielem tej wysyłki.",
+            "file_deletion_failed": "Serwer nie mógł usunąć pliku.",
+            "prolong_limit_exceeded": "To więcej, niż pozwala ten serwer.",
+            "file_prolong_failed": "Serwer nie mógł przedłużyć wysyłki.",
+            "stats_store_failed": "Nie udało się wysłać zgłoszenia."
         }
     },
     "common": {

@@ -49,7 +49,22 @@
             "invalid_file_id": "Liên kết tải xuống này không hợp lệ.",
             "tls_requirements_not_met": "Kết nối của bạn không đáp ứng mức bảo mật yêu cầu.",
             "invalid_request": "Yêu cầu không hợp lệ.",
-            "user_agent_blocked": "Trình duyệt dùng để tải về không được phép ở đây."
+            "user_agent_blocked": "Trình duyệt dùng để tải về không được phép ở đây.",
+            "invalid_upload": "Máy chủ đã từ chối lượt tải lên. Hãy kiểm tra các tùy chọn và thử lại.",
+            "upload_too_large": "Tệp lớn hơn mức máy chủ này nhận.",
+            "upload_not_found": "Không tìm thấy lượt tải lên. Có thể nó đã bị bỏ dở; hãy bắt đầu lại.",
+            "upload_already_finished": "Lượt tải lên đã hoàn tất.",
+            "upload_offset_mismatch": "Lượt tải lên bị mất vị trí. Hãy bắt đầu lại.",
+            "temp_filename_failed": "Máy chủ không chuẩn bị được lượt tải lên. Hãy thử lại.",
+            "file_id_failed": "Máy chủ không chuẩn bị được lượt tải lên. Hãy thử lại.",
+            "owner_token_failed": "Máy chủ không chuẩn bị được lượt tải lên. Hãy thử lại.",
+            "store_failed": "Máy chủ không lưu được tệp. Hãy thử lại.",
+            "save_failed": "Máy chủ không lưu được tệp. Hãy thử lại.",
+            "owner_token_mismatch": "Trình duyệt này không phải chủ của lượt chia sẻ đó.",
+            "file_deletion_failed": "Máy chủ không xóa được tệp.",
+            "prolong_limit_exceeded": "Nhiều hơn mức máy chủ này cho phép.",
+            "file_prolong_failed": "Máy chủ không gia hạn được lượt chia sẻ.",
+            "stats_store_failed": "Không gửi được báo cáo."
         }
     },
     "common": {

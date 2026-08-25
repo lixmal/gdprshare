@@ -49,7 +49,22 @@
             "invalid_file_id": "Deze downloadlink is niet geldig.",
             "tls_requirements_not_met": "Je verbinding voldoet niet aan het vereiste beveiligingsniveau.",
             "invalid_request": "Het verzoek was niet geldig.",
-            "user_agent_blocked": "De browser die voor de download werd gebruikt, is hier niet toegestaan."
+            "user_agent_blocked": "De browser die voor de download werd gebruikt, is hier niet toegestaan.",
+            "invalid_upload": "De server heeft de upload geweigerd. Controleer de opties en probeer het opnieuw.",
+            "upload_too_large": "Het bestand is groter dan deze server aanneemt.",
+            "upload_not_found": "De upload is niet gevonden. Mogelijk is hij afgebroken; begin opnieuw.",
+            "upload_already_finished": "De upload is al afgerond.",
+            "upload_offset_mismatch": "De upload is de plaats kwijt. Begin opnieuw.",
+            "temp_filename_failed": "De server kon de upload niet voorbereiden. Probeer het opnieuw.",
+            "file_id_failed": "De server kon de upload niet voorbereiden. Probeer het opnieuw.",
+            "owner_token_failed": "De server kon de upload niet voorbereiden. Probeer het opnieuw.",
+            "store_failed": "De server kon het bestand niet opslaan. Probeer het opnieuw.",
+            "save_failed": "De server kon het bestand niet opslaan. Probeer het opnieuw.",
+            "owner_token_mismatch": "Deze browser is niet de eigenaar van die deling.",
+            "file_deletion_failed": "De server kon het bestand niet verwijderen.",
+            "prolong_limit_exceeded": "Dat is meer dan deze server toestaat.",
+            "file_prolong_failed": "De server kon de deling niet verlengen.",
+            "stats_store_failed": "De melding kon niet worden verzonden."
         }
     },
     "common": {

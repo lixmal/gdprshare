@@ -49,7 +49,22 @@
             "invalid_file_id": "Dieser Download-Link ist ungültig.",
             "tls_requirements_not_met": "Ihre Verbindung erfüllt nicht die erforderliche Sicherheitsstufe.",
             "invalid_request": "Die Anfrage war ungültig.",
-            "user_agent_blocked": "Der für den Download verwendete Browser ist hier nicht erlaubt."
+            "user_agent_blocked": "Der für den Download verwendete Browser ist hier nicht erlaubt.",
+            "invalid_upload": "Der Server hat den Upload abgelehnt. Prüfen Sie die Optionen und versuchen Sie es erneut.",
+            "upload_too_large": "Die Datei ist größer, als dieser Server annimmt.",
+            "upload_not_found": "Der Upload wurde nicht gefunden. Er wurde möglicherweise abgebrochen; beginnen Sie neu.",
+            "upload_already_finished": "Der Upload ist bereits abgeschlossen.",
+            "upload_offset_mismatch": "Der Upload hat die Stelle verloren. Bitte beginnen Sie neu.",
+            "temp_filename_failed": "Der Server konnte den Upload nicht vorbereiten. Bitte versuchen Sie es erneut.",
+            "file_id_failed": "Der Server konnte den Upload nicht vorbereiten. Bitte versuchen Sie es erneut.",
+            "owner_token_failed": "Der Server konnte den Upload nicht vorbereiten. Bitte versuchen Sie es erneut.",
+            "store_failed": "Der Server konnte die Datei nicht speichern. Bitte versuchen Sie es erneut.",
+            "save_failed": "Der Server konnte die Datei nicht speichern. Bitte versuchen Sie es erneut.",
+            "owner_token_mismatch": "Dieser Browser ist nicht der Eigentümer dieser Freigabe.",
+            "file_deletion_failed": "Der Server konnte die Datei nicht löschen.",
+            "prolong_limit_exceeded": "Das ist mehr, als dieser Server erlaubt.",
+            "file_prolong_failed": "Der Server konnte die Freigabe nicht verlängern.",
+            "stats_store_failed": "Der Bericht konnte nicht gesendet werden."
         }
     },
     "common": {

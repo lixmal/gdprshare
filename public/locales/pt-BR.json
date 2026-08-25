@@ -49,7 +49,22 @@
             "invalid_file_id": "Este link de download não é válido.",
             "tls_requirements_not_met": "Sua conexão não atende ao nível de segurança exigido.",
             "invalid_request": "A solicitação não era válida.",
-            "user_agent_blocked": "O navegador usado para o download não é permitido aqui."
+            "user_agent_blocked": "O navegador usado para o download não é permitido aqui.",
+            "invalid_upload": "O servidor recusou o envio. Confira as opções e tente novamente.",
+            "upload_too_large": "O arquivo é maior do que este servidor aceita.",
+            "upload_not_found": "O envio não foi encontrado. Ele pode ter sido abandonado; comece de novo.",
+            "upload_already_finished": "O envio já foi concluído.",
+            "upload_offset_mismatch": "O envio perdeu o lugar. Comece de novo.",
+            "temp_filename_failed": "O servidor não conseguiu preparar o envio. Tente novamente.",
+            "file_id_failed": "O servidor não conseguiu preparar o envio. Tente novamente.",
+            "owner_token_failed": "O servidor não conseguiu preparar o envio. Tente novamente.",
+            "store_failed": "O servidor não conseguiu armazenar o arquivo. Tente novamente.",
+            "save_failed": "O servidor não conseguiu armazenar o arquivo. Tente novamente.",
+            "owner_token_mismatch": "Este navegador não é o proprietário desse envio.",
+            "file_deletion_failed": "O servidor não conseguiu excluir o arquivo.",
+            "prolong_limit_exceeded": "Isso é mais do que este servidor permite.",
+            "file_prolong_failed": "O servidor não conseguiu estender o envio.",
+            "stats_store_failed": "Não foi possível enviar o relatório."
         }
     },
     "common": {

@@ -49,7 +49,22 @@
             "invalid_file_id": "Bu indirme bağlantısı geçerli değil.",
             "tls_requirements_not_met": "Bağlantınız gerekli güvenlik düzeyini karşılamıyor.",
             "invalid_request": "İstek geçerli değildi.",
-            "user_agent_blocked": "İndirme için kullanılan tarayıcıya burada izin verilmiyor."
+            "user_agent_blocked": "İndirme için kullanılan tarayıcıya burada izin verilmiyor.",
+            "invalid_upload": "Sunucu yüklemeyi reddetti. Seçenekleri denetleyip yeniden deneyin.",
+            "upload_too_large": "Dosya, bu sunucunun kabul ettiğinden büyük.",
+            "upload_not_found": "Yükleme bulunamadı. Yarıda bırakılmış olabilir; yeniden başlatın.",
+            "upload_already_finished": "Yükleme çoktan tamamlandı.",
+            "upload_offset_mismatch": "Yükleme yerini kaybetti. Lütfen yeniden başlatın.",
+            "temp_filename_failed": "Sunucu yüklemeyi hazırlayamadı. Lütfen yeniden deneyin.",
+            "file_id_failed": "Sunucu yüklemeyi hazırlayamadı. Lütfen yeniden deneyin.",
+            "owner_token_failed": "Sunucu yüklemeyi hazırlayamadı. Lütfen yeniden deneyin.",
+            "store_failed": "Sunucu dosyayı saklayamadı. Lütfen yeniden deneyin.",
+            "save_failed": "Sunucu dosyayı saklayamadı. Lütfen yeniden deneyin.",
+            "owner_token_mismatch": "Bu tarayıcı o paylaşımın sahibi değil.",
+            "file_deletion_failed": "Sunucu dosyayı silemedi.",
+            "prolong_limit_exceeded": "Bu, sunucunun izin verdiğinden fazla.",
+            "file_prolong_failed": "Sunucu paylaşımı uzatamadı.",
+            "stats_store_failed": "Bildirim gönderilemedi."
         }
     },
     "common": {

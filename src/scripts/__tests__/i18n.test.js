@@ -168,4 +168,23 @@ describe('locale files', () => {
             expect(Object.keys(server).sort()).toEqual(codes.sort())
         })
     })
+
+    // The codes above are only worth having if they are the ones the server
+    // actually sends. Comparing the locales with each other cannot tell: it is
+    // the Go source that decides, and a code without an entry reaches the
+    // visitor as the English message the API happened to carry.
+    test('the server sends no code the locales do not cover', () => {
+        const source = fs.readFileSync(
+            path.join(__dirname, '..', '..', '..', 'pkg', 'server', 'errors.go'), 'utf8')
+
+        const sent = (source.match(/ErrorCode = "[a-z_]+"/g) || [])
+            .map((line) => line.replace(/.*"([a-z_]+)"/, '$1'))
+        const covered = Object.keys(
+            JSON.parse(fs.readFileSync(path.join(localeDir, 'en.json'), 'utf8')).errors.server)
+
+        expect(sent.length).toBeGreaterThan(0)
+        expect(sent.filter((code) => covered.indexOf(code) === -1)).toEqual([])
+        // and nothing is translated that the server cannot send any more
+        expect(covered.filter((code) => sent.indexOf(code) === -1)).toEqual([])
+    })
 })
