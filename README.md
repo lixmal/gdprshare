@@ -102,6 +102,8 @@ whoever runs the server.
 
 * localized in 22 languages, picked from the browser's preferences. API errors
   carry a stable code, so the recipient reads them in their own language
+* the options an upload was sent with come back for the next one, kept in the
+  browser. The password is deliberately not among them
 * follows the system light/dark preference and can be switched by hand
 * fonts are served from the same host as the app, so no third party learns who
   is sending or downloading what

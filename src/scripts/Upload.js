@@ -19,6 +19,44 @@ const REASON_KEYS = {
     file_not_found: 'files.reasonMissing',
 }
 
+// The options an upload was last sent with, so the next one starts where the
+// last one left off. Everything read back is checked against what the form
+// offers: a stored value that no longer exists would leave a select blank.
+const DELAYS = ['0', '1', '5', '15', '30', '60', '120', '1440']
+const EPHEMERALS = ['0', '5', '10', '30', '60', '120', '300']
+const REGIONS = ['none', 'eea', 'gdpr-aligned', 'custom']
+
+// The password is deliberately not among them: it belongs to one share, and a
+// remembered one would be applied to the next file without being asked for.
+function rememberedOptions() {
+    var stored = {}
+    try {
+        stored = JSON.parse(window.localStorage.getItem('options')) || {}
+    } catch (e) {
+        stored = {}
+    }
+
+    const oneOf = function (value, allowed, fallback) {
+        return allowed.indexOf(String(value)) !== -1 ? String(value) : fallback
+    }
+
+    return {
+        count: gdprshare.clamp(stored.count, 1, gdprshare.config.maxCount),
+        expiry: gdprshare.clamp(stored.expiry, 1, gdprshare.config.maxExpiry),
+        geoRestriction: oneOf(stored.geoRestriction, REGIONS, 'eea'),
+        delay: oneOf(stored.delay, DELAYS, '0'),
+        ephemeral: oneOf(stored.ephemeral, EPHEMERALS, '0'),
+        strip: stored.strip === true,
+        selectedCountries: Array.isArray(stored.selectedCountries)
+            ? stored.selectedCountries.filter(function (code) {
+                return typeof code === 'string' && /^[A-Z]{2}$/.test(code)
+            })
+            : [],
+        // written under its own key before the rest was remembered
+        email: String(stored.email || window.localStorage.getItem('email') || '').slice(0, 255),
+    }
+}
+
 class Upload extends React.Component {
     constructor() {
         super()
@@ -61,6 +99,9 @@ class Upload extends React.Component {
         this.forgetFile = this.forgetFile.bind(this)
         this.toggleRecord = this.toggleRecord.bind(this)
 
+        // the last upload's options, so the next one starts where it left off
+        this.remembered = rememberedOptions()
+
         this.state = {
             error: null,
             mask: false,
@@ -69,22 +110,22 @@ class Upload extends React.Component {
             copy: null,
             fileInfo: null,
             type: 'file',
-            geoRestriction: 'eea',
+            geoRestriction: this.remembered.geoRestriction,
             countryList: [],
             countryGroups: {},
-            selectedCountries: [],
+            selectedCountries: this.remembered.selectedCountries,
             yourCountry: '',
             countrySearch: '',
-            customCountriesUsed: false,
-            delay: '0',
-            ephemeral: '0',
-            strip: false,
+            customCountriesUsed: this.remembered.selectedCountries.length > 0,
+            delay: this.remembered.delay,
+            ephemeral: this.remembered.ephemeral,
+            strip: this.remembered.strip,
             prolongFor: null,
             prolongDays: 0,
             prolongCount: 0,
-            count: 1,
-            expiry: 7,
-            email: window.localStorage.getItem('email') || '',
+            count: this.remembered.count,
+            expiry: this.remembered.expiry,
+            email: this.remembered.email,
             optionsOpen: false,
             picked: null,
             recordFor: null,
@@ -106,7 +147,9 @@ class Upload extends React.Component {
                     countryList: data.countries,
                     countryGroups: data.groups,
                     yourCountry: data.yourCountry || '',
-                    selectedCountries: data.groups.euEEA || [],
+                    selectedCountries: this.remembered.selectedCountries.length
+                        ? this.remembered.selectedCountries
+                        : (data.groups.euEEA || []),
                 })
             } else {
                 this.setState({ geoRestriction: 'none' })
@@ -224,7 +267,21 @@ class Upload extends React.Component {
         if (this.state.type === 'image' && this.state.ephemeral !== '0')
             formData.append('ephemeral', this.state.ephemeral)
 
-        window.localStorage.setItem('email', email)
+        // remembered for the next upload, the password deliberately excluded
+        try {
+            window.localStorage.setItem('options', JSON.stringify({
+                count: this.state.count,
+                expiry: this.state.expiry,
+                geoRestriction: this.state.geoRestriction,
+                selectedCountries: this.state.selectedCountries,
+                delay: this.state.delay,
+                ephemeral: this.state.ephemeral,
+                strip: this.state.strip,
+                email: email,
+            }))
+        } catch (e) {
+            console.log(e)
+        }
 
         let response
         try {
