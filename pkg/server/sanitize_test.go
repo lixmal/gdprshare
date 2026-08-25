@@ -1,7 +1,9 @@
 package server
 
 import (
+	"strings"
 	"testing"
+	"unicode/utf8"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -79,7 +81,15 @@ func TestSanitizeUserAgent(t *testing.T) {
 		longUA[i] = 'A'
 	}
 	result := sanitizeUserAgent(string(longUA))
-	assert.Equal(t, 512, len(result), "Long user agent should be truncated to 512")
+	assert.Equal(t, maxUserAgentLength, len(result), "Long user agent should be truncated to 512")
+
+	// a cut in the middle of a character would store invalid UTF-8 and hand it
+	// back out in the download record
+	multibyte := strings.Repeat("ä", 400)
+	result = sanitizeUserAgent(multibyte)
+	assert.True(t, utf8.ValidString(result), "the truncated user agent is still text")
+	assert.LessOrEqual(t, len(result), maxUserAgentLength)
+	assert.Equal(t, strings.Repeat("ä", maxUserAgentLength/2), result)
 }
 
 func TestSanitizeCountries(t *testing.T) {

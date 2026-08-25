@@ -3,7 +3,11 @@ package server
 import (
 	"regexp"
 	"strings"
+	"unicode/utf8"
 )
+
+// how much of a user agent is kept, in bytes
+const maxUserAgentLength = 512
 
 var (
 	controlCharsRegex = regexp.MustCompile(`[\x00-\x1f\x7f-\x9f]`)
@@ -54,8 +58,14 @@ func sanitizeUserAgent(ua string) string {
 	ua = controlCharsRegex.ReplaceAllString(ua, "")
 	ua = strings.TrimSpace(ua)
 
-	if len(ua) > 512 {
-		ua = ua[:512]
+	// cut on a rune boundary: half a character would be stored and handed back
+	// out as invalid UTF-8
+	if len(ua) > maxUserAgentLength {
+		cut := maxUserAgentLength
+		for cut > 0 && !utf8.ValidString(ua[:cut]) {
+			cut--
+		}
+		ua = ua[:cut]
 	}
 
 	return ua
