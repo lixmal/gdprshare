@@ -29,7 +29,7 @@ func TestUserAgentName(t *testing.T) {
 		},
 		{"curl/8.5.0", "curl 8.5.0"},
 		// this project's own client, which an owner should see named
-		{"GDPRShare-Android", "GDPRShare app"},
+		{"GDPRShare-Android", "GDPRShare on Android"},
 		{"Go-http-client/2.0", "Go 2.0"},
 		{
 			"Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
