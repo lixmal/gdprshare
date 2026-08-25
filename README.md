@@ -50,7 +50,8 @@ aspects.
 * shredding the stored file as well is not implemented yet
 * the web client cannot protect against a contaminated server or a malicious
   operator: the code doing the encrypting is served by that same server on every
-  visit. A dedicated (non-web) client would, and is work in progress
+  visit, so trusting the file means trusting whoever runs it. A client that is
+  installed rather than served would not have that problem
 
 ### Limits on a share
 
