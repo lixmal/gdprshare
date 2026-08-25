@@ -93,9 +93,13 @@ func setupRoutes(router *gin.Engine, srv *Server) {
 
 	router.Static("/assets", "public")
 
-	router.GET("/", srv.index)
-	router.GET("/uploaded", srv.index)
-	router.GET("/d/:fileId", srv.index)
+	// HEAD as well as GET: a link handed to a chat program or a monitor is
+	// often probed with HEAD first, and a page that answers 404 to that reads
+	// as a dead link
+	for _, page := range []string{"/", "/uploaded", "/d/:fileId"} {
+		router.GET(page, srv.index)
+		router.HEAD(page, srv.index)
+	}
 
 	v1 := router.Group("/api/v1")
 

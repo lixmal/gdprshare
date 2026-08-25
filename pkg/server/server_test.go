@@ -1093,3 +1093,36 @@ func TestStatsAreStoredBelowTheCap(t *testing.T) {
 	require.Len(t, stored, 1)
 	assert.Equal(t, "https://example.org/d/broken", stored[0].URL)
 }
+
+// TestPagesAnswerHead covers the probe a chat program or a monitor sends before
+// it fetches a link. A 404 there reads as a dead link.
+func TestPagesAnswerHead(t *testing.T) {
+	// the handler serves IndexFile by its path relative to the working
+	// directory, which is the repository root when the server runs
+	t.Chdir("../..")
+
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	for _, page := range []string{"/", "/uploaded", "/d/someshareid"} {
+		w := httptest.NewRecorder()
+		srv.Handler.ServeHTTP(w, httptest.NewRequest(http.MethodHead, page, nil))
+
+		assert.Equal(t, http.StatusOK, w.Code, page)
+		assert.Contains(t, w.Header().Get("Content-Type"), "text/html", page)
+		// a HEAD answer carries the headers and no body
+		assert.Empty(t, w.Body.String(), page)
+	}
+}
+
+// TestPageHeadIsNotABlanketRoute keeps the probe from answering for paths the
+// app does not serve.
+func TestPageHeadIsNotABlanketRoute(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	w := httptest.NewRecorder()
+	srv.Handler.ServeHTTP(w, httptest.NewRequest(http.MethodHead, "/not-a-page", nil))
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+}

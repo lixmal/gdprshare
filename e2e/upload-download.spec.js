@@ -828,6 +828,15 @@ test.describe('Icon buttons', () => {
     await page.locator('button#link-qr').hover();
     await expect(page.locator('#tip')).toContainText(en.uploaded.qr);
 
+    // The base styles come from the library's own injected stylesheet, not from
+    // a CDN: an unstyled tooltip is transparent and sits in the page flow.
+    const style = await page.locator('#tip').evaluate(function (el) {
+      const computed = window.getComputedStyle(el);
+      return { position: computed.position, background: computed.backgroundColor };
+    });
+    expect(style.position).toBe('absolute');
+    expect(style.background).not.toBe('rgba(0, 0, 0, 0)');
+
     await page.locator('button#link-copy').hover();
     await expect(page.locator('#copy-tip')).toContainText(en.common.copyLink);
 
