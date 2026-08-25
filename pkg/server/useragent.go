@@ -38,6 +38,10 @@ var userAgentNames = []struct {
 	{"Archiver", regexp.MustCompile(`ia_archiver|archive\.org_bot`)},
 	{"Bot", regexp.MustCompile(`(?i)bot\b|crawler|spider|scrapy`)},
 
+	// this project's own clients
+	{"GDPRShare app", regexp.MustCompile(`^GDPRShare-Android`)},
+	{"GDPRShare client", regexp.MustCompile(`^GDPRShare`)},
+
 	// tools that fetch without a browser
 	{"curl", regexp.MustCompile(`^curl/`)},
 	{"wget", regexp.MustCompile(`^Wget/`)},
