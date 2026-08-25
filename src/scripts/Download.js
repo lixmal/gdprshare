@@ -7,6 +7,10 @@ import Success from './Success'
 import Modal from 'react-modal'
 import { withTranslation } from 'react-i18next'
 
+// Above this, a file is written straight to disk rather than assembled in the
+// browser first, so its size is no longer bounded by what the browser can hold.
+const SAVE_TO_DISK_ABOVE = 64 * 1024 * 1024
+
 // Server codes that mean the link itself is finished, as opposed to one that
 // works but not from here or not yet.
 const GONE_CODES = [
@@ -29,6 +33,7 @@ export class Download extends React.Component {
         this.handleImageZoom = this.handleImageZoom.bind(this)
         this.handleVisibilityChange = this.handleVisibilityChange.bind(this)
         this.reportProgress = this.reportProgress.bind(this)
+        this.saveToDisk = this.saveToDisk.bind(this)
 
         this.state = {
             error: null,
@@ -49,6 +54,8 @@ export class Download extends React.Component {
             // a password the sender passed on some other way
             needsPassword: false,
             secret: null,
+            // a large file waiting for the recipient to say where to put it
+            save: null,
         }
         this.countdownTimer = null
     }
@@ -95,7 +102,7 @@ export class Download extends React.Component {
                 disableForm: true,
             })
 
-            this.handleDownload(null, link.secret)
+            this.prepare(link.secret)
         }
     }
 
@@ -287,6 +294,87 @@ export class Download extends React.Component {
             }
         }
 
+        this.prepare(key)
+    }
+
+    // Asks what the download would be before being one: nothing is spent
+    // finding out that a link no longer works, and a file too large to hold in
+    // the browser can be written to disk instead, which needs somewhere to
+    // write it and so a word from the recipient first.
+    async prepare(key) {
+        this.setState({
+            error: null,
+            mask: true,
+            phase: 'downloading',
+            progress: null,
+        })
+
+        const fileId = window.location.pathname.split('/').pop()
+
+        let head
+        try {
+            head = await window.fetch(gdprshare.config.apiUrl + '/' + fileId, {method: 'HEAD'})
+        } catch (error) {
+            // an older server does not answer this: go straight to the download
+            return this.fetchFile(key)
+        }
+
+        // The answer to a HEAD carries no body, so there is no message to read.
+        // The status is enough to know a download would be refused, and the
+        // download itself reports why.
+        if (!head.ok)
+            return this.fetchFile(key)
+
+        const size = parseInt(head.headers.get('Content-Length') || '0', 10)
+        const type = head.headers.get('X-Type')
+
+        const canSave = typeof window.showSaveFilePicker === 'function'
+        if (!canSave || type !== 'file' || size <= SAVE_TO_DISK_ABOVE)
+            return this.fetchFile(key)
+
+        var filename = ''
+        try {
+            const sealed = Buffer.from(head.headers.get('X-Filename') || '', 'base64')
+            filename = new TextDecoder().decode(await gdprshare.decrypt(sealed, key))
+        } catch (error) {
+            // the name is a convenience, the download does not depend on it
+            filename = ''
+        }
+
+        this.setState({
+            mask: false,
+            phase: null,
+            save: {key: key, size: size, filename: filename},
+        })
+    }
+
+    // Writes the file where the recipient says, a record at a time, so nothing
+    // has to fit in memory. Only reachable from a click, which is what the
+    // browser requires before it will offer a place to save.
+    async saveToDisk() {
+        const save = this.state.save
+
+        let handle
+        try {
+            handle = await window.showSaveFilePicker({suggestedName: save.filename || undefined})
+        } catch (error) {
+            // the recipient closed the dialog, which is not a failure
+            return
+        }
+
+        let writable
+        try {
+            writable = await handle.createWritable()
+        } catch (error) {
+            return gdprshare.displayErr.call(this, error)
+        }
+
+        await this.fetchFile(save.key, async function (bytes) {
+            await writable.write(bytes)
+        }, writable)
+    }
+
+    async fetchFile(key, onPlain, writable) {
         this.setState({
             error: null,
             mask: true,
@@ -321,10 +409,32 @@ export class Download extends React.Component {
             // is all it can do.
             var fileClearText
             if (response.body && response.body.getReader) {
-                fileClearText = await gdprshare.decryptResponse(response, key, this.reportProgress)
+                fileClearText = await gdprshare.decryptResponse(response, key, this.reportProgress, onPlain)
             } else {
                 const whole = await this.readWithProgress(response)
-                fileClearText = new Blob([await gdprshare.decrypt(whole, key)])
+                const plain = new Uint8Array(await gdprshare.decrypt(whole, key))
+
+                if (onPlain)
+                    await onPlain(plain)
+                else
+                    fileClearText = new Blob([plain])
+            }
+
+            // written where the recipient asked for it, so there is no blob to
+            // hand to the browser afterwards
+            if (writable) {
+                await writable.close()
+
+                this.setState({
+                    successful: true,
+                    save: null,
+                    mask: false,
+                    phase: null,
+                    disableForm: true,
+                })
+                gdprshare.confirmReceipt(fileId)
+
+                return
             }
 
             this.setState({ phase: 'decrypting', progress: null })
@@ -453,6 +563,18 @@ export class Download extends React.Component {
                         </div>
 
                         {status}
+                        {this.state.save && !this.state.mask && (
+                            <div className="field">
+                                {this.state.save.filename && (
+                                    <span className="lbl">{this.state.save.filename}</span>
+                                )}
+                                <button className="btn btn-primary btn-block" id="save-file"
+                                        onClick={this.saveToDisk}>
+                                    {t('download.save', {size: gdprshare.formatSize(this.state.save.size)})}
+                                </button>
+                                <span className="hint">{t('download.saveHint')}</span>
+                            </div>
+                        )}
                         {this.state.disableForm ? null : form}
 
                         {this.state.successful && <Success message={t('download.success')} />}

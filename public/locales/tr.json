@@ -17,7 +17,9 @@
         "goneTitle": "Bu bağlantı artık çalışmıyor",
         "passwordHint": "Size gelen bağlantı bunu genelde kendisi doldurur. Ayrı gönderildiyse buraya yapıştırın.",
         "senderPassword": "Gönderenin parolası",
-        "senderPasswordHint": "Gönderen bu dosyayı bir parolayla kilitledi. Parola bağlantıda yer almaz, bu yüzden gönderenden isteyin."
+        "senderPasswordHint": "Gönderen bu dosyayı bir parolayla kilitledi. Parola bağlantıda yer almaz, bu yüzden gönderenden isteyin.",
+        "save": "Dosyayı kaydet ({{size}})",
+        "saveHint": "Doğrudan diske yazılacak kadar büyük. Tarayıcınız nereye koyacağınızı soracak."
     },
     "shell": {
         "tagline": "Cihazınızdan ayrılmadan önce şifrelenir",

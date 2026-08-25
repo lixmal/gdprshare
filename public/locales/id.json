@@ -17,7 +17,9 @@
         "goneTitle": "Tautan ini sudah tidak berfungsi",
         "passwordHint": "Tautan yang Anda terima biasanya sudah mengisinya. Tempel di sini kalau dikirim terpisah.",
         "senderPassword": "Kata sandi dari pengirim",
-        "senderPasswordHint": "Pengirim melindungi berkas ini dengan kata sandi. Kata sandi tidak ada di dalam tautan, jadi mintalah kepada pengirim."
+        "senderPasswordHint": "Pengirim melindungi berkas ini dengan kata sandi. Kata sandi tidak ada di dalam tautan, jadi mintalah kepada pengirim.",
+        "save": "Simpan berkas ({{size}})",
+        "saveHint": "Cukup besar untuk ditulis langsung ke disk. Peramban akan menanyakan tempat menyimpannya."
     },
     "shell": {
         "tagline": "Dienkripsi sebelum meninggalkan perangkat Anda",

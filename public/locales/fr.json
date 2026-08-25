@@ -17,7 +17,9 @@
         "goneTitle": "Ce lien ne fonctionne plus",
         "passwordHint": "Le lien qu’on vous a envoyé le remplit d’habitude. Collez-le si l’expéditeur l’a envoyé à part.",
         "senderPassword": "Mot de passe de l’expéditeur",
-        "senderPasswordHint": "L’expéditeur a protégé ce fichier par un mot de passe. Il ne fait pas partie du lien : demandez-le-lui."
+        "senderPasswordHint": "L’expéditeur a protégé ce fichier par un mot de passe. Il ne fait pas partie du lien : demandez-le-lui.",
+        "save": "Enregistrer le fichier ({{size}})",
+        "saveHint": "Assez volumineux pour être écrit directement sur le disque. Votre navigateur vous demandera où le mettre."
     },
     "shell": {
         "tagline": "Chiffré avant de quitter votre appareil",

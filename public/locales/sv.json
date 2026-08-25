@@ -17,7 +17,9 @@
         "goneTitle": "Den här länken fungerar inte längre",
         "passwordHint": "Länken du fick fyller vanligtvis i detta. Klistra in det om avsändaren skickade det separat.",
         "senderPassword": "Lösenord från avsändaren",
-        "senderPasswordHint": "Avsändaren har låst den här filen med ett lösenord. Det ingår inte i länken, så fråga efter det."
+        "senderPasswordHint": "Avsändaren har låst den här filen med ett lösenord. Det ingår inte i länken, så fråga efter det.",
+        "save": "Spara filen ({{size}})",
+        "saveHint": "Tillräckligt stor för att skrivas direkt till disk. Din webbläsare frågar var den ska ligga."
     },
     "shell": {
         "tagline": "Krypterat innan det lämnar din enhet",

@@ -152,11 +152,12 @@ export async function encryptBlob(file, key, onProgress, size) {
 }
 
 /**
- * Decrypts a stream in the record format into a Blob, holding no more than one
- * record of ciphertext at a time. Throws when a record fails to authenticate,
- * which is also what a truncated or reordered stream comes down to.
+ * Decrypts a stream in the record format, holding no more than one record of
+ * ciphertext at a time. Each record goes to onPlain when there is one, and into
+ * a Blob otherwise. Throws when a record fails to authenticate, which is also
+ * what a truncated or reordered stream comes down to.
  */
-export async function decryptStream(stream, key, onProgress, total) {
+export async function decryptStream(stream, key, onProgress, total, onPlain) {
     const reader = stream.getReader()
     const cryptoKey = await importKey(key, 'decrypt')
 
@@ -165,6 +166,17 @@ export async function decryptStream(stream, key, onProgress, total) {
     // Folding a Blob into a larger one does not copy what is already in it.
     var kept = new Blob([])
     var parts = []
+
+    // With somewhere to put each record, nothing is kept at all: the file goes
+    // straight where it is being written.
+    const emit = onPlain || async function (bytes) {
+        parts.push(bytes)
+
+        if (parts.length >= foldEvery) {
+            kept = new Blob([kept].concat(parts))
+            parts = []
+        }
+    }
 
     var buffered = new Uint8Array(0)
     var counter = 0
@@ -193,13 +205,8 @@ export async function decryptStream(stream, key, onProgress, total) {
             record,
         )
 
-        parts.push(new Uint8Array(plain))
+        await emit(new Uint8Array(plain))
         counter++
-
-        if (parts.length >= foldEvery) {
-            kept = new Blob([kept].concat(parts))
-            parts = []
-        }
     }
 
     for (;;) {
@@ -240,5 +247,5 @@ export async function decryptStream(stream, key, onProgress, total) {
         }
     }
 
-    return new Blob([kept].concat(parts))
+    return onPlain ? null : new Blob([kept].concat(parts))
 }

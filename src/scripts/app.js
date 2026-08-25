@@ -139,7 +139,7 @@ gdprshare.recordSize = stream.recordSize
 // Opens a response body as records arrive, so the file is never held whole. A
 // share written before the record format existed is one nonce and one
 // ciphertext, which has to be read whole to be opened at all.
-gdprshare.decryptResponse = async function (response, key, onProgress) {
+gdprshare.decryptResponse = async function (response, key, onProgress, onPlain) {
     const total = parseInt(response.headers.get('Content-Length') || '0', 10)
     const reader = response.body.getReader()
 
@@ -171,7 +171,14 @@ gdprshare.decryptResponse = async function (response, key, onProgress) {
                 onProgress(prefix.length, total)
         }
 
-        return new Blob([await gdprshare.decrypt(prefix.buffer, key)])
+        const whole = new Uint8Array(await gdprshare.decrypt(prefix.buffer, key))
+        if (onPlain) {
+            await onPlain(whole)
+
+            return null
+        }
+
+        return new Blob([whole])
     }
 
     const body = new ReadableStream({
@@ -188,7 +195,7 @@ gdprshare.decryptResponse = async function (response, key, onProgress) {
     })
 
     try {
-        return await stream.decryptStream(body, key, onProgress, total)
+        return await stream.decryptStream(body, key, onProgress, total, onPlain)
     } catch (error) {
         throw gdprshare.decryptionError(error)
     }

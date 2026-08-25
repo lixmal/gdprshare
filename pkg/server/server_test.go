@@ -1126,3 +1126,72 @@ func TestPageHeadIsNotABlanketRoute(t *testing.T) {
 
 	assert.Equal(t, http.StatusNotFound, w.Code)
 }
+
+func headFileReq(t *testing.T, srv *Server, fileId string) *httptest.ResponseRecorder {
+	t.Helper()
+
+	w := httptest.NewRecorder()
+	srv.Handler.ServeHTTP(w, httptest.NewRequest(http.MethodHead, "/api/v1/files/"+fileId, nil))
+
+	return w
+}
+
+// TestHeadFileReportsTheSizeWithoutSpendingADownload is what lets the download
+// page ask where to put a large file before it starts arriving.
+func TestHeadFileReportsTheSizeWithoutSpendingADownload(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	fileId, ownerToken := uploadTestFile(t, srv, map[string]string{"count": "2", "filename": "sealed-name"})
+
+	w := headFileReq(t, srv, fileId)
+	require.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, "sealed-name", w.Header().Get("X-Filename"))
+	assert.Equal(t, "12", w.Header().Get("Content-Length"), "the stored file is 12 bytes")
+	assert.Empty(t, w.Body.String(), "a head answer carries no body")
+
+	// the count is untouched, and nothing was recorded
+	var storedFile database.StoredFile
+	require.NoError(t, srv.db.Where(&database.StoredFile{FileId: fileId}).Find(&storedFile).Error)
+	assert.Equal(t, uint(2), storedFile.Count)
+	assert.Empty(t, recordsOf(t, srv, fileId, ownerToken))
+
+	// and both downloads are still there to be had
+	assert.Equal(t, http.StatusOK, downloadOnce(t, srv, fileId).Code)
+	assert.Equal(t, http.StatusOK, downloadOnce(t, srv, fileId).Code)
+}
+
+// TestHeadFileRefusesWhatADownloadWouldRefuse means the recipient learns the
+// link is finished without a download being spent on finding out.
+func TestHeadFileRefusesWhatADownloadWouldRefuse(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	fileId, ownerToken := uploadTestFile(t, srv, map[string]string{"expiry": "1", "count": "1"})
+	backdate(t, srv, fileId, 3*24*time.Hour)
+
+	w := headFileReq(t, srv, fileId)
+	require.Equal(t, http.StatusNotFound, w.Code)
+
+	// the refusal is recorded, as it is for a download: the owner wants to see
+	// that someone tried after the share had ended
+	records := recordsOf(t, srv, fileId, ownerToken)
+	require.Len(t, records, 1)
+	assert.True(t, records[0].Denied)
+	assert.Equal(t, string(ErrCodeFileExpired), records[0].Reason)
+}
+
+// TestHeadFileSaysNothingAboutAPendingUpload keeps a share that is still
+// arriving from being measured.
+func TestHeadFileSaysNothingAboutAPendingUpload(t *testing.T) {
+	srv, cleanup := setupTestServer(t)
+	defer cleanup()
+
+	fileId, token := begin(t, srv, nil)
+	require.Equal(t, http.StatusOK, appendChunk(t, srv, fileId, token, 0, []byte("half of it")).Code)
+
+	assert.Equal(t, http.StatusNotFound, headFileReq(t, srv, fileId).Code)
+
+	require.Equal(t, http.StatusCreated, finish(t, srv, fileId, token).Code)
+	assert.Equal(t, http.StatusOK, headFileReq(t, srv, fileId).Code)
+}

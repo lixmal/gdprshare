@@ -17,7 +17,9 @@
         "goneTitle": "Este enlace ya no funciona",
         "passwordHint": "El enlace que recibiste normalmente lo rellena. Pégalo si te lo enviaron por separado.",
         "senderPassword": "Contraseña del remitente",
-        "senderPasswordHint": "El remitente protegió este archivo con una contraseña. No forma parte del enlace, así que pídasela."
+        "senderPasswordHint": "El remitente protegió este archivo con una contraseña. No forma parte del enlace, así que pídasela.",
+        "save": "Guardar el archivo ({{size}})",
+        "saveHint": "Lo bastante grande para escribirse directamente en el disco. Su navegador le preguntará dónde ponerlo."
     },
     "shell": {
         "tagline": "Cifrado antes de salir de tu dispositivo",

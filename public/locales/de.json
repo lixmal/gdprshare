@@ -17,7 +17,9 @@
         "goneTitle": "Dieser Link funktioniert nicht mehr",
         "passwordHint": "Der Link, den Sie bekommen haben, füllt das normalerweise aus. Fügen Sie es ein, wenn es separat geschickt wurde.",
         "senderPassword": "Passwort des Absenders",
-        "senderPasswordHint": "Der Absender hat diese Datei mit einem Passwort geschützt. Es steht nicht im Link, fragen Sie also danach."
+        "senderPasswordHint": "Der Absender hat diese Datei mit einem Passwort geschützt. Es steht nicht im Link, fragen Sie also danach.",
+        "save": "Datei speichern ({{size}})",
+        "saveHint": "Groß genug, um direkt auf die Festplatte geschrieben zu werden. Ihr Browser fragt, wohin."
     },
     "shell": {
         "tagline": "Verschlüsselt, bevor es Ihr Gerät verlässt",

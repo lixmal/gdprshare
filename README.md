@@ -116,6 +116,10 @@ whoever runs the server.
   is sending or downloading what
 * a picture can be shown inline and taken off the screen again after a few
   seconds
+* a file too large to assemble in the browser is written straight to disk. The
+  page asks the server what the download would be before being one, so nothing
+  is spent finding out that a link no longer works, and a large file waits for a
+  click, since a browser only offers a place to save from one
 
 ### Handing over a share
 

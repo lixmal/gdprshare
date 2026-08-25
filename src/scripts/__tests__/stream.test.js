@@ -164,3 +164,38 @@ describe('looksStreamed', () => {
         expect(looksStreamed(null)).toBe(false)
     })
 })
+
+// Writing straight to disk means handing each record on rather than keeping it
+describe('a sink to write into', () => {
+    test('receives the records in order and nothing is kept', async () => {
+        const secret = key()
+        const plain = body(SIZE * 2 + 11)
+        const sealed = await encryptBlob(new Blob([plain]), secret, null, SIZE)
+
+        const written = []
+        const kept = await decryptStream(
+            sealed.stream(), secret, null, sealed.size,
+            async (bytes) => { written.push(bytes) },
+        )
+
+        expect(kept).toBeNull()
+        expect(written).toHaveLength(3)
+        expect(Buffer.concat(written.map((b) => Buffer.from(b)))).toEqual(Buffer.from(plain))
+    })
+
+    test('is not written to past a record that fails to authenticate', async () => {
+        const secret = key()
+        const sealed = await encryptBlob(new Blob([body(SIZE * 3)]), secret, null, SIZE)
+        const bytes = new Uint8Array(await sealed.arrayBuffer())
+        // spoil the second record, which is read after the first was handed on
+        bytes[headerLength + SIZE + tagLength + 10] ^= 0x01
+
+        const written = []
+        await expect(decryptStream(
+            streamOf(bytes), secret, null, bytes.length,
+            async (chunk) => { written.push(chunk) },
+        )).rejects.toThrow()
+
+        expect(written).toHaveLength(1)
+    })
+})

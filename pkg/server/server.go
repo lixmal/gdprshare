@@ -147,6 +147,7 @@ func setupRoutes(router *gin.Engine, srv *Server) {
 	v1.POST("/uploads/:fileId", srv.appendUpload)
 	v1.POST("/uploads/:fileId/finish", srv.finishUpload)
 	v1.GET("/files/:fileId", srv.downloadFile)
+	v1.HEAD("/files/:fileId", srv.headFile)
 	v1.POST("/files/:fileId", srv.confirmReceipt)
 	v1.DELETE("/files/:fileId", srv.deleteFile)
 	v1.POST("/files/:fileId/prolong", srv.prolongFile)

@@ -17,7 +17,9 @@
         "goneTitle": "Ten link już nie działa",
         "passwordHint": "Link, który dostałeś, zwykle wypełnia to sam. Wklej hasło, jeśli przyszło osobno.",
         "senderPassword": "Hasło od nadawcy",
-        "senderPasswordHint": "Nadawca zabezpieczył ten plik hasłem. Nie ma go w linku, więc poproś o nie nadawcę."
+        "senderPasswordHint": "Nadawca zabezpieczył ten plik hasłem. Nie ma go w linku, więc poproś o nie nadawcę.",
+        "save": "Zapisz plik ({{size}})",
+        "saveHint": "Na tyle duży, że zostanie zapisany wprost na dysk. Przeglądarka zapyta, gdzie go umieścić."
     },
     "shell": {
         "tagline": "Zaszyfrowane, zanim opuści Twoje urządzenie",

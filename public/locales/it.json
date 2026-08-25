@@ -17,7 +17,9 @@
         "goneTitle": "Questo link non funziona più",
         "passwordHint": "Il link che hai ricevuto di solito lo compila. Incollalo se te l’hanno mandato a parte.",
         "senderPassword": "Password del mittente",
-        "senderPasswordHint": "Il mittente ha protetto questo file con una password. Non fa parte del link, quindi chiedila a lui."
+        "senderPasswordHint": "Il mittente ha protetto questo file con una password. Non fa parte del link, quindi chiedila a lui.",
+        "save": "Salva il file ({{size}})",
+        "saveHint": "Abbastanza grande da essere scritto direttamente su disco. Il browser chiederà dove metterlo."
     },
     "shell": {
         "tagline": "Cifrato prima di lasciare il tuo dispositivo",

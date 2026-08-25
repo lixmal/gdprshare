@@ -17,7 +17,9 @@
         "goneTitle": "This link no longer works",
         "passwordHint": "The link you were sent usually fills this in. Paste it if the sender sent it separately.",
         "senderPassword": "Password from the sender",
-        "senderPasswordHint": "The sender locked this file with a password. It is not part of the link, so ask them for it."
+        "senderPasswordHint": "The sender locked this file with a password. It is not part of the link, so ask them for it.",
+        "save": "Save the file ({{size}})",
+        "saveHint": "Large enough to be written straight to disk. Your browser will ask where to put it."
     },
     "shell": {
         "tagline": "Encrypted before it leaves your device",

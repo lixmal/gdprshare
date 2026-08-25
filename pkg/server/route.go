@@ -130,34 +130,128 @@ func (s *Server) validateFiles(c *gin.Context) {
 }
 
 func (s *Server) downloadFile(c *gin.Context) {
+	ready, ok := s.readyToDownload(c)
+	if !ok {
+		return
+	}
+
+	// Take the download before serving it: two requests arriving together on a
+	// share with one download left must not both be served, which a read,
+	// decrement and save would allow.
+	taken := s.db.Model(&database.StoredFile{}).
+		Where("id = ? AND count > 0", ready.file.ID).
+		Update("count", gorm.Expr("count - 1"))
+	if taken.Error != nil {
+		log.Printf("Failed to save decreased count on file with id %s: %s\n", ready.file.FileId, taken.Error)
+		apiError(c, http.StatusInternalServerError, ErrCodeSaveFailed, "failed to save download count")
+		return
+	}
+	if taken.RowsAffected == 0 {
+		s.refuse(c, ready.file, ready.client, http.StatusNotFound, ErrCodeCountExpired, ErrCodeCountExpired, "download count expired")
+		return
+	}
+	ready.file.Count--
+
+	record := *ready.client
+	record.StoredFileId = ready.file.ID
+	if err := s.db.Create(&record).Error; err != nil {
+		log.Printf("Failed to record the download of file with id %s: %s\n", ready.file.FileId, err)
+	}
+
+	s.shareHeaders(c, ready.file)
+	c.FileAttachment(ready.path, ready.filename())
+
+	if ready.file.Count < 1 {
+		// Remove actual file only, db entry will be deleted on confirmation
+		if err := os.Remove(ready.path); err != nil {
+			log.Printf("Failed to delete file with id %s from storage: %s\n", ready.file.FileId, err)
+		}
+	}
+
+	s.notify(ready.file, ready.client, true)
+}
+
+// headFile answers what a download would be, without being one: the size, so
+// the recipient can be asked where to put a large file before it starts, and
+// the same refusals a download would meet, so nothing is spent finding out that
+// the link no longer works. It never takes a download off the count.
+func (s *Server) headFile(c *gin.Context) {
+	ready, ok := s.readyToDownload(c)
+	if !ok {
+		return
+	}
+
+	info, err := os.Stat(ready.path)
+	if err != nil {
+		log.Printf("Failed to read the size of file with id %s: %s\n", ready.file.FileId, err)
+		apiError(c, http.StatusNotFound, ErrCodeFileNotFound, "file not found")
+		return
+	}
+
+	s.shareHeaders(c, ready.file)
+	c.Header("Content-Length", strconv.FormatInt(info.Size(), 10))
+	c.Status(http.StatusOK)
+}
+
+// What a share needs to be handed over, once every reason not to has been ruled
+// out.
+type readyDownload struct {
+	file   *database.StoredFile
+	client *database.DstClient
+	path   string
+}
+
+// The name the file is offered under, which is ciphertext the recipient
+// decrypts, or the storage name when the sender sent none.
+func (r readyDownload) filename() string {
+	if r.file.Filename != "" {
+		return r.file.Filename
+	}
+
+	return r.file.Name
+}
+
+func (s *Server) shareHeaders(c *gin.Context, storedFile *database.StoredFile) {
+	c.Header("X-Filename", readyDownload{file: storedFile}.filename())
+	c.Header("X-Type", storedFile.Type)
+	c.Header("X-Ephemeral", strconv.FormatUint(uint64(storedFile.Ephemeral), 10))
+}
+
+// readyToDownload rules out every reason a share cannot be handed over, and
+// answers the request itself when one applies. A refusal is recorded and the
+// owner told, whether it was a download that was refused or the question of
+// whether one would be.
+func (s *Server) readyToDownload(c *gin.Context) (readyDownload, bool) {
+	var ready readyDownload
+
 	fileId, err := bindFileID(c)
 	if err != nil {
-		return
+		return ready, false
 	}
 
 	storedFile, err := s.getStoredFile(fileId, c)
 	if err != nil {
 		log.Printf("Failed to retrieve file with ID %s: %s\n", fileId, err)
-		return
+		return ready, false
 	}
 
 	// read before any refusal, so every attempt can be recorded and answered
 	// with the same TLS requirements
 	client := (*database.DstClient)(s.getClientInfo(c))
 	if client == nil {
-		return
+		return ready, false
 	}
 
 	// still arriving in pieces: there is no whole file to hand over, and the
 	// attempt is not worth recording against a share that does not exist yet
 	if storedFile.Pending {
 		apiError(c, http.StatusNotFound, ErrCodeFileNotFound, "file not found")
-		return
+		return ready, false
 	}
 
 	if storedFile.Count < 1 {
 		s.refuse(c, storedFile, client, http.StatusNotFound, ErrCodeCountExpired, ErrCodeCountExpired, "download count expired")
-		return
+		return ready, false
 	}
 
 	// The share only lives for the days it was given. The cleanup sweep runs on
@@ -165,7 +259,7 @@ func (s *Server) downloadFile(c *gin.Context) {
 	// date has to be honoured here as well.
 	if time.Now().After(expiryDate(storedFile)) {
 		s.refuse(c, storedFile, client, http.StatusNotFound, ErrCodeFileExpired, ErrCodeFileExpired, "file expired")
-		return
+		return ready, false
 	}
 
 	path := filepath.Join(s.config.StorePath, storedFile.Name)
@@ -177,12 +271,12 @@ func (s *Server) downloadFile(c *gin.Context) {
 		}
 
 		s.refuse(c, storedFile, client, http.StatusNotFound, ErrCodeFileNotFound, ErrCodeFileNotFound, "file not found")
-		return
+		return ready, false
 	}
 
 	if time.Now().Before(storedFile.CreatedAt.Add(time.Duration(storedFile.Delay) * time.Minute)) {
 		s.refuse(c, storedFile, client, http.StatusForbidden, ErrCodeNotYetDownloadble, ErrCodeNotYetDownloadble, "file not yet downloadable")
-		return
+		return ready, false
 	}
 
 	// The blocklist reads the header itself: with client info turned off the
@@ -198,49 +292,10 @@ func (s *Server) downloadFile(c *gin.Context) {
 
 		// a blocked user agent is not told what gave it away
 		s.refuse(c, storedFile, client, http.StatusForbidden, ErrCodeLocationForbidden, reason, "download from this location forbidden")
-		return
+		return ready, false
 	}
 
-	// Take the download before serving it: two requests arriving together on a
-	// share with one download left must not both be served, which a read,
-	// decrement and save would allow.
-	taken := s.db.Model(&database.StoredFile{}).
-		Where("id = ? AND count > 0", storedFile.ID).
-		Update("count", gorm.Expr("count - 1"))
-	if taken.Error != nil {
-		log.Printf("Failed to save decreased count on file with id %s: %s\n", fileId, taken.Error)
-		apiError(c, http.StatusInternalServerError, ErrCodeSaveFailed, "failed to save download count")
-		return
-	}
-	if taken.RowsAffected == 0 {
-		s.refuse(c, storedFile, client, http.StatusNotFound, ErrCodeCountExpired, ErrCodeCountExpired, "download count expired")
-		return
-	}
-	storedFile.Count--
-
-	record := *client
-	record.StoredFileId = storedFile.ID
-	if err := s.db.Create(&record).Error; err != nil {
-		log.Printf("Failed to record the download of file with id %s: %s\n", fileId, err)
-	}
-
-	filename := storedFile.Filename
-	if filename == "" {
-		filename = storedFile.Name
-	}
-	c.Header("X-Filename", filename)
-	c.Header("X-Type", storedFile.Type)
-	c.Header("X-Ephemeral", strconv.FormatUint(uint64(storedFile.Ephemeral), 10))
-	c.FileAttachment(path, filename)
-
-	if storedFile.Count < 1 {
-		// Remove actual file only, db entry will be deleted on confirmation
-		if err := os.Remove(path); err != nil {
-			log.Printf("Failed to delete file with id %s from storage: %s\n", fileId, err)
-		}
-	}
-
-	s.notify(storedFile, client, true)
+	return readyDownload{file: storedFile, client: client, path: path}, true
 }
 
 // refuse answers a download attempt that will not go through. The attempt is

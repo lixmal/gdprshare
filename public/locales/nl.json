@@ -17,7 +17,9 @@
         "goneTitle": "Deze link werkt niet meer",
         "passwordHint": "De link die je kreeg vult dit meestal in. Plak het als de afzender het apart heeft gestuurd.",
         "senderPassword": "Wachtwoord van de afzender",
-        "senderPasswordHint": "De afzender heeft dit bestand met een wachtwoord beveiligd. Het staat niet in de link, dus vraag ernaar."
+        "senderPasswordHint": "De afzender heeft dit bestand met een wachtwoord beveiligd. Het staat niet in de link, dus vraag ernaar.",
+        "save": "Bestand opslaan ({{size}})",
+        "saveHint": "Groot genoeg om rechtstreeks naar schijf te worden geschreven. Uw browser vraagt waar."
     },
     "shell": {
         "tagline": "Versleuteld voordat het je apparaat verlaat",
