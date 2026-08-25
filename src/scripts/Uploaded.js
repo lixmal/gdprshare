@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import Alert from './Alert'
 import { Tooltip } from 'react-tooltip'
 import { QRCodeSVG } from 'qrcode.react'
@@ -111,7 +111,7 @@ class Uploaded extends React.Component {
                             <label htmlFor="link-key" className="lbl">{t('uploaded.linkLabel')}</label>
                             <div className="link-group">
                                 <input className="form-control mono-input" id="link-key" type="text"
-                                       ref="link-key" readOnly value={link}
+                                       readOnly value={link}
                                        aria-describedby="link-key-help" />
                                 <button id="link-copy" onClick={this.copyHandler} type="button"
                                         className="btn btn-icon" data-tooltip-id="copy-tip"

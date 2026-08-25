@@ -1,5 +1,5 @@
 import React from 'react'
-import { useNavigate, useLocation, useParams } from 'react-router-dom'
+import { useNavigate, useLocation, useParams } from 'react-router'
 
 export function withRouter(Component) {
     return function ComponentWithRouterProp(props) {

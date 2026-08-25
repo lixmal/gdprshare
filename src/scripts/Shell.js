@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { withTranslation } from 'react-i18next'
 import { Shield, Moon, Sun } from './Icons'
 import Footer from './Footer'

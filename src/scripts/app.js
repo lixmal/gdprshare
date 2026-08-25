@@ -2,7 +2,10 @@ import '../style/app.css'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+// react-router, not react-router-dom: browserify's resolver does not read the
+// package exports map v7 uses, and everything this app needs is on this entry
+// point anyway
+import { BrowserRouter, Routes, Route } from 'react-router'
 
 import ErrPage from './ErrPage'
 import Shell, { storedTheme, applyTheme } from './Shell'

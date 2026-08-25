@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import Classnames from 'classnames'
 import Alert from './Alert'
 import { Lock, ImageIcon, Timer, Check } from './Icons'
@@ -20,6 +20,8 @@ const GONE_CODES = [
 export class Download extends React.Component {
     constructor() {
         super()
+        this.passwordInput = React.createRef()
+
         this.handleDownload = this.handleDownload.bind(this)
         this.downloadFile = this.downloadFile.bind(this)
         this.closeModal = this.closeModal.bind(this)
@@ -236,7 +238,7 @@ export class Download extends React.Component {
             return
 
         if (!key) {
-            key = gdprshare.keyFromB64(this.refs.password.value)
+            key = gdprshare.keyFromB64(this.passwordInput.current.value)
         }
 
         this.setState({
@@ -339,7 +341,7 @@ export class Download extends React.Component {
             <form className="app-inner" onSubmit={this.handleDownload}>
                 <div className="field">
                     <label htmlFor="password" className="lbl">{t('download.password')}</label>
-                    <input className="form-control mono-input" id="password" type="password" ref="password"
+                    <input className="form-control mono-input" id="password" type="password" ref={this.passwordInput}
                            placeholder={t('download.password')} maxLength="255" autoFocus required />
                     <span className="hint">{t('download.passwordHint')}</span>
                 </div>
