@@ -64,7 +64,8 @@
             "file_deletion_failed": "服务器无法删除文件。",
             "prolong_limit_exceeded": "超过了这台服务器允许的范围。",
             "file_prolong_failed": "服务器无法延长这次分享。",
-            "stats_store_failed": "报告发送失败。"
+            "stats_store_failed": "报告发送失败。",
+            "not_signed_in": "会话已结束。请重新登录以继续。"
         }
     },
     "common": {

@@ -64,7 +64,8 @@
             "file_deletion_failed": "لم يستطع الخادم حذف الملف.",
             "prolong_limit_exceeded": "هذا أكثر مما يسمح به هذا الخادم.",
             "file_prolong_failed": "لم يستطع الخادم تمديد المشاركة.",
-            "stats_store_failed": "لم يتمكّن من إرسال التقرير."
+            "stats_store_failed": "لم يتمكّن من إرسال التقرير.",
+            "not_signed_in": "انتهت جلستك. سجّل الدخول مرة أخرى للمتابعة."
         }
     },
     "common": {

@@ -1,12 +1,14 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
 	limits "github.com/gin-contrib/size"
 	"github.com/gin-gonic/gin"
 
+	"github.com/lixmal/gdprshare/pkg/auth"
 	"github.com/lixmal/gdprshare/pkg/config"
 	"github.com/lixmal/gdprshare/pkg/database"
 )
@@ -120,6 +122,41 @@ type Server struct {
 	*http.Server
 	db     *database.Database
 	config *config.Config
+	// nil when the server asks nobody to sign in
+	guard *auth.Guard
+}
+
+// letThrough is what stands in for the guard where nobody has to sign in, so
+// every route reads the same whether a provider is configured or not.
+func letThrough(c *gin.Context) {
+	c.Next()
+}
+
+// Who has to sign in for which routes. A share's recipient is not a user of
+// this server, only the person a link was sent to, so the download side is left
+// open unless the operator says otherwise.
+type guards struct {
+	senderPage    gin.HandlerFunc
+	sender        gin.HandlerFunc
+	recipientPage gin.HandlerFunc
+	recipient     gin.HandlerFunc
+}
+
+func (s *Server) guards() guards {
+	open := guards{letThrough, letThrough, letThrough, letThrough}
+	if s.guard == nil {
+		return open
+	}
+
+	open.senderPage = s.guard.Require(true)
+	open.sender = s.guard.Require(false)
+
+	if s.config.OIDC.Protect == "all" {
+		open.recipientPage = open.senderPage
+		open.recipient = open.sender
+	}
+
+	return open
 }
 
 func setupRoutes(router *gin.Engine, srv *Server) {
@@ -127,14 +164,27 @@ func setupRoutes(router *gin.Engine, srv *Server) {
 	router.Use(limits.RequestSizeLimiter(srv.config.MaxUploadSize * 1024 * 1024))
 	router.MaxMultipartMemory = MultipartMem
 
+	// The bundle, the styles and the fonts stay open: the download page is
+	// built from them, and they hold nothing that is not public anyway.
 	router.Static("/assets", "public")
+
+	who := srv.guards()
+
+	if srv.guard != nil {
+		srv.guard.Register(router)
+	}
 
 	// HEAD as well as GET: a link handed to a chat program or a monitor is
 	// often probed with HEAD first, and a page that answers 404 to that reads
 	// as a dead link
-	for _, page := range []string{"/", "/uploaded", "/d/:fileId"} {
-		router.GET(page, srv.index)
-		router.HEAD(page, srv.index)
+	pages := map[string]gin.HandlerFunc{
+		"/":          who.senderPage,
+		"/uploaded":  who.senderPage,
+		"/d/:fileId": who.recipientPage,
+	}
+	for page, guard := range pages {
+		router.GET(page, guard, srv.index)
+		router.HEAD(page, guard, srv.index)
 	}
 
 	v1 := router.Group("/api/v1")
@@ -157,38 +207,52 @@ func setupRoutes(router *gin.Engine, srv *Server) {
 		chunks.Use(perChunk.middleware())
 	}
 
-	v1.POST("/stats", srv.setStats)
-	v1.GET("/config", srv.getConfig)
-	v1.GET("/countries", srv.getCountries)
-	v1.POST("/files", srv.uploadFile)
-	v1.POST("/uploads", srv.beginUpload)
-	chunks.POST("/uploads/:fileId", srv.appendUpload)
-	v1.POST("/uploads/:fileId/finish", srv.finishUpload)
-	v1.GET("/files/:fileId", srv.downloadFile)
-	v1.HEAD("/files/:fileId", srv.headFile)
-	v1.POST("/files/:fileId", srv.confirmReceipt)
-	v1.DELETE("/files/:fileId", srv.deleteFile)
-	v1.POST("/files/:fileId/prolong", srv.prolongFile)
-	v1.POST("/files/:fileId/downloads", srv.downloadRecords)
-	v1.POST("/files/validate", srv.validateFiles)
+	// what the recipient of a link needs
+	v1.POST("/stats", who.recipient, srv.setStats)
+	v1.GET("/config", who.recipient, srv.getConfig)
+	v1.GET("/files/:fileId", who.recipient, srv.downloadFile)
+	v1.HEAD("/files/:fileId", who.recipient, srv.headFile)
+	v1.POST("/files/:fileId", who.recipient, srv.confirmReceipt)
+
+	// what the sender needs
+	v1.GET("/countries", who.sender, srv.getCountries)
+	v1.POST("/files", who.sender, srv.uploadFile)
+	v1.POST("/uploads", who.sender, srv.beginUpload)
+	chunks.POST("/uploads/:fileId", who.sender, srv.appendUpload)
+	v1.POST("/uploads/:fileId/finish", who.sender, srv.finishUpload)
+	v1.DELETE("/files/:fileId", who.sender, srv.deleteFile)
+	v1.POST("/files/:fileId/prolong", who.sender, srv.prolongFile)
+	v1.POST("/files/:fileId/downloads", who.sender, srv.downloadRecords)
+	v1.POST("/files/validate", who.sender, srv.validateFiles)
 }
 
 // New creates a new Server instance with the given database and configuration.
-func New(db *database.Database, conf *config.Config) *Server {
+func New(db *database.Database, conf *config.Config) (*Server, error) {
 	router := gin.Default()
 
 	srv := &Server{
-		&http.Server{
+		Server: &http.Server{
 			Addr:    conf.ListenAddr,
 			Handler: router,
 		},
-		db,
-		conf,
+		db:     db,
+		config: conf,
+	}
+
+	// A provider that cannot be set up is a reason not to start: carrying on
+	// without it would serve the app to everyone.
+	if conf.OIDC.Enabled {
+		guard, err := auth.NewGuard(conf, db)
+		if err != nil {
+			return nil, fmt.Errorf("set up the identity provider: %w", err)
+		}
+
+		srv.guard = guard
 	}
 
 	setupRoutes(router, srv)
 
-	return srv
+	return srv, nil
 }
 
 // Start starts the HTTP or HTTPS server based on the TLS configuration.

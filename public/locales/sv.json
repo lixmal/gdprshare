@@ -64,7 +64,8 @@
             "file_deletion_failed": "Servern kunde inte ta bort filen.",
             "prolong_limit_exceeded": "Det är mer än den här servern tillåter.",
             "file_prolong_failed": "Servern kunde inte förlänga delningen.",
-            "stats_store_failed": "Rapporten kunde inte skickas."
+            "stats_store_failed": "Rapporten kunde inte skickas.",
+            "not_signed_in": "Din session har avslutats. Logga in igen för att fortsätta."
         }
     },
     "common": {

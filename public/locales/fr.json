@@ -64,7 +64,8 @@
             "file_deletion_failed": "Le serveur n’a pas pu supprimer le fichier.",
             "prolong_limit_exceeded": "C’est plus que ce que ce serveur autorise.",
             "file_prolong_failed": "Le serveur n’a pas pu prolonger le partage.",
-            "stats_store_failed": "Le rapport n’a pas pu être envoyé."
+            "stats_store_failed": "Le rapport n’a pas pu être envoyé.",
+            "not_signed_in": "Votre session est terminée. Reconnectez-vous pour continuer."
         }
     },
     "common": {

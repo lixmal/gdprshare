@@ -2,6 +2,7 @@ package database
 
 import (
 	"mime/multipart"
+	"time"
 
 	"github.com/jinzhu/gorm"
 
@@ -48,6 +49,33 @@ type StoredFile struct {
 	Pending    bool         `form:"-"`
 	SrcClient  *Client      `form:"-"`
 	DstClients []*DstClient `form:"-"`
+}
+
+// Session is a signed in visitor. It lives in the database rather than in a
+// cookie the server signs, so that no secret exists which could mint one, and
+// so that signing out or losing a group ends a session at once instead of
+// whenever it would have expired. The cookie carries the id and nothing else.
+type Session struct {
+	gorm.Model
+	SessionId string `gorm:"not null;unique_index"`
+	Subject   string `gorm:"not null"`
+	Email     string
+	// as the provider gave them, comma separated
+	Groups    string
+	ExpiresAt time.Time `gorm:"not null"`
+}
+
+// Login is a sign in that is under way: what has to come back from the provider
+// unchanged for the answer to be this server's own question. It is deleted the
+// moment it is answered, and swept if it never is.
+type Login struct {
+	gorm.Model
+	LoginId   string `gorm:"not null;unique_index"`
+	State     string `gorm:"not null"`
+	Nonce     string `gorm:"not null"`
+	Verifier  string `gorm:"not null"`
+	Return    string
+	ExpiresAt time.Time `gorm:"not null"`
 }
 
 type Stats struct {

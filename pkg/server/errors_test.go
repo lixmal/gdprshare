@@ -139,6 +139,7 @@ func TestErrorCodesAreUnique(t *testing.T) {
 		ErrCodeUploadFinished,
 		ErrCodeUploadOffset,
 		ErrCodeUploadTooLarge,
+		ErrCodeNotSignedIn,
 		ErrCodeTLSRequirements,
 		ErrCodeRateLimited,
 		ErrCodeInvalidRequest,

@@ -38,6 +38,14 @@ func New(config *config.Config) (*Database, error) {
 		return nil, fmt.Errorf("migrate schema stats: %w", err)
 	}
 
+	if err = db.AutoMigrate(&Session{}).Error; err != nil {
+		return nil, fmt.Errorf("migrate schema session: %w", err)
+	}
+
+	if err = db.AutoMigrate(&Login{}).Error; err != nil {
+		return nil, fmt.Errorf("migrate schema login: %w", err)
+	}
+
 	return &Database{db}, nil
 }
 

@@ -78,6 +78,15 @@ gdprshare.displayErr = function (error, tone) {
 
 // Reports a server error response, calling it a notice when it is one.
 gdprshare.displayServerErr = function (data) {
+    // A session that ran out mid visit is not an error to read, it is a login
+    // to do again. Loading the page hands that to the server, which knows where
+    // to send the visitor.
+    if (data && data.code === 'not_signed_in') {
+        window.location.reload()
+
+        return
+    }
+
     gdprshare.displayErr.call(
         this,
         serverErrorText(data),

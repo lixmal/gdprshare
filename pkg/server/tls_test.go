@@ -49,7 +49,8 @@ func TestTLSValidation(t *testing.T) {
 	require.NoError(t, err)
 	defer db.Close()
 
-	srv := New(db, conf)
+	srv, err := New(db, conf)
+	require.NoError(t, err)
 
 	err = srv.validateTLS(strconv.Itoa(int(tls.VersionTLS12)), "")
 	assert.NoError(t, err, "TLS 1.2 should be allowed")
@@ -75,7 +76,8 @@ func TestWeakCipherRejection(t *testing.T) {
 	require.NoError(t, err)
 	defer db.Close()
 
-	srv := New(db, conf)
+	srv, err := New(db, conf)
+	require.NoError(t, err)
 
 	err = srv.validateTLS(
 		strconv.Itoa(int(tls.VersionTLS12)),
@@ -100,7 +102,8 @@ func TestTLSValidationDisabled(t *testing.T) {
 	require.NoError(t, err)
 	defer db.Close()
 
-	srv := New(db, conf)
+	srv, err := New(db, conf)
+	require.NoError(t, err)
 
 	err = srv.validateTLS(strconv.Itoa(int(tls.VersionTLS10)), "")
 	assert.NoError(t, err, "TLS validation should be disabled")
@@ -118,7 +121,8 @@ func TestBlockedCipherFromConfig(t *testing.T) {
 	require.NoError(t, err)
 	defer db.Close()
 
-	srv := New(db, conf)
+	srv, err := New(db, conf)
+	require.NoError(t, err)
 
 	err = srv.validateTLS(
 		strconv.Itoa(int(tls.VersionTLS12)),

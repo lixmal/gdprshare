@@ -64,7 +64,8 @@
             "file_deletion_failed": "De server kon het bestand niet verwijderen.",
             "prolong_limit_exceeded": "Dat is meer dan deze server toestaat.",
             "file_prolong_failed": "De server kon de deling niet verlengen.",
-            "stats_store_failed": "De melding kon niet worden verzonden."
+            "stats_store_failed": "De melding kon niet worden verzonden.",
+            "not_signed_in": "Uw sessie is beëindigd. Meld u opnieuw aan om verder te gaan."
         }
     },
     "common": {

@@ -95,6 +95,25 @@ showcountdown: false
 # MaxMind GeoLite2 City database path (mmdb file)
 geoippath: ''
 
+# who may use this server, established against an OpenID Connect provider.
+# 'uploads' asks the sender to sign in and leaves a share's recipient alone,
+# since they are the person a link was sent to rather than a user of this
+# server. 'all' asks everyone. Sessions live in the database, so they survive a
+# restart, end the moment they are signed out, and are swept with everything
+# else. The provider needs the redirect url registered as it stands here.
+oidc:
+    enabled:  false
+    issuer:   'https://auth.example.org/realms/main'
+    clientid: 'gdprshare'
+    clientsecret: ''
+    redirecturl:  'https://share.example.org/auth/callback'
+    scopes:  ['openid', 'email', 'profile']
+    protect: 'uploads'
+    # when set, a visitor has to be in one of them
+    allowedgroups: []
+    groupsclaim:   'groups'
+    sessionlifetime: '12h'
+
 # rate limiting per IP address
 ratelimit:
     enabled: true

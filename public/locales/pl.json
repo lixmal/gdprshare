@@ -64,7 +64,8 @@
             "file_deletion_failed": "Serwer nie mógł usunąć pliku.",
             "prolong_limit_exceeded": "To więcej, niż pozwala ten serwer.",
             "file_prolong_failed": "Serwer nie mógł przedłużyć wysyłki.",
-            "stats_store_failed": "Nie udało się wysłać zgłoszenia."
+            "stats_store_failed": "Nie udało się wysłać zgłoszenia.",
+            "not_signed_in": "Sesja się zakończyła. Zaloguj się ponownie, aby kontynuować."
         }
     },
     "common": {

@@ -137,6 +137,38 @@ The download page asks for whichever half is missing. Both can be combined: a
 split link to a share that also has a password asks for the secret first and the
 password after it.
 
+### Who may use it
+
+Without `oidc` anyone who can reach the server can send a file, which is the
+setup this started as. Turning it on puts an OpenID Connect provider in front:
+
+    oidc:
+        enabled:  true
+        issuer:   'https://auth.example.org/realms/main'
+        clientid: 'gdprshare'
+        clientsecret: '...'
+        redirecturl:  'https://share.example.org/auth/callback'
+        protect: 'uploads'
+        allowedgroups: ['staff']
+
+`protect: uploads` asks the sender to sign in and leaves the recipient of a
+share alone: they are the person a link was sent to, not a user of this server.
+`protect: all` asks everyone, so a link only works for people the provider
+knows. The bundle and the fonts stay open either way, since the download page is
+built from them.
+
+The login is the authorization code flow with PKCE. The ID token is read straight
+from the provider's token endpoint over TLS, with this server authenticating
+itself, which is the case where OpenID Connect does not require the client to
+check the token's signature ([Core 3.1.3.7](https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation));
+its issuer, audience, expiry and the nonce this server sent are all checked.
+
+A signed in visitor is a row in the database and the cookie carries nothing but
+its id. There is deliberately no signed cookie: that would mean a secret which
+could mint a session for anyone, and losing it would hand over every account at
+once. Signing out ends a session for good, and expired ones go with the cleanup
+sweep.
+
 ## REQUIREMENTS
 
 ### Client

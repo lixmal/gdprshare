@@ -64,7 +64,8 @@
             "file_deletion_failed": "Sunucu dosyayı silemedi.",
             "prolong_limit_exceeded": "Bu, sunucunun izin verdiğinden fazla.",
             "file_prolong_failed": "Sunucu paylaşımı uzatamadı.",
-            "stats_store_failed": "Bildirim gönderilemedi."
+            "stats_store_failed": "Bildirim gönderilemedi.",
+            "not_signed_in": "Oturumunuz sona erdi. Devam etmek için yeniden oturum açın."
         }
     },
     "common": {

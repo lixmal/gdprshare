@@ -65,6 +65,20 @@ func Cleanup(db *database.Database, config *config.Config) []error {
 		errors = append(errors, fmt.Errorf("delete expired stats: %w", err))
 	}
 
+	// A session and a login that is under way both carry their own end, and
+	// neither is worth keeping past it.
+	if err := db.Unscoped().
+		Where("expires_at < ?", now).
+		Delete(&database.Session{}).Error; err != nil {
+		errors = append(errors, fmt.Errorf("delete expired sessions: %w", err))
+	}
+
+	if err := db.Unscoped().
+		Where("expires_at < ?", now).
+		Delete(&database.Login{}).Error; err != nil {
+		errors = append(errors, fmt.Errorf("delete abandoned logins: %w", err))
+	}
+
 	var files []database.StoredFile
 	if err := db.Find(&files).Error; err != nil && !db.IsRecordNotFoundError(err) {
 		return append(errors, fmt.Errorf("fetch files from database: %w", err))

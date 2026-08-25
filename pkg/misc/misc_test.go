@@ -166,3 +166,36 @@ func TestCleanupDropsAbandonedUploads(t *testing.T) {
 	require.Len(t, left, 1)
 	assert.Equal(t, "still-arriving", left[0].Name)
 }
+
+// TestCleanupDropsSpentSessions sweeps what a sign in leaves behind, so a
+// server that has been running for months is not carrying every session it ever
+// opened.
+func TestCleanupDropsSpentSessions(t *testing.T) {
+	db, conf := setup(t)
+
+	live := database.Session{SessionId: "still-signed-in", Subject: "someone",
+		ExpiresAt: time.Now().Add(time.Hour)}
+	stale := database.Session{SessionId: "long-gone", Subject: "someone",
+		ExpiresAt: time.Now().Add(-time.Minute)}
+	require.NoError(t, db.Create(&live).Error)
+	require.NoError(t, db.Create(&stale).Error)
+
+	waiting := database.Login{LoginId: "under-way", State: "s", Nonce: "n", Verifier: "v",
+		ExpiresAt: time.Now().Add(time.Minute)}
+	abandoned := database.Login{LoginId: "walked-away", State: "s", Nonce: "n", Verifier: "v",
+		ExpiresAt: time.Now().Add(-time.Minute)}
+	require.NoError(t, db.Create(&waiting).Error)
+	require.NoError(t, db.Create(&abandoned).Error)
+
+	assert.Empty(t, Cleanup(db, conf))
+
+	var sessions []database.Session
+	require.NoError(t, db.Find(&sessions).Error)
+	require.Len(t, sessions, 1)
+	assert.Equal(t, "still-signed-in", sessions[0].SessionId)
+
+	var logins []database.Login
+	require.NoError(t, db.Find(&logins).Error)
+	require.Len(t, logins, 1)
+	assert.Equal(t, "under-way", logins[0].LoginId)
+}

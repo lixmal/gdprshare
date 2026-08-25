@@ -76,7 +76,10 @@ func main() {
 		}
 	}
 
-	srv := server.New(db, conf)
+	srv, err := server.New(db, conf)
+	if err != nil {
+		log.Fatalf("Failed to set up the server: %s\n", err)
+	}
 
 	cleanupCtx, stopCleanup := context.WithCancel(context.Background())
 	defer stopCleanup()

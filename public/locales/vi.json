@@ -64,7 +64,8 @@
             "file_deletion_failed": "Máy chủ không xóa được tệp.",
             "prolong_limit_exceeded": "Nhiều hơn mức máy chủ này cho phép.",
             "file_prolong_failed": "Máy chủ không gia hạn được lượt chia sẻ.",
-            "stats_store_failed": "Không gửi được báo cáo."
+            "stats_store_failed": "Không gửi được báo cáo.",
+            "not_signed_in": "Phiên của bạn đã kết thúc. Hãy đăng nhập lại để tiếp tục."
         }
     },
     "common": {

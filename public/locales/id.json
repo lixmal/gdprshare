@@ -64,7 +64,8 @@
             "file_deletion_failed": "Server tidak dapat menghapus berkas.",
             "prolong_limit_exceeded": "Itu lebih banyak daripada yang diizinkan server ini.",
             "file_prolong_failed": "Server tidak dapat memperpanjang kiriman.",
-            "stats_store_failed": "Laporan tidak dapat dikirim."
+            "stats_store_failed": "Laporan tidak dapat dikirim.",
+            "not_signed_in": "Sesi Anda berakhir. Masuk lagi untuk melanjutkan."
         }
     },
     "common": {

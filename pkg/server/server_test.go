@@ -66,7 +66,8 @@ func newTestServer(t *testing.T, dbArgs string, adjust ...func(*config.Config)) 
 	db, err := database.New(conf)
 	require.NoError(t, err)
 
-	srv := New(db, conf)
+	srv, err := New(db, conf)
+	require.NoError(t, err)
 
 	cleanup := func() {
 		db.Close()

@@ -64,7 +64,8 @@
             "file_deletion_failed": "伺服器無法刪除檔案。",
             "prolong_limit_exceeded": "超過了這台伺服器允許的範圍。",
             "file_prolong_failed": "伺服器無法延長這次分享。",
-            "stats_store_failed": "報告傳送失敗。"
+            "stats_store_failed": "報告傳送失敗。",
+            "not_signed_in": "工作階段已結束。請重新登入以繼續。"
         }
     },
     "common": {

@@ -64,7 +64,8 @@
             "file_deletion_failed": "सर्वर फ़ाइल हटा नहीं सका।",
             "prolong_limit_exceeded": "यह इस सर्वर की अनुमति से अधिक है।",
             "file_prolong_failed": "सर्वर साझा अवधि बढ़ा नहीं सका।",
-            "stats_store_failed": "रिपोर्ट नहीं भेजी जा सकी।"
+            "stats_store_failed": "रिपोर्ट नहीं भेजी जा सकी।",
+            "not_signed_in": "आपका सत्र समाप्त हो गया। जारी रखने के लिए फिर से साइन इन करें।"
         }
     },
     "common": {

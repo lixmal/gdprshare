@@ -64,7 +64,8 @@
             "file_deletion_failed": "Der Server konnte die Datei nicht löschen.",
             "prolong_limit_exceeded": "Das ist mehr, als dieser Server erlaubt.",
             "file_prolong_failed": "Der Server konnte die Freigabe nicht verlängern.",
-            "stats_store_failed": "Der Bericht konnte nicht gesendet werden."
+            "stats_store_failed": "Der Bericht konnte nicht gesendet werden.",
+            "not_signed_in": "Ihre Sitzung ist beendet. Melden Sie sich erneut an, um weiterzumachen."
         }
     },
     "common": {

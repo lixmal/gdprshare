@@ -64,7 +64,8 @@
             "file_deletion_failed": "サーバーがファイルを削除できませんでした。",
             "prolong_limit_exceeded": "このサーバーが許す範囲を超えています。",
             "file_prolong_failed": "サーバーが共有を延長できませんでした。",
-            "stats_store_failed": "報告を送信できませんでした。"
+            "stats_store_failed": "報告を送信できませんでした。",
+            "not_signed_in": "セッションが終了しました。続けるにはもう一度サインインしてください。"
         }
     },
     "common": {

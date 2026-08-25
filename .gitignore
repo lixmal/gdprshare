@@ -4,7 +4,8 @@
 *.dll
 *.so
 *.dylib
-gdprshare
+# the built binary at the root, not the cmd/gdprshare directory
+/gdprshare
 
 # Test binary, build with `go test -c`
 *.test

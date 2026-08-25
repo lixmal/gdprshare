@@ -47,6 +47,10 @@ const (
 	// recorded as the reason of a refused attempt, never sent as an API error
 	ErrCodeUserAgentBlocked ErrorCode = "user_agent_blocked"
 
+	// answered by the guard rather than by a handler, when a visitor is not
+	// signed in or their session has ended
+	ErrCodeNotSignedIn ErrorCode = "not_signed_in"
+
 	// shared
 	ErrCodeTLSRequirements ErrorCode = "tls_requirements_not_met"
 	ErrCodeRateLimited     ErrorCode = "rate_limit_exceeded"

@@ -64,7 +64,8 @@
             "file_deletion_failed": "El servidor no pudo eliminar el archivo.",
             "prolong_limit_exceeded": "Eso es más de lo que permite este servidor.",
             "file_prolong_failed": "El servidor no pudo ampliar el envío.",
-            "stats_store_failed": "No se pudo enviar el informe."
+            "stats_store_failed": "No se pudo enviar el informe.",
+            "not_signed_in": "Su sesión ha terminado. Vuelva a iniciar sesión para continuar."
         }
     },
     "common": {

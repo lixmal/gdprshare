@@ -64,7 +64,8 @@
             "file_deletion_failed": "서버가 파일을 삭제하지 못했습니다.",
             "prolong_limit_exceeded": "이 서버가 허용하는 범위를 넘습니다.",
             "file_prolong_failed": "서버가 공유를 연장하지 못했습니다.",
-            "stats_store_failed": "보고를 보내지 못했습니다."
+            "stats_store_failed": "보고를 보내지 못했습니다.",
+            "not_signed_in": "세션이 종료되었습니다. 계속하려면 다시 로그인하세요."
         }
     },
     "common": {

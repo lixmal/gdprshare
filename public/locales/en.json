@@ -64,7 +64,8 @@
             "file_deletion_failed": "The server could not delete the file.",
             "prolong_limit_exceeded": "That is more than this server allows.",
             "file_prolong_failed": "The server could not extend the share.",
-            "stats_store_failed": "The report could not be sent."
+            "stats_store_failed": "The report could not be sent.",
+            "not_signed_in": "Your session has ended. Sign in again to carry on."
         }
     },
     "common": {
