@@ -443,16 +443,25 @@ class Upload extends React.Component {
                     var parts = [
                         record.address || t('files.recordNoAddress'),
                         record.location,
+                        record.client || record.userAgent,
                         record.tlsVersion,
                         record.tlsCipher,
-                        record.userAgent,
                     ].filter(function (part) { return part && part !== 'none' })
 
-                    // a refusal says why: the reason is an error code the
-                    // locales already carry
-                    var reason = record.denied
-                        ? gdprshare.serverErrorText({code: record.reason, message: record.reason})
-                        : null
+                    // the record is read by the owner, so a refusal is worded
+                    // from that side rather than from the refused visitor's
+                    var reason = null
+                    if (record.denied) {
+                        if (record.reason === 'download_location_forbidden')
+                            reason = t('files.reasonLocation')
+                        else if (record.reason === 'file_not_yet_downloadable')
+                            reason = t('files.reasonTooEarly')
+                        else if (record.reason === 'user_agent_blocked')
+                            reason = t('files.reasonBrowser')
+                        else
+                            // a server newer than this build still says something
+                            reason = record.reason
+                    }
 
                     return (
                         <div className="record-line" key={index}>
@@ -462,7 +471,7 @@ class Upload extends React.Component {
                             {record.denied && (
                                 <span className="chip chip-refused">{t('files.recordRefused')}</span>
                             )}
-                            <span className="record-detail long-text">
+                            <span className="record-detail long-text" title={record.userAgent}>
                                 {parts.concat(reason ? [reason] : []).join(' · ')}
                             </span>
                         </div>

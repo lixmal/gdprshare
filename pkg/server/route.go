@@ -701,6 +701,7 @@ func (s *Server) downloadRecords(c *gin.Context) {
 			Reason:     client.Reason,
 			Address:    client.Addr,
 			UserAgent:  client.UserAgent,
+			Client:     userAgentName(client.UserAgent),
 			TLSVersion: tlsVersionName(client.TLSVersion),
 			TLSCipher:  tlsCipherName(client.TLSCipherSuite),
 			Location:   s.locationOf(client.Addr, countries),
@@ -762,9 +763,8 @@ func tlsCipherName(stored string) string {
 	return tls.CipherSuiteName(uint16(value))
 }
 
-// The country a download came from, as far as the local database can tell.
-// Country and no finer: that is the granularity the region restriction works at,
-// and the record has no purpose that a city would serve better. Empty when no
+// Where a download came from, as far as the local database can tell: city,
+// region and country, since a refused attempt is worth looking at closely. Empty when no
 // database is configured or the address was never stored.
 func (s *Server) locationOf(addr string, seen map[string]string) string {
 	if s.config.GeoIPPath == "" || addr == "" {
@@ -777,13 +777,19 @@ func (s *Server) locationOf(addr string, seen map[string]string) string {
 		return country
 	}
 
-	country := ""
+	place := ""
 	if location, err := geoip.LookupIP(s.config.GeoIPPath, addr); err == nil && location != nil {
-		country = location.Country
+		parts := make([]string, 0, 3)
+		for _, part := range []string{location.City, location.Subdivision1, location.Country} {
+			if part != "" {
+				parts = append(parts, part)
+			}
+		}
+		place = strings.Join(parts, ", ")
 	}
-	seen[addr] = country
+	seen[addr] = place
 
-	return country
+	return place
 }
 
 func expiryDate(f *database.StoredFile) time.Time {

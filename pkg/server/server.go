@@ -56,14 +56,18 @@ type ProlongRequest struct {
 // same material the notification mail carries, so this adds a way to read it
 // rather than a new kind of record.
 type DownloadRecord struct {
-	Time       time.Time `json:"time"`
-	Denied     bool      `json:"denied"`
-	Reason     string    `json:"reason"`
-	Address    string    `json:"address"`
-	UserAgent  string    `json:"userAgent"`
-	TLSVersion string    `json:"tlsVersion"`
-	TLSCipher  string    `json:"tlsCipher"`
-	Location   string    `json:"location"`
+	Time      time.Time `json:"time"`
+	Denied    bool      `json:"denied"`
+	Reason    string    `json:"reason"`
+	Address   string    `json:"address"`
+	UserAgent string    `json:"userAgent"`
+	// The user agent read as a short name, empty when it says nothing that can
+	// be read. The raw string stays next to it: for a refused crawler it is the
+	// evidence, and nothing forces a user agent to be true.
+	Client     string `json:"client"`
+	TLSVersion string `json:"tlsVersion"`
+	TLSCipher  string `json:"tlsCipher"`
+	Location   string `json:"location"`
 }
 
 type OwnedFile struct {

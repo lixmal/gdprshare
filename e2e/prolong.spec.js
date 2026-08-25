@@ -266,7 +266,9 @@ test.describe('Refused attempts', () => {
 
     const line = page.locator('.record-line').first();
     await expect(line.locator('.chip-refused')).toHaveText(en.files.recordRefused);
-    await expect(line).toContainText(en.errors.server.download_location_forbidden);
+    // worded for the owner reading their own record, not for the visitor who
+    // was refused
+    await expect(line).toContainText(en.files.reasonLocation);
 
     fs.unlinkSync(testFilePath);
   });
