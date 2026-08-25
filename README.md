@@ -38,9 +38,9 @@ aspects.
   something. Nothing has to be shredded on the server after deletion
 * a file larger than one record is sent as it is encrypted: the browser opens an
   upload, appends each record, and finishes it. The share exists from the first
-  byte and is not downloadable until the last one, and an upload that is
-  abandoned is swept away within the hour. A smaller file still goes in a single
-  request, which is one round trip instead of three
+  byte and is not downloadable until the last one, and one that is abandoned is
+  swept once it is an hour old. A smaller file still goes in a single request,
+  which is one round trip instead of three
 * the key lives in the link fragment and never reaches the server
 * the sender can add a password: the file is then encrypted under a key derived
   from the secret in the link and the password together (PBKDF2-SHA256), so a
@@ -82,9 +82,9 @@ as it is.
 * the sender is notified on each download attempt
 * the notification carries the TLS version and ciphers of both sides, which is
   the evidence half of the accountability duty
-* the same record is readable in the app: one line per attempt, refusals
-  included, with the reason a refused one did not go through. It lives as long
-  as the share does and goes with it
+* the same record is readable in the interface, under the sender's own uploads:
+  one line per attempt, refusals included, with the reason a refused one did not
+  go through. It lives as long as the share does and goes with it
 * every attempt is kept, including the ones on a link that ran out, expired or
   whose file is gone. A share keeps at most 50 refusals, and the notifications
   stop with them, so a link someone keeps hammering cannot grow the database or
@@ -102,8 +102,8 @@ Art. 5 (2) with [Art. 24 (1)](https://gdpr-info.eu/art-24-gdpr/) for the
 download records. It also covers the error reports the download page
 sends when a link fails to open, which are dropped after two weeks and capped in
 number, since that endpoint needs no token. `privacyurl` and `imprinturl` add
-links to the operator's own pages; without them the footer says the rest is up to
-whoever runs the server.
+links to the operator's own pages; without them the footer says the rest is up
+to whoever runs the server.
 
 ### The interface
 
@@ -116,10 +116,12 @@ whoever runs the server.
   is sending or downloading what
 * a picture can be shown inline and taken off the screen again after a few
   seconds
-* a file too large to assemble in the browser is written straight to disk. The
-  page asks the server what the download would be before being one, so nothing
-  is spent finding out that a link no longer works, and a large file waits for a
-  click, since a browser only offers a place to save from one
+* a file too large to assemble in the browser is written straight to disk, where
+  the browser allows it (Chrome and Edge; elsewhere it is put together in the
+  browser first). The page asks the server what the download would be before
+  being one, so nothing is spent finding out that a link no longer works, and a
+  large file waits for a click, since a browser only offers a place to save from
+  one
 
 ### Handing over a share
 
@@ -157,11 +159,13 @@ share alone: they are the person a link was sent to, not a user of this server.
 knows. The bundle and the fonts stay open either way, since the download page is
 built from them.
 
-The login is the authorization code flow with PKCE. The ID token is read straight
-from the provider's token endpoint over TLS, with this server authenticating
-itself, which is the case where OpenID Connect does not require the client to
-check the token's signature ([Core 3.1.3.7](https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation));
-its issuer, audience, expiry and the nonce this server sent are all checked.
+The login is the authorization code flow with PKCE. The ID token is read
+straight from the provider's token endpoint over TLS, with this server
+authenticating itself, which is the one case where OpenID Connect does not
+require the client to check the token's signature ([Core 3.1.3.7][idtoken]); its
+issuer, audience, expiry and the nonce this server sent are all checked.
+
+[idtoken]: https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation
 
 A signed in visitor is a row in the database and the cookie carries nothing but
 its id. There is deliberately no signed cookie: that would mean a secret which
@@ -176,6 +180,9 @@ sweep.
 * a current browser (Internet Explorer and pre-Chromium Edge are out)
 * HTTPS, or localhost: the Web Crypto API the client encrypts with only exists
   in a secure context
+* for a download of several hundred megabytes or more, a browser with the File
+  System Access API (Chrome, Edge) writes it straight to disk. Firefox and
+  Safari assemble it in the browser first, which is what bounds the size there
 
 ### Server
 
@@ -215,11 +222,13 @@ gdprshare looks for a `config.yml` in its working directory; `gdprshare -config
 <config file>` points it somewhere else.
 
 Expired files are deleted by the server itself, every `cleanup.interval`
-(1 hour by default), which is one less moving part in a container. The sweep
-erases what is left behind; a download is already refused from the moment a
-share expires, whether or not a sweep has run. Set `cleanup.enabled: false` to
-drive it from outside instead: `gdprshare -cleanup` sweeps once and exits, and
-`misc/crontab` has an example entry.
+(1 hour by default), which is one less moving part in a container. The same
+sweep clears uploads that were never finished, error reports past their
+retention, and sessions that have run out. It erases what is left behind; a
+download is already refused from the moment a share expires, whether or not a
+sweep has run. Set `cleanup.enabled: false` to drive it from outside instead:
+`gdprshare -cleanup` sweeps once and exits, and `misc/crontab` has an example
+entry.
 `misc/gdprshare.service` is an example systemd unit.
 
 Alternatively run the [docker image](https://ghcr.io/lixmal/gdprshare):
@@ -247,4 +256,6 @@ preferences; `?lang=<code>` overrides that. Adding a language means dropping a
 
 fails when a language misses a key English has, keeps one English dropped, still
 carries the English source string, loses a placeholder in translation, or when
-the code asks for a key no locale defines. CI runs it on every pull request.
+the code asks for a key no locale defines. The unit tests go one further and
+read the error codes out of the Go source, so a code the server can send with no
+translation behind it fails as well. CI runs both on every pull request.

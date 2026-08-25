@@ -285,7 +285,12 @@ gdprshare.formatSize = function (bytes) {
         value /= 1024
         unit++
     }
-    return (unit === 0 ? value : value.toFixed(1)) + ' ' + units[unit]
+    // a whole number reads better without a nought after the point: 25 MB, not
+    // 25.0 MB
+    if (unit === 0 || value % 1 === 0)
+        return value + ' ' + units[unit]
+
+    return value.toFixed(1) + ' ' + units[unit]
 }
 
 // keeps a stepper or a typed value inside what the server accepts

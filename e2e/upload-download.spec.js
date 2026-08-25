@@ -810,7 +810,12 @@ test.describe('The size limit', () => {
   test('reads as a size rather than a number of megabytes', async ({ page }) => {
     await page.goto('/');
 
-    const limit = await page.evaluate(() => window.gdprshare.config.maxFileSize);
+    // straight from the api: the page's own copy is the built in default until
+    // the config request comes back
+    const conf = await page.request.get('/api/v1/config').then((r) => r.json());
+    const limit = conf.maxFileSize;
+
+    await expect(page.locator('.drop')).toContainText('up to');
     const shown = await page.locator('.app-inner').first().innerText();
 
     if (limit >= 1024) {
@@ -819,6 +824,11 @@ test.describe('The size limit', () => {
     } else {
       expect(shown).toContain('MB');
     }
+
+    // a whole number of them reads without a nought after the point
+    const size = shown.match(/up to ([\d.]+ [KMG]?B)/);
+    expect(size).toBeTruthy();
+    expect(size[1]).not.toMatch(/\.0 /);
   });
 });
 
