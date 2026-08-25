@@ -14,6 +14,11 @@ import (
 	"github.com/lixmal/gdprshare/pkg/database"
 )
 
+// PendingUploadTimeout is how long a file that arrives in pieces may stay
+// unfinished. A sender who walks away mid-upload otherwise leaves the bytes and
+// the row behind for as long as the share would have lived.
+const PendingUploadTimeout = time.Hour
+
 // StatsRetention is how long an error report from the download page is kept.
 // The rows carry the address and user agent of whoever hit a broken link, so
 // they go the way a share does rather than sitting there for good.
@@ -67,6 +72,11 @@ func Cleanup(db *database.Database, config *config.Config) []error {
 
 	for _, f := range files {
 		expiryTime := f.CreatedAt.AddDate(0, 0, int(f.Expiry))
+		if f.Pending {
+			// an upload that was never finished goes much sooner than the share
+			// it would have become
+			expiryTime = f.CreatedAt.Add(PendingUploadTimeout)
+		}
 
 		if now.After(expiryTime) {
 			if errs := DeleteStoredFile(&f, db, config); len(errs) > 0 {

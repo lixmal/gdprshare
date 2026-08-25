@@ -105,6 +105,7 @@
         "emailHint": "One email each time someone opens the link",
         "password": "Password (optional)",
         "passwordHint": "A second lock on top of the link. Pass it on another way; it cannot be recovered.",
+        "sending": "Sending…",
         "chipPassword": "Password",
         "strip": "Remove hidden data",
         "stripHint": "Location, camera and author details are taken out first. Pictures other than GIFs are re-encoded, other file types are refused.",

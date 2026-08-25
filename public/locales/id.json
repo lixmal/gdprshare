@@ -105,6 +105,7 @@
         "emailHint": "Satu email setiap kali ada yang membuka tautannya",
         "password": "Kata sandi (opsional)",
         "passwordHint": "Kunci kedua selain tautan. Sampaikan melalui cara lain; kata sandi tidak dapat dipulihkan.",
+        "sending": "Mengirim…",
         "chipPassword": "Kata sandi",
         "strip": "Buang data tersembunyi",
         "stripHint": "Lokasi, kamera, dan penulis dibuang lebih dulu. Gambar selain GIF dikodekan ulang, jenis berkas lain ditolak.",

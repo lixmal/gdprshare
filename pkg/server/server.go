@@ -51,6 +51,37 @@ type OwnerToken struct {
 	OwnerToken string `form:"ownerToken" binding:"required,printascii,min=3,max=64"`
 }
 
+// UploadBegin opens a share whose file arrives in pieces. It carries what
+// StoredFile takes as a form minus the file itself, since there are no bytes
+// yet; TestUploadBeginCoversTheForm keeps the two in step.
+type UploadBegin struct {
+	Type             string `form:"type"              binding:"omitempty,printascii,min=1,max=255"`
+	Filename         string `form:"filename"          binding:"omitempty,max=1024"`
+	Email            string `form:"email"             binding:"omitempty,email,min=4,max=255"`
+	Expiry           uint   `form:"expiry"            binding:"omitempty,min=1,max=14"`
+	Count            uint   `form:"count"             binding:"omitempty,min=1,max=15"`
+	OnlyEEA          bool   `form:"only-eea"`
+	IncludeOther     bool   `form:"include-other"`
+	AllowedCountries string `form:"allowed-countries" binding:"omitempty,max=2000"`
+	Delay            uint   `form:"delay"             binding:"omitempty,min=0,max=1440"`
+	Ephemeral        uint   `form:"ephemeral"         binding:"omitempty,min=0,max=300"`
+}
+
+func (u UploadBegin) storedFile() *database.StoredFile {
+	return &database.StoredFile{
+		Type:             u.Type,
+		Filename:         u.Filename,
+		Email:            u.Email,
+		Expiry:           u.Expiry,
+		Count:            u.Count,
+		OnlyEEA:          u.OnlyEEA,
+		IncludeOther:     u.IncludeOther,
+		AllowedCountries: u.AllowedCountries,
+		Delay:            u.Delay,
+		Ephemeral:        u.Ephemeral,
+	}
+}
+
 type ProlongRequest struct {
 	OwnerToken
 	Days  uint `form:"days"  binding:"omitempty,min=0,max=14"`
@@ -112,6 +143,9 @@ func setupRoutes(router *gin.Engine, srv *Server) {
 	v1.GET("/config", srv.getConfig)
 	v1.GET("/countries", srv.getCountries)
 	v1.POST("/files", srv.uploadFile)
+	v1.POST("/uploads", srv.beginUpload)
+	v1.POST("/uploads/:fileId", srv.appendUpload)
+	v1.POST("/uploads/:fileId/finish", srv.finishUpload)
 	v1.GET("/files/:fileId", srv.downloadFile)
 	v1.POST("/files/:fileId", srv.confirmReceipt)
 	v1.DELETE("/files/:fileId", srv.deleteFile)

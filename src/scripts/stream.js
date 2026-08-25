@@ -96,14 +96,17 @@ async function importKey(key, usage) {
 }
 
 /**
- * Encrypts a File or Blob into a Blob in the record format. The file is read a
- * record at a time, so the plaintext is never held whole.
+ * Encrypts a File or Blob a record at a time, handing each piece of the result
+ * to onBytes in order, starting with the header. The plaintext is never held
+ * whole, and neither is the ciphertext when the caller passes the pieces on as
+ * they come.
  */
-export async function encryptBlob(file, key, onProgress, size) {
+export async function encryptRecords(file, key, onBytes, onProgress, size) {
     const step = size || recordSize
     const base = window.crypto.getRandomValues(new Uint8Array(nonceBaseLength))
     const cryptoKey = await importKey(key, 'encrypt')
-    const parts = [header(step, base)]
+
+    await onBytes(header(step, base))
 
     // an empty file still gets one record, so the format always ends on a
     // record that says it is the last
@@ -124,11 +127,23 @@ export async function encryptBlob(file, key, onProgress, size) {
             plain,
         )
 
-        parts.push(new Uint8Array(record))
+        await onBytes(new Uint8Array(record), last)
 
         if (onProgress)
             onProgress(Math.min(offset + step, file.size), file.size)
     }
+}
+
+/**
+ * Encrypts a File or Blob into a Blob in the record format. The file is read a
+ * record at a time, so the plaintext is never held whole.
+ */
+export async function encryptBlob(file, key, onProgress, size) {
+    const parts = []
+
+    await encryptRecords(file, key, function (bytes) {
+        parts.push(bytes)
+    }, onProgress, size)
 
     return new Blob(parts)
 }

@@ -105,6 +105,7 @@
         "emailHint": "Ett mejl varje gång någon öppnar länken",
         "password": "Lösenord (valfritt)",
         "passwordHint": "Ett andra lås utöver länken. Skicka det på annat sätt; det går inte att återskapa.",
+        "sending": "Skickar…",
         "chipPassword": "Lösenord",
         "strip": "Ta bort dolda data",
         "stripHint": "Plats, kamera och upphovsman tas bort först. Bilder utom GIF kodas om, andra filtyper nekas.",

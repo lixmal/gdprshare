@@ -46,6 +46,59 @@ test.describe('A file spanning several records', () => {
     fs.unlinkSync(saved);
   });
 
+  test('is sent in pieces, with progress', async ({ page }) => {
+    const calls = [];
+    await page.route('**/api/v1/**', (route) => {
+      calls.push(new URL(route.request().url()).pathname);
+      return route.continue();
+    });
+
+    const filePath = path.join(__dirname, 'test-in-pieces.bin');
+    fs.writeFileSync(filePath, crypto.randomBytes(9 * 1024 * 1024));
+
+    await page.goto('/');
+    await page.locator('input#content').setInputFiles(filePath);
+    await openOptions(page);
+    await page.locator('select#geo-restriction').selectOption('none');
+    await page.locator('input[type="submit"]').click();
+
+    // the sender is told how far along it is rather than left on a frozen page
+    await expect(page.locator('#upload-progress-bar')).toBeVisible();
+
+    await page.waitForURL(/\/uploaded/, { timeout: 60000 });
+
+    expect(calls).toContain('/api/v1/uploads');
+    // the header and each record, rather than the whole file in one request
+    expect(calls.filter((p) => p.startsWith('/api/v1/uploads/')).length).toBeGreaterThan(1);
+    expect(calls).not.toContain('/api/v1/files');
+
+    fs.unlinkSync(filePath);
+  });
+
+  test('goes in a single request when it fits in one record', async ({ page }) => {
+    const calls = [];
+    await page.route('**/api/v1/**', (route) => {
+      calls.push(new URL(route.request().url()).pathname);
+      return route.continue();
+    });
+
+    const filePath = path.join(__dirname, 'test-one-request.txt');
+    fs.writeFileSync(filePath, 'small enough for a single request');
+
+    await page.goto('/');
+    await page.locator('input#content').setInputFiles(filePath);
+    await openOptions(page);
+    await page.locator('select#geo-restriction').selectOption('none');
+    await page.locator('input[type="submit"]').click();
+    await page.waitForURL(/\/uploaded/);
+
+    // three round trips are not worth it for a file this size
+    expect(calls).toContain('/api/v1/files');
+    expect(calls).not.toContain('/api/v1/uploads');
+
+    fs.unlinkSync(filePath);
+  });
+
   test('is stored in the record format rather than as one block', async ({ page }) => {
     const filePath = path.join(__dirname, 'test-format.txt');
     fs.writeFileSync(filePath, 'small enough for a single record');

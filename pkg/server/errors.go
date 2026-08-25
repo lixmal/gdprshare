@@ -30,6 +30,13 @@ const (
 	ErrCodeFileGone          ErrorCode = "file_not_found_or_limit_exceeded"
 	ErrCodeRetrievalFailed   ErrorCode = "file_retrieval_failed"
 
+	// chunked upload
+	ErrCodeUploadNotFound  ErrorCode = "upload_not_found"
+	ErrCodeUploadFinished  ErrorCode = "upload_already_finished"
+	ErrCodeUploadOffset    ErrorCode = "upload_offset_mismatch"
+	ErrCodeUploadTooLarge  ErrorCode = "upload_too_large"
+	ErrCodeUploadIncapable ErrorCode = "upload_not_accepted"
+
 	// deletion
 	ErrCodeOwnerTokenMismatch ErrorCode = "owner_token_mismatch"
 	ErrCodeDeleteFailed       ErrorCode = "file_deletion_failed"

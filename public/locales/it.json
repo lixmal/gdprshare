@@ -105,6 +105,7 @@
         "emailHint": "Una e-mail ogni volta che qualcuno apre il link",
         "password": "Password (facoltativa)",
         "passwordHint": "Una seconda serratura oltre al link. Comunicala per un’altra via; non può essere recuperata.",
+        "sending": "Invio…",
         "chipPassword": "Password",
         "strip": "Togli i dati nascosti",
         "stripHint": "Luogo, fotocamera e autore vengono tolti prima. Le immagini tranne i GIF sono ricodificate, gli altri tipi rifiutati.",

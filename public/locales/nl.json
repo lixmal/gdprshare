@@ -105,6 +105,7 @@
         "emailHint": "Eén mail elke keer dat iemand de link opent",
         "password": "Wachtwoord (optioneel)",
         "passwordHint": "Een tweede slot naast de link. Geef het via een andere weg door; het is niet terug te halen.",
+        "sending": "Verzenden…",
         "chipPassword": "Wachtwoord",
         "strip": "Verborgen gegevens verwijderen",
         "stripHint": "Locatie, camera en auteur gaan er eerst uit. Foto’s behalve GIFs worden opnieuw opgeslagen, andere bestandstypen geweigerd.",

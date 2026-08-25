@@ -105,6 +105,7 @@
         "emailHint": "Bağlantı her açıldığında bir e-posta",
         "password": "Parola (isteğe bağlı)",
         "passwordHint": "Bağlantının yanında ikinci bir kilit. Başka bir yolla iletin; geri getirilemez.",
+        "sending": "Gönderiliyor…",
         "chipPassword": "Parola",
         "strip": "Gizli verileri kaldır",
         "stripHint": "Konum, kamera ve yazar bilgisi önce çıkarılır. GIF dışındaki resimler yeniden kodlanır, diğer dosya türleri kabul edilmez.",

@@ -105,6 +105,7 @@
         "emailHint": "Um e-mail cada vez que alguém abre o link",
         "password": "Senha (opcional)",
         "passwordHint": "Uma segunda tranca além do link. Passe-a por outro meio; não é possível recuperá-la.",
+        "sending": "Enviando…",
         "chipPassword": "Senha",
         "strip": "Remover dados ocultos",
         "stripHint": "Local, câmera e autor saem primeiro. As imagens, exceto GIFs, são recodificadas; outros tipos são recusados.",

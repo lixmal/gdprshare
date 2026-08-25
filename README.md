@@ -36,6 +36,11 @@ aspects.
   number is authenticated and the last record says that it is the last, so a
   stream that was reordered or cut short fails instead of decrypting to
   something. Nothing has to be shredded on the server after deletion
+* a file larger than one record is sent as it is encrypted: the browser opens an
+  upload, appends each record, and finishes it. The share exists from the first
+  byte and is not downloadable until the last one, and an upload that is
+  abandoned is swept away within the hour. A smaller file still goes in a single
+  request, which is one round trip instead of three
 * the key lives in the link fragment and never reaches the server
 * the sender can add a password: the file is then encrypted under a key derived
   from the secret in the link and the password together (PBKDF2-SHA256), so a
@@ -58,6 +63,8 @@ aspects.
 * downloads can be limited to the EU/EEA, to countries with the same rules, or
   to a hand-picked list (needs a GeoIP database, see `geoippath`)
 * uploads and downloads are rate limited per IP address
+* `maxuploadsize` is the ceiling for a whole file, whether it arrives in one
+  request or in pieces
 
 ### Metadata
 

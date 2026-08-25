@@ -105,6 +105,7 @@
         "emailHint": "Un e-mail chaque fois que quelqu’un ouvre le lien",
         "password": "Mot de passe (facultatif)",
         "passwordHint": "Un second verrou en plus du lien. Transmettez-le par un autre moyen ; il ne peut pas être récupéré.",
+        "sending": "Envoi…",
         "chipPassword": "Mot de passe",
         "strip": "Retirer les données cachées",
         "stripHint": "Lieu, appareil et auteur sont retirés d’abord. Les images sauf les GIF sont réencodées, les autres types refusés.",

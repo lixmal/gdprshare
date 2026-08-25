@@ -130,6 +130,12 @@ gdprshare.encryptBlob = function (file, key, onProgress) {
     return stream.encryptBlob(file, key, onProgress)
 }
 
+gdprshare.encryptRecords = function (file, key, onBytes, onProgress) {
+    return stream.encryptRecords(file, key, onBytes, onProgress)
+}
+
+gdprshare.recordSize = stream.recordSize
+
 // Opens a response body as records arrive, so the file is never held whole. A
 // share written before the record format existed is one nonce and one
 // ciphertext, which has to be read whole to be opened at all.

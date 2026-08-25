@@ -139,3 +139,30 @@ func TestCleanupDropsOldStats(t *testing.T) {
 	require.NoError(t, db.Unscoped().Model(&database.Stats{}).Count(&all).Error)
 	assert.Equal(t, 1, all)
 }
+
+// TestCleanupDropsAbandonedUploads sweeps a file that arrived in pieces and was
+// never finished, which would otherwise sit there for the share's whole life.
+func TestCleanupDropsAbandonedUploads(t *testing.T) {
+	db, conf := setup(t)
+
+	// both would live for 14 days had they been finished
+	fresh := storedFile(t, db, conf, "still-arriving", 14, 0)
+	stale := storedFile(t, db, conf, "walked-away", 14, 0)
+
+	require.NoError(t, db.Model(&database.StoredFile{}).
+		Where("name in (?)", []string{"still-arriving", "walked-away"}).
+		Update("pending", true).Error)
+	require.NoError(t, db.Model(&database.StoredFile{}).
+		Where("name = ?", "walked-away").
+		UpdateColumn("created_at", time.Now().Add(-PendingUploadTimeout-time.Minute)).Error)
+
+	assert.Empty(t, Cleanup(db, conf))
+
+	assert.FileExists(t, fresh)
+	assert.NoFileExists(t, stale)
+
+	var left []database.StoredFile
+	require.NoError(t, db.Find(&left).Error)
+	require.Len(t, left, 1)
+	assert.Equal(t, "still-arriving", left[0].Name)
+}

@@ -105,6 +105,7 @@
         "emailHint": "Một email mỗi lần có người mở liên kết",
         "password": "Mật khẩu (không bắt buộc)",
         "passwordHint": "Một lớp khóa thứ hai bên cạnh liên kết. Hãy chuyển bằng cách khác; không thể lấy lại được.",
+        "sending": "Đang gửi…",
         "chipPassword": "Mật khẩu",
         "strip": "Bỏ dữ liệu ẩn",
         "stripHint": "Vị trí, máy ảnh và tác giả được bỏ trước. Ảnh ngoài GIF sẽ được mã hóa lại, các loại tệp khác bị từ chối.",

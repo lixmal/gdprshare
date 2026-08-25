@@ -96,6 +96,7 @@ class Upload extends React.Component {
         this.handleClearFile = this.handleClearFile.bind(this)
         this.handleEmailChange = this.handleEmailChange.bind(this)
         this.handlePasswordChange = this.handlePasswordChange.bind(this)
+        this.reportProgress = this.reportProgress.bind(this)
         this.forgetFile = this.forgetFile.bind(this)
         this.toggleRecord = this.toggleRecord.bind(this)
 
@@ -107,6 +108,7 @@ class Upload extends React.Component {
             mask: false,
             filesBusy: false,
             password: '',
+            progress: null,
             copy: null,
             fileInfo: null,
             type: 'file',
@@ -216,7 +218,9 @@ class Upload extends React.Component {
         return Classnames({
             'app-outer': true,
             'drag-outer': this.state.isDragOver,
-            'loading-mask': this.state.mask,
+            // the progress block draws its own wait, so the overlay would just
+            // dim the numbers the sender is reading
+            'loading-mask': this.state.mask && this.state.progress === null,
         })
     }
 
@@ -243,31 +247,63 @@ class Upload extends React.Component {
         })
     }
 
-    async uploadFile(fragment, data, encFilename, plainFilename) {
-        var formData = new FormData()
-        var file = new File(
-            [data],
-            {
-                type: 'application/octet-stream'
-            },
-        )
-
-        var email = this.state.email
-        formData.append('type', this.state.type)
-        formData.append('file', file, encFilename)
-        formData.append('filename', encFilename)
-        formData.append('count', this.state.count)
-        formData.append('expiry', this.state.expiry)
-        formData.append('email', email)
-        if (this.state.geoRestriction !== 'none') {
-            formData.append('allowed-countries', this.state.selectedCountries.join(','))
+    // What the share is, apart from its bytes. The same set opens an upload that
+    // arrives in pieces and accompanies one that arrives in a single request.
+    shareFields(encFilename) {
+        var fields = {
+            type: this.state.type,
+            filename: encFilename,
+            count: this.state.count,
+            expiry: this.state.expiry,
+            email: this.state.email,
         }
-        if (this.state.delay !== '0')
-            formData.append('delay', this.state.delay)
-        if (this.state.type === 'image' && this.state.ephemeral !== '0')
-            formData.append('ephemeral', this.state.ephemeral)
 
-        // remembered for the next upload, the password deliberately excluded
+        if (this.state.geoRestriction !== 'none')
+            fields['allowed-countries'] = this.state.selectedCountries.join(',')
+        if (this.state.delay !== '0')
+            fields.delay = this.state.delay
+        if (this.state.type === 'image' && this.state.ephemeral !== '0')
+            fields.ephemeral = this.state.ephemeral
+
+        return fields
+    }
+
+    // Tells the sender the wait is doing something, and roughly how much of it
+    // is left. Wears the download page's progress markup, since it is the same
+    // kind of wait.
+    sendingStatus() {
+        if (!this.state.mask || this.state.progress === null)
+            return null
+
+        return (
+            <div className="download-status" role="status" aria-live="polite">
+                <div className="download-status-head">
+                    <span className="download-status-text">{this.props.t('upload.sending')}</span>
+                    <span className="download-status-value">{this.state.progress}%</span>
+                </div>
+                <div className="download-progress"
+                     role="progressbar"
+                     aria-valuenow={this.state.progress}
+                     aria-valuemin="0"
+                     aria-valuemax="100">
+                    <div className="download-progress-bar" id="upload-progress-bar"
+                         style={{ width: this.state.progress + '%' }}></div>
+                    <span className="download-progress-value">{this.state.progress}%</span>
+                </div>
+            </div>
+        )
+    }
+
+    // Without a size there is nothing to divide by, and the label stays
+    // indeterminate.
+    reportProgress(done, total) {
+        this.setState({
+            progress: total > 0 ? Math.min(100, Math.round((done / total) * 100)) : null,
+        })
+    }
+
+    rememberOptions() {
+        // the password deliberately excluded: it belongs to one share
         try {
             window.localStorage.setItem('options', JSON.stringify({
                 count: this.state.count,
@@ -277,11 +313,29 @@ class Upload extends React.Component {
                 delay: this.state.delay,
                 ephemeral: this.state.ephemeral,
                 strip: this.state.strip,
-                email: email,
+                email: this.state.email,
             }))
         } catch (e) {
             console.log(e)
         }
+    }
+
+    async uploadFile(fragment, data, encFilename, plainFilename) {
+        var formData = new FormData()
+        var file = new File(
+            [data],
+            {
+                type: 'application/octet-stream'
+            },
+        )
+
+        var fields = this.shareFields(encFilename)
+        Object.keys(fields).forEach(function (name) {
+            formData.append(name, fields[name])
+        })
+        formData.append('file', file, encFilename)
+
+        this.rememberOptions()
 
         let response
         try {
@@ -303,6 +357,12 @@ class Upload extends React.Component {
         if (!response.ok)
             return gdprshare.displayErr.call(this, fetchData.message)
 
+        this.shareCreated(fragment, fetchData, response.headers.get('Location'), plainFilename)
+    }
+
+    // Where an upload ends up, however its bytes got here: remembered among the
+    // sender's own shares, and shown with its link.
+    shareCreated(fragment, fetchData, locationPath, plainFilename) {
         var files = {}
 
         try {
@@ -313,8 +373,7 @@ class Upload extends React.Component {
 
         if (!files) files = {}
 
-
-        const loc = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + response.headers.get('Location')
+        const loc = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + locationPath
         if (gdprshare.config.saveFiles) {
             files[fetchData.fileId] = {
                 filename: plainFilename,
@@ -351,6 +410,114 @@ class Upload extends React.Component {
         })
     }
 
+    // Sends a file as it is encrypted, a record at a time, so neither the
+    // plaintext nor the ciphertext is ever held whole. The share exists on the
+    // server from the first byte and is not downloadable until it is finished.
+    async uploadInPieces(fragment, file, key, encFilename, plainFilename) {
+        const api = gdprshare.config.apiPrefix + '/uploads'
+
+        const opened = await this.post(api, {
+            body: new URLSearchParams(this.shareFields(encFilename)),
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        })
+        if (!opened)
+            return
+
+        this.rememberOptions()
+
+        const chunkTo = api + '/' + opened.fileId
+        var pending = []
+        var pendingSize = 0
+        var offset = 0
+
+        const flush = async function () {
+            if (!pendingSize)
+                return true
+
+            const chunk = new Blob(pending)
+            pending = []
+            pendingSize = 0
+
+            const stored = await this.post(chunkTo, {
+                body: chunk,
+                headers: {
+                    'Content-Type': 'application/octet-stream',
+                    'X-Owner-Token': opened.ownerToken,
+                    'X-Upload-Offset': String(offset),
+                },
+            })
+            if (!stored)
+                return false
+
+            offset += chunk.size
+
+            return true
+        }.bind(this)
+
+        var failed = false
+        await gdprshare.encryptRecords(file, key, async function (bytes, last) {
+            if (failed)
+                return
+
+            pending.push(bytes)
+            pendingSize += bytes.length
+
+            // one record at a time is what the server takes, and the header
+            // rides along with the first one
+            if (pendingSize >= gdprshare.recordSize || last) {
+                if (!await flush())
+                    failed = true
+            }
+        }, this.reportProgress)
+
+        if (failed)
+            return
+
+        if (!await flush())
+            return
+
+        const finished = await this.post(chunkTo + '/finish', {
+            headers: {'X-Owner-Token': opened.ownerToken},
+        })
+        if (!finished)
+            return
+
+        this.shareCreated(fragment, finished.data, finished.location, plainFilename)
+    }
+
+    // One request of the upload, with the server's answer read the same way
+    // everywhere. Reports the failure itself and answers null, so a caller only
+    // has to stop.
+    async post(url, options) {
+        let response
+        try {
+            response = await window.fetch(url, Object.assign({method: 'POST'}, options))
+        } catch (error) {
+            gdprshare.displayErr.call(this, error)
+            return null
+        }
+
+        let data
+        try {
+            data = await response.clone().json()
+        } catch (error) {
+            gdprshare.asTextErr.call(this, response, error)
+            return null
+        }
+
+        if (!response.ok) {
+            gdprshare.displayServerErr.call(this, data)
+            return null
+        }
+
+        return {
+            fileId: data.fileId,
+            ownerToken: data.ownerToken,
+            location: response.headers.get('Location'),
+            data: data,
+        }
+    }
+
     handleDrop(event) {
         event.preventDefault()
         event.stopPropagation()
@@ -378,6 +545,7 @@ class Upload extends React.Component {
         this.setState({
             error: null,
             mask: true,
+            progress: null,
         })
 
         // The link carries the secret. With a password the file is encrypted
@@ -418,11 +586,16 @@ class Upload extends React.Component {
 
             var filename = Buffer.from(cipherText).toString('base64')
 
-            // a record at a time, so a large file is never held whole, neither
-            // as plaintext nor as ciphertext
-            const sealed = await gdprshare.encryptBlob(file, key)
+            // A file that spans more than one record is sent as it is
+            // encrypted, so nothing is held whole. A small one goes in a single
+            // request, which is one round trip instead of three.
+            if (file.size > gdprshare.recordSize) {
+                await this.uploadInPieces(fragment, file, key, filename, file.name)
+            } else {
+                const sealed = await gdprshare.encryptBlob(file, key)
 
-            await this.uploadFile(fragment, sealed, filename, file.name)
+                await this.uploadFile(fragment, sealed, filename, file.name)
+            }
         } catch (error) {
             gdprshare.displayErr.call(this, error)
         }
@@ -1438,6 +1611,7 @@ class Upload extends React.Component {
 
                     {this.contentInput()}
                     {this.summaryChips()}
+                    {this.sendingStatus()}
 
                     <button type="button" className="btn btn-link-quiet btn-sm align-self-start px-0"
                             onClick={this.toggleOptions} aria-expanded={this.state.optionsOpen}>

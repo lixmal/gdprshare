@@ -105,6 +105,7 @@
         "emailHint": "Jeden e-mail za każdym otwarciem linku",
         "password": "Hasło (opcjonalnie)",
         "passwordHint": "Druga blokada obok linku. Przekaż je inną drogą; nie da się go odzyskać.",
+        "sending": "Wysyłanie…",
         "chipPassword": "Hasło",
         "strip": "Usuń ukryte dane",
         "stripHint": "Miejsce, aparat i autor są usuwane najpierw. Zdjęcia poza GIF-ami są przekodowywane, inne typy plików odrzucane.",

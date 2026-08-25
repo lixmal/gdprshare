@@ -105,6 +105,7 @@
         "emailHint": "Un correo cada vez que alguien abre el enlace",
         "password": "Contraseña (opcional)",
         "passwordHint": "Un segundo cierre además del enlace. Pásela por otra vía; no se puede recuperar.",
+        "sending": "Enviando…",
         "chipPassword": "Contraseña",
         "strip": "Quitar los datos ocultos",
         "stripHint": "La ubicación, la cámara y el autor se quitan primero. Las imágenes salvo los GIF se recodifican, otros tipos se rechazan.",

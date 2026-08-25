@@ -16,7 +16,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
-	uuid "github.com/nu7hatch/gouuid"
 	"gopkg.in/gomail.v2"
 
 	"github.com/lixmal/gdprshare/pkg/database"
@@ -59,97 +58,39 @@ func (s *Server) uploadFile(c *gin.Context) {
 		return
 	}
 
-	storedFile.Filename = sanitizeFilename(storedFile.Filename)
-	storedFile.Type = sanitizeType(storedFile.Type)
-	storedFile.AllowedCountries = sanitizeCountries(storedFile.AllowedCountries)
-	if storedFile.AllowedCountries != "" {
-		storedFile.OnlyEEA = false
-		storedFile.IncludeOther = false
-	}
-	if storedFile.Type != "image" {
-		storedFile.Ephemeral = 0
-	}
-
-	name, err := uuid.NewV4()
+	created, err := s.createShare(c, &storedFile)
 	if err != nil {
-		log.Printf("Failed to create uuid: %s\n", err)
-		apiError(c, http.StatusInternalServerError, ErrCodeTempFilename, "failed to generate temp filename")
-		return
-	}
-	namestr := name.String()
-
-	fileId, err := misc.GenToken(s.config.IDLength)
-	if err != nil {
-		log.Printf("Failed to generate file ID: %s\n", err)
-		apiError(c, http.StatusInternalServerError, ErrCodeFileIDFailed, "failed to generate file ID")
 		return
 	}
 
-	ownerToken, err := misc.GenToken(OwnerTokenLen)
-	if err != nil {
-		log.Printf("Failed to generate file ID: %s\n", err)
-		apiError(c, http.StatusInternalServerError, ErrCodeOwnerTokenFailed, "failed to generate owner token")
-		return
-	}
-
-	tx := s.db.Begin()
-	if err = tx.Error; err != nil {
-		log.Printf("Failed to begin transaction: %s\n", err)
-		apiError(c, http.StatusInternalServerError, ErrCodeTransactionStart, "failed to start transaction")
-		return
-	}
-
-	storedFile.FileId = fileId
-	storedFile.OwnerToken = ownerToken
-	storedFile.Name = namestr
-
-	storedFile.SrcClient = s.getClientInfo(c)
-	if storedFile.SrcClient == nil {
-		if err = tx.Rollback().Error; err != nil {
-			log.Printf("Failed to rollback: %s\n", err)
-		}
-		if !c.IsAborted() {
-			apiError(c, http.StatusForbidden, ErrCodeTLSRequirements, "TLS requirements not met")
-		}
-		return
-	}
-
-	if err = tx.Create(&storedFile).Error; err != nil {
-		log.Printf("Failed to create file in database: %s\n", err)
-		if err = tx.Rollback().Error; err != nil {
-			log.Printf("Failed to rollback: %s\n", err)
-		}
-		apiError(c, http.StatusInternalServerError, ErrCodeStoreFailed, "failed to store file in database")
-		return
-	}
-
-	path := filepath.Join(s.config.StorePath, namestr)
-	if err := c.SaveUploadedFile(storedFile.File, path); err != nil {
+	path := filepath.Join(s.config.StorePath, created.Name)
+	if err := c.SaveUploadedFile(created.File, path); err != nil {
 		log.Printf("Failed to save file: %s\n", err)
-		if err = tx.Rollback().Error; err != nil {
-			log.Printf("Failed to rollback: %s\n", err)
-		}
+		s.abandonShare(created)
 		apiError(c, http.StatusInternalServerError, ErrCodeSaveFailed, "failed to save file")
 		return
 	}
 
-	if err = tx.Commit().Error; err != nil {
-		log.Printf("Failed to commit: %s\n", err)
+	// the bytes are there, so the share can be downloaded
+	created.Pending = false
+	if err := s.db.Save(created).Error; err != nil {
+		log.Printf("Failed to store file with id %s: %s\n", created.FileId, err)
 
-		if err = os.Remove(path); err != nil {
+		if err := os.Remove(path); err != nil {
 			log.Printf("Failed to remove file %s: %s\n", path, err)
 		}
+		s.abandonShare(created)
 		apiError(c, http.StatusInternalServerError, ErrCodeStoreFailed, "failed to store file in database")
 		return
 	}
 
-	c.Header("Location", "/d/"+fileId)
+	c.Header("Location", "/d/"+created.FileId)
 	c.JSON(
 		http.StatusCreated,
 		gin.H{
 			"message":    "file uploaded successfully",
-			"fileId":     fileId,
-			"ownerToken": ownerToken,
+			"fileId":     created.FileId,
+			"ownerToken": created.OwnerToken,
 		},
 	)
 }
@@ -204,6 +145,13 @@ func (s *Server) downloadFile(c *gin.Context) {
 	// with the same TLS requirements
 	client := (*database.DstClient)(s.getClientInfo(c))
 	if client == nil {
+		return
+	}
+
+	// still arriving in pieces: there is no whole file to hand over, and the
+	// attempt is not worth recording against a share that does not exist yet
+	if storedFile.Pending {
+		apiError(c, http.StatusNotFound, ErrCodeFileNotFound, "file not found")
 		return
 	}
 
@@ -383,6 +331,20 @@ func (s *Server) isUserAgentDisallowed(userAgent string) bool {
 	return false
 }
 
+// ownsFile reports whether the caller proved it is the owner of the share, and
+// answers the request itself when it did not. Compared in constant time: the
+// token is the only thing standing between a passer-by and someone else's
+// share.
+func (s *Server) ownsFile(c *gin.Context, storedFile *database.StoredFile, token string) bool {
+	if subtle.ConstantTimeCompare([]byte(token), []byte(storedFile.OwnerToken)) != 1 {
+		apiError(c, http.StatusUnauthorized, ErrCodeOwnerTokenMismatch, "owner token doesn't match")
+
+		return false
+	}
+
+	return true
+}
+
 func (s *Server) confirmReceipt(c *gin.Context) {
 	fileId, err := bindFileID(c)
 	if err != nil {
@@ -432,9 +394,7 @@ func (s *Server) deleteFile(c *gin.Context) {
 		return
 	}
 
-	// check if owner token matches the stored one
-	if subtle.ConstantTimeCompare([]byte(o.OwnerToken), []byte(storedFile.OwnerToken)) != 1 {
-		apiError(c, http.StatusUnauthorized, ErrCodeOwnerTokenMismatch, "owner token doesn't match")
+	if !s.ownsFile(c, &storedFile, o.OwnerToken) {
 		return
 	}
 
@@ -481,9 +441,12 @@ func (s *Server) prolongFile(c *gin.Context) {
 		return
 	}
 
-	// check if owner token matches the stored one
-	if subtle.ConstantTimeCompare([]byte(p.OwnerToken.OwnerToken), []byte(storedFile.OwnerToken)) != 1 {
-		apiError(c, http.StatusUnauthorized, ErrCodeOwnerTokenMismatch, "owner token doesn't match")
+	if !s.ownsFile(c, &storedFile, p.OwnerToken.OwnerToken) {
+		return
+	}
+
+	if storedFile.Pending {
+		apiError(c, http.StatusNotFound, ErrCodeFileNotFound, "file not found")
 		return
 	}
 
@@ -756,9 +719,7 @@ func (s *Server) downloadRecords(c *gin.Context) {
 		return
 	}
 
-	// check if owner token matches the stored one
-	if subtle.ConstantTimeCompare([]byte(o.OwnerToken), []byte(storedFile.OwnerToken)) != 1 {
-		apiError(c, http.StatusUnauthorized, ErrCodeOwnerTokenMismatch, "owner token doesn't match")
+	if !s.ownsFile(c, &storedFile, o.OwnerToken) {
 		return
 	}
 

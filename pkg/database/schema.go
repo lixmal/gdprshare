@@ -42,8 +42,12 @@ type StoredFile struct {
 	AllowedCountries string                `form:"allowed-countries" gorm:"type:text"    binding:"omitempty,max=2000"`
 	Delay            uint                  `form:"delay"                                    binding:"omitempty,min=0,max=1440"`
 	Ephemeral        uint                  `form:"ephemeral"          gorm:"default:0"      binding:"omitempty,min=0,max=300"`
-	SrcClient        *Client               `form:"-"`
-	DstClients       []*DstClient          `form:"-"`
+	// Set while the file is still arriving in pieces. Such a share is not
+	// downloadable and cannot be extended; it becomes an ordinary one when the
+	// upload is finished, and is swept away if it never is.
+	Pending    bool         `form:"-"`
+	SrcClient  *Client      `form:"-"`
+	DstClients []*DstClient `form:"-"`
 }
 
 type Stats struct {
