@@ -11,6 +11,17 @@ import (
 	"github.com/jinzhu/configor"
 )
 
+// What the OIDC block falls back to for anything an operator leaves out. The
+// example config states the same values.
+const (
+	DefaultProtect         = "uploads"
+	DefaultGroupsClaim     = "groups"
+	DefaultSessionLifetime = "12h"
+)
+
+// DefaultScopes is what is asked of the provider when the config names nothing.
+var DefaultScopes = []string{"openid", "email", "profile"}
+
 type Config struct {
 	MaxUploadSize int64  `default:"25"` // MiB
 	IDLength      int    `default:"20"`
@@ -119,6 +130,8 @@ func (c *Config) validate() error {
 	}
 
 	if c.OIDC.Enabled {
+		c.applyOIDCDefaults()
+
 		if err := c.validateOIDC(); err != nil {
 			return err
 		}
@@ -135,6 +148,28 @@ func (c *Config) validate() error {
 	}
 
 	return nil
+}
+
+// The `default` tags are only honoured for fields at the top level of the
+// configuration, not for the ones nested in a block like this, so a setting left
+// out arrives as an empty string rather than as what the example config says it
+// would be. These are the ones an operator is entitled to leave out.
+func (c *Config) applyOIDCDefaults() {
+	if c.OIDC.Protect == "" {
+		c.OIDC.Protect = DefaultProtect
+	}
+
+	if c.OIDC.GroupsClaim == "" {
+		c.OIDC.GroupsClaim = DefaultGroupsClaim
+	}
+
+	if c.OIDC.SessionLifetime == "" {
+		c.OIDC.SessionLifetime = DefaultSessionLifetime
+	}
+
+	if len(c.OIDC.Scopes) == 0 {
+		c.OIDC.Scopes = append([]string(nil), DefaultScopes...)
+	}
 }
 
 // A half configured provider would let everyone in or nobody, so the server

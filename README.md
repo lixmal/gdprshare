@@ -154,6 +154,12 @@ setup this started as. Turning it on puts an OpenID Connect provider in front:
         protect: 'uploads'
         allowedgroups: ['staff']
 
+Only those five settings are required; the rest fall back to what the example
+config states. A setting left out of that block is not the same as one left out
+at the top level of the file, where the defaults are read from the struct: inside
+a block an omitted setting arrives empty, so these are filled in by the server
+itself.
+
 `protect: uploads` asks the sender to sign in and leaves the recipient of a
 share alone: they are the person a link was sent to, not a user of this server.
 `protect: all` asks everyone, so a link only works for people the provider
