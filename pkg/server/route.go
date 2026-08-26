@@ -34,11 +34,15 @@ func (s *Server) getConfig(c *gin.Context) {
 	c.JSON(
 		http.StatusOK,
 		gin.H{
-			"maxFileSize":     s.config.MaxUploadSize,
-			"showCountdown":   s.config.ShowCountdown,
-			"maxExpiry":       MaxExpiryDays,
-			"maxCount":        MaxDownloadCount,
-			"saveClientInfo":  s.config.SaveClientInfo,
+			"maxFileSize":    s.config.MaxUploadSize,
+			"showCountdown":  s.config.ShowCountdown,
+			"maxExpiry":      MaxExpiryDays,
+			"maxCount":       MaxDownloadCount,
+			"saveClientInfo": s.config.SaveClientInfo,
+			// So a client knows before it starts sending: an upload refused for want of a
+			// session is refused while the file is still going up, which a proxy in front may
+			// report as something else entirely.
+			"signInRequired":  s.guard != nil,
 			"reportRetention": int(misc.StatsRetention.Hours() / 24),
 			"geoIP":           s.config.GeoIPPath != "",
 			"privacyUrl":      s.config.PrivacyURL,

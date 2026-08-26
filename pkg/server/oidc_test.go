@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -200,4 +201,35 @@ func sessionCookie(t *testing.T, srv *Server, in time.Duration) *http.Cookie {
 	require.NoError(t, err)
 
 	return &http.Cookie{Name: auth.SessionCookie, Value: value}
+}
+
+// TestConfigSaysWhetherASignInIsNeeded lets a client know before it starts sending. An upload
+// refused for want of a session is refused while the file is still on its way up, which whatever
+// sits in front of the server may report as something else entirely.
+func TestConfigSaysWhetherASignInIsNeeded(t *testing.T) {
+	guarded, cleanup := setupGuardedServer(t, "uploads")
+	defer cleanup()
+
+	assert.True(t, signInRequired(t, guarded))
+
+	open, openCleanup := setupTestServer(t)
+	defer openCleanup()
+
+	assert.False(t, signInRequired(t, open))
+}
+
+func signInRequired(t *testing.T, srv *Server) bool {
+	t.Helper()
+
+	w := httptest.NewRecorder()
+	srv.Handler.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/api/v1/config", nil))
+	require.Equal(t, http.StatusOK, w.Code)
+
+	var resp map[string]any
+	require.NoError(t, json.NewDecoder(w.Body).Decode(&resp))
+
+	required, ok := resp["signInRequired"].(bool)
+	require.True(t, ok, "the config says nothing about signing in: %v", resp)
+
+	return required
 }
