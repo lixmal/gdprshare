@@ -123,6 +123,7 @@
         "emailHint": "Um e-mail cada vez que alguém abre o link",
         "password": "Senha (opcional)",
         "passwordHint": "Uma segunda tranca além do link. Passe-a por outro meio; não é possível recuperá-la.",
+        "passwordCost": "Cada tentativa errada consome um dos downloads.",
         "sending": "Enviando…",
         "chipPassword": "Senha",
         "strip": "Remover dados ocultos",
