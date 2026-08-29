@@ -123,6 +123,7 @@
         "emailHint": "Um e-mail cada vez que alguém abre o link",
         "password": "Palavra-passe (opcional)",
         "passwordHint": "Um segundo fecho além da ligação. Transmita-a por outra via; não é possível recuperá-la.",
+        "passwordCost": "Cada tentativa errada gasta uma das transferências.",
         "sending": "A enviar…",
         "chipPassword": "Palavra-passe",
         "strip": "Remover dados escondidos",

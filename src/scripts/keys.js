@@ -61,3 +61,25 @@ export function readFragment(fragment) {
         needsPassword: false,
     }
 }
+
+/**
+ * A page address with the secret taken out of it.
+ *
+ * The fragment is the key, so an address that carries one must never be sent
+ * anywhere. The query goes too: nothing on this server puts anything there that
+ * a report needs, and it is the other half of a URL people paste secrets into.
+ */
+export function withoutSecret(url) {
+    const text = String(url)
+
+    // an address that cannot be read is reported as nothing rather than as
+    // itself: it may still hold the fragment
+    let parsed
+    try {
+        parsed = new URL(text)
+    } catch (e) {
+        return ''
+    }
+
+    return parsed.origin + parsed.pathname
+}

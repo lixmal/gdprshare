@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/lixmal/gdprshare/pkg/auth"
 	"github.com/lixmal/gdprshare/pkg/config"
 	"github.com/lixmal/gdprshare/pkg/database"
+	"github.com/lixmal/gdprshare/pkg/trustedproxy"
 )
 
 const (
@@ -124,6 +126,10 @@ type Server struct {
 	config *config.Config
 	// nil when the server asks nobody to sign in
 	guard *auth.Guard
+	// who may speak for someone else: whose X-Forwarded-For decides the client
+	// address, and whose headers may state the encryption of a connection this
+	// server did not terminate itself
+	proxies *trustedproxy.List
 }
 
 // letThrough is what stands in for the guard where nobody has to sign in, so
@@ -160,6 +166,10 @@ func (s *Server) guards() guards {
 }
 
 func setupRoutes(router *gin.Engine, srv *Server) {
+	if *srv.config.SecurityHeaders.Enabled {
+		router.Use(srv.securityHeaders())
+	}
+
 	// TODO: add json response
 	router.Use(limits.RequestSizeLimiter(srv.config.MaxUploadSize * 1024 * 1024))
 	router.MaxMultipartMemory = MultipartMem
@@ -226,17 +236,63 @@ func setupRoutes(router *gin.Engine, srv *Server) {
 	v1.POST("/files/validate", who.sender, srv.validateFiles)
 }
 
+// warnAboutTrust says out loud what the defaults leave open. Both of these are
+// how this server has always behaved, so neither is a reason to refuse to
+// start, but an operator should not have to read the code to find out.
+func warnAboutTrust(conf *config.Config, proxies *trustedproxy.List) {
+	if proxies.Everyone() {
+		log.Println(
+			"SECURITY: trustedproxies is 'all', so X-Forwarded-For and the TLS headers are believed from any client." +
+				" Anything that can reach this server directly then picks its own rate limit bucket, its own country" +
+				" and its own TLS evidence. Set trustedproxies to the addresses of the proxy in front, or to 'none'" +
+				" when there is none.",
+		)
+	}
+
+	if conf.TLSValidation.Enabled && !conf.TLSValidation.Required {
+		log.Println(
+			"SECURITY: tlsvalidation is enabled but not required, so a request that says nothing about its" +
+				" encryption is let through unchecked. Set tlsvalidation.required once the connection or the proxy" +
+				" in front actually reports it.",
+		)
+	}
+}
+
+// trustsPeer reports whether the request arrived from a proxy this server was
+// told to believe. Anything a client can set itself is only read when it did.
+func (s *Server) trustsPeer(c *gin.Context) bool {
+	return s.proxies.IsTrusted(c.Request.RemoteAddr)
+}
+
 // New creates a new Server instance with the given database and configuration.
 func New(db *database.Database, conf *config.Config) (*Server, error) {
 	router := gin.Default()
+
+	// a config that was put together rather than loaded still has to arrive
+	// here whole
+	conf.ApplyDefaults()
+
+	proxies, err := conf.TrustedProxyList()
+	if err != nil {
+		return nil, err
+	}
+
+	// gin trusts every proxy until it is told otherwise, so this is set on
+	// every start rather than only when the operator named someone.
+	if err := router.SetTrustedProxies(proxies.Prefixes()); err != nil {
+		return nil, fmt.Errorf("set the trusted proxies: %w", err)
+	}
+
+	warnAboutTrust(conf, proxies)
 
 	srv := &Server{
 		Server: &http.Server{
 			Addr:    conf.ListenAddr,
 			Handler: router,
 		},
-		db:     db,
-		config: conf,
+		db:      db,
+		config:  conf,
+		proxies: proxies,
 	}
 
 	// A provider that cannot be set up is a reason not to start: carrying on

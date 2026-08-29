@@ -123,6 +123,7 @@
         "emailHint": "One email each time someone opens the link",
         "password": "Password (optional)",
         "passwordHint": "A second lock on top of the link. Pass it on another way; it cannot be recovered.",
+        "passwordCost": "Each wrong attempt uses up one of the downloads.",
         "sending": "Sending…",
         "chipPassword": "Password",
         "strip": "Remove hidden data",

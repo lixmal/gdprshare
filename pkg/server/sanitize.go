@@ -1,6 +1,7 @@
 package server
 
 import (
+	"net/url"
 	"regexp"
 	"strings"
 	"unicode/utf8"
@@ -48,6 +49,23 @@ func sanitizeCountries(raw string) string {
 		}
 	}
 	return strings.Join(valid, ",")
+}
+
+// sanitizeReportURL drops the fragment and the query from a reported address.
+// The fragment of a download link is the key to the file, and a client that
+// still sends one is a page this server handed out before it knew better: the
+// key is thrown away here rather than written down.
+func sanitizeReportURL(reported string) string {
+	parsed, err := url.Parse(reported)
+	if err != nil {
+		return ""
+	}
+
+	parsed.Fragment = ""
+	parsed.RawFragment = ""
+	parsed.RawQuery = ""
+
+	return parsed.String()
 }
 
 func sanitizeUserAgent(ua string) string {

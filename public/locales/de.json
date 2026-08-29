@@ -123,6 +123,7 @@
         "emailHint": "Eine E-Mail, sobald jemand den Link öffnet",
         "password": "Passwort (optional)",
         "passwordHint": "Ein zweites Schloss zusätzlich zum Link. Geben Sie es auf einem anderen Weg weiter; es lässt sich nicht wiederherstellen.",
+        "passwordCost": "Jeder Fehlversuch verbraucht einen der Downloads.",
         "sending": "Wird gesendet…",
         "chipPassword": "Passwort",
         "strip": "Verborgene Daten entfernen",

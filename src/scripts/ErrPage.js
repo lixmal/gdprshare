@@ -11,8 +11,10 @@ class ErrPage extends React.Component {
     componentDidMount() {
         var XHR = new XMLHttpRequest()
         XHR.open("POST", this.url)
+        // The address, minus the fragment: that is the key to the file, and it
+        // is the one thing this server must never be told.
         XHR.send(JSON.stringify({
-            url: window.document.location.toString(),
+            url: gdprshare.withoutSecret(window.document.location.toString()),
         }))
     }
 

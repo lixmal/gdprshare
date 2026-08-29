@@ -66,7 +66,15 @@ func (s *Server) validateTLS(versionStr, cipherStr string) error {
 		return nil
 	}
 
+	// Nothing was said about the encryption: either this server did not
+	// terminate the connection and no trusted proxy reported it, or there is
+	// none. Letting that through is what this server has always done, so it
+	// stays the default, but an operator who has the evidence can insist on it.
 	if versionStr == "" && cipherStr == "" {
+		if s.config.TLSValidation.Required {
+			return fmt.Errorf("the request says nothing about its encryption")
+		}
+
 		return nil
 	}
 
