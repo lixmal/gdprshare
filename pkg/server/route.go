@@ -417,9 +417,10 @@ func (s *Server) confirmReceipt(c *gin.Context) {
 	}
 
 	if storedFile.Count < 1 {
-		// File already deleted from storage by download handler, so we're taking care of the db now
-		if err := s.db.Delete(storedFile).Error; err != nil {
-			log.Printf("Failed to delete file with id %s from database: %s\n", fileId, err)
+		// The ciphertext went with the last download, so what is left is the
+		// row and everything recorded against it.
+		for _, err := range misc.DeleteStoredFile(storedFile, s.db, s.config) {
+			log.Printf("%s\n", err)
 		}
 	}
 
@@ -570,6 +571,8 @@ func (s *Server) setStats(c *gin.Context) {
 		return
 	}
 
+	stats.URL = sanitizeReportURL(stats.URL)
+
 	if s.config.SaveClientInfo {
 		stats.Client = s.getClientInfo(c)
 		if stats.Client == nil {
@@ -636,10 +639,14 @@ func (s *Server) getClientInfo(c *gin.Context) *database.Client {
 		ua = "none"
 	}
 
+	// What the connection actually was, when this server terminated it. Failing
+	// that, what the proxy in front says it was, which is worth reading only
+	// from a proxy this server was told about: a client that sets the headers
+	// itself would otherwise state its own encryption.
 	if c.Request.TLS != nil {
 		tlscipher = strconv.Itoa(int(c.Request.TLS.CipherSuite))
 		tlsversion = strconv.Itoa(int(c.Request.TLS.Version))
-	} else {
+	} else if s.trustsPeer(c) {
 		tlsversion = c.Request.Header.Get(s.config.Header.TLSVersion)
 		tlscipher = c.Request.Header.Get(s.config.Header.TLSCipherSuite)
 	}

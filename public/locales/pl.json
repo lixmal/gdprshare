@@ -123,6 +123,7 @@
         "emailHint": "Jeden e-mail za każdym otwarciem linku",
         "password": "Hasło (opcjonalnie)",
         "passwordHint": "Druga blokada obok linku. Przekaż je inną drogą; nie da się go odzyskać.",
+        "passwordCost": "Każda błędna próba zużywa jedno z pobrań.",
         "sending": "Wysyłanie…",
         "chipPassword": "Hasło",
         "strip": "Usuń ukryte dane",

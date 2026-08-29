@@ -123,6 +123,7 @@
         "emailHint": "Một email mỗi lần có người mở liên kết",
         "password": "Mật khẩu (không bắt buộc)",
         "passwordHint": "Một lớp khóa thứ hai bên cạnh liên kết. Hãy chuyển bằng cách khác; không thể lấy lại được.",
+        "passwordCost": "Mỗi lần nhập sai sẽ dùng mất một lượt tải.",
         "sending": "Đang gửi…",
         "chipPassword": "Mật khẩu",
         "strip": "Bỏ dữ liệu ẩn",

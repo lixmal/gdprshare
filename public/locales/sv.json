@@ -123,6 +123,7 @@
         "emailHint": "Ett mejl varje gång någon öppnar länken",
         "password": "Lösenord (valfritt)",
         "passwordHint": "Ett andra lås utöver länken. Skicka det på annat sätt; det går inte att återskapa.",
+        "passwordCost": "Varje felaktigt försök förbrukar en av nedladdningarna.",
         "sending": "Skickar…",
         "chipPassword": "Lösenord",
         "strip": "Ta bort dolda data",

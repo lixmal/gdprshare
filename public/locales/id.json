@@ -123,6 +123,7 @@
         "emailHint": "Satu email setiap kali ada yang membuka tautannya",
         "password": "Kata sandi (opsional)",
         "passwordHint": "Kunci kedua selain tautan. Sampaikan melalui cara lain; kata sandi tidak dapat dipulihkan.",
+        "passwordCost": "Setiap percobaan yang salah menghabiskan satu unduhan.",
         "sending": "Mengirim…",
         "chipPassword": "Kata sandi",
         "strip": "Buang data tersembunyi",

@@ -123,6 +123,7 @@
         "emailHint": "Un correo cada vez que alguien abre el enlace",
         "password": "Contraseña (opcional)",
         "passwordHint": "Un segundo cierre además del enlace. Pásela por otra vía; no se puede recuperar.",
+        "passwordCost": "Cada intento fallido consume una de las descargas.",
         "sending": "Enviando…",
         "chipPassword": "Contraseña",
         "strip": "Quitar los datos ocultos",
