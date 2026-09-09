@@ -90,6 +90,10 @@ as it is.
   whose file is gone. A share keeps at most 50 refusals, and the notifications
   stop with them, so a link someone keeps hammering cannot grow the database or
   the sender's mailbox without end
+* a share that is deleted, downloaded out or expired takes all of it with it:
+  the row, the sender's address and the record of everyone who came for the
+  file are removed rather than marked deleted. A database written before this
+  is swept clean on the next cleanup run
 
 ### What the visitor is told
 
@@ -245,12 +249,45 @@ Alternatively run the [docker image](https://ghcr.io/lixmal/gdprshare):
 The `/data` volume has to be writable by uid 1000, the user the image runs as,
 and needs a `files` directory inside it (created automatically).
 
+### Behind a reverse proxy
+
+`trustedproxies` says who may speak for someone else: whose `X-Forwarded-For`
+decides the client address, and whose headers may state the encryption of a
+connection this server did not terminate. List the addresses or CIDR prefixes of
+the proxy, or `none` when there is none.
+
+It defaults to `all`, which is what this server has always done and what a
+configuration written before the setting existed gets. That is only safe where
+nothing but the proxy can reach the app: a client that sets `X-Forwarded-For`
+itself otherwise picks its own rate limit bucket, its own country for the
+download restrictions, and its own TLS evidence in the download records. The
+server says so at startup while it is left that way.
+
 ### TLS
 
 Allow TLS 1.2 and above only. The server checks this itself: `tlsvalidation` in
 `config.yml` sets the minimum version and a cipher blocklist, and refuses a
 transfer that does not meet them. Behind a reverse proxy it reads the version
-and cipher from the headers named under `header`, so the proxy has to set them.
+and cipher from the headers named under `header`, so the proxy has to set them,
+and `trustedproxies` has to name it or the headers are ignored.
+
+A request that says nothing about its encryption is let through, since a server
+with neither its own TLS nor a proxy reporting it would otherwise refuse
+everything. Set `tlsvalidation.required` once one of those is true and silence
+becomes a refusal instead.
+
+### Security headers
+
+Every response carries `Content-Security-Policy`, `X-Content-Type-Options`,
+`Referrer-Policy` and `X-Frame-Options`, plus `Strict-Transport-Security` where
+this server terminates TLS itself. The policy allows scripts from this origin
+and by hash only: what the app promises rests on the code doing the encrypting
+being the code that was shipped, and that is what says so. The hashes are read
+from `public/index.html` at startup, so editing the page cannot leave the policy
+behind.
+
+Turn `securityheaders.csp` off if the proxy in front sends its own policy: a
+browser applies both, and only what passes each of them runs.
 
 ## TRANSLATIONS
 

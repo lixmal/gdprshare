@@ -123,6 +123,7 @@
         "emailHint": "Eén mail elke keer dat iemand de link opent",
         "password": "Wachtwoord (optioneel)",
         "passwordHint": "Een tweede slot naast de link. Geef het via een andere weg door; het is niet terug te halen.",
+        "passwordCost": "Elke mislukte poging verbruikt een van de downloads.",
         "sending": "Verzenden…",
         "chipPassword": "Wachtwoord",
         "strip": "Verborgen gegevens verwijderen",

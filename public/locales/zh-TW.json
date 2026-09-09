@@ -123,6 +123,7 @@
         "emailHint": "每次有人開啟連結就寄一封信",
         "password": "密碼（選填）",
         "passwordHint": "在連結之外再加一道鎖。請用其他方式轉告，密碼無法找回。",
+        "passwordCost": "每輸錯一次都會消耗一次下載次數。",
         "sending": "正在傳送…",
         "chipPassword": "密碼",
         "strip": "去掉隱藏資訊",

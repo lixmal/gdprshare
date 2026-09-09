@@ -123,6 +123,7 @@
         "emailHint": "Un e-mail chaque fois que quelqu’un ouvre le lien",
         "password": "Mot de passe (facultatif)",
         "passwordHint": "Un second verrou en plus du lien. Transmettez-le par un autre moyen ; il ne peut pas être récupéré.",
+        "passwordCost": "Chaque tentative erronée consomme l’un des téléchargements.",
         "sending": "Envoi…",
         "chipPassword": "Mot de passe",
         "strip": "Retirer les données cachées",

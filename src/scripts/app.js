@@ -305,6 +305,7 @@ gdprshare.keyToB64 = keys.keyToB64
 gdprshare.keyFromB64 = keys.keyFromB64
 gdprshare.passwordPrefix = keys.passwordPrefix
 gdprshare.readFragment = keys.readFragment
+gdprshare.withoutSecret = keys.withoutSecret
 
 gdprshare.deriveKey = function (secret, password) {
     return keys.deriveKey(secret, password, gdprshare.config.keyLength)

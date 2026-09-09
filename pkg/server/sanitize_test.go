@@ -121,3 +121,34 @@ func TestIsCountryInList(t *testing.T) {
 	assert.False(t, isCountryInList("DE", ""))
 	assert.True(t, isCountryInList("US", "US"))
 }
+
+// The fragment of a download link is the key to the file. A report that carries
+// one is a page handed out before this server knew better, and the key is
+// thrown away rather than written down.
+func TestSanitizeReportURL(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{
+			"https://share.example.org/d/abc123#Zm9vYmFyYmF6",
+			"https://share.example.org/d/abc123",
+		},
+		{
+			"https://share.example.org/d/abc123#p.Zm9vYmFyYmF6",
+			"https://share.example.org/d/abc123",
+		},
+		{
+			"https://share.example.org/d/abc123?lang=de#secret",
+			"https://share.example.org/d/abc123",
+		},
+		{"https://share.example.org/d/abc123", "https://share.example.org/d/abc123"},
+		{"https://share.example.org/", "https://share.example.org/"},
+		{"", ""},
+		{"://nonsense", ""},
+	}
+
+	for _, tt := range tests {
+		assert.Equal(t, tt.expected, sanitizeReportURL(tt.input), "Input: %q", tt.input)
+	}
+}
