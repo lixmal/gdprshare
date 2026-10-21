@@ -146,6 +146,7 @@ func TestSanitizeReportURL(t *testing.T) {
 		{"https://share.example.org/", "https://share.example.org/"},
 		{"", ""},
 		{"://nonsense", ""},
+		{"https://user:secret@share.example.org/d/abc123", "https://share.example.org/d/abc123"},
 	}
 
 	for _, tt := range tests {

@@ -64,6 +64,7 @@ func sanitizeReportURL(reported string) string {
 	parsed.Fragment = ""
 	parsed.RawFragment = ""
 	parsed.RawQuery = ""
+	parsed.User = nil
 
 	return parsed.String()
 }
