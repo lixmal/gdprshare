@@ -73,6 +73,41 @@ func TestDeleteStoredFileAcceptsAMissingFile(t *testing.T) {
 	assert.Empty(t, DeleteStoredFile(file, db, conf))
 }
 
+// Dropping a table makes its delete fail while the others succeed. The erasure
+// is one transaction, so the rows that were already deleted come back and the
+// share can be erased again once the table is back.
+func TestDeleteStoredFileRollsBackWhenAChildDeleteFails(t *testing.T) {
+	t.Run("sender", func(t *testing.T) {
+		db, conf := setup(t)
+
+		file := shareWithRecords(t, db, "sender-fails")
+		require.NoError(t, db.Exec("DROP TABLE clients").Error)
+
+		assert.NotEmpty(t, DeleteStoredFile(file, db, conf))
+
+		var files, dst int
+		require.NoError(t, db.Unscoped().Model(&database.StoredFile{}).Count(&files).Error)
+		require.NoError(t, db.Unscoped().Model(&database.DstClient{}).Count(&dst).Error)
+		assert.Equal(t, 1, files, "the share row must survive a failed erasure")
+		assert.Equal(t, 2, dst, "the download records must survive a failed erasure")
+	})
+
+	t.Run("downloads", func(t *testing.T) {
+		db, conf := setup(t)
+
+		file := shareWithRecords(t, db, "downloads-fail")
+		require.NoError(t, db.Exec("DROP TABLE dst_clients").Error)
+
+		assert.NotEmpty(t, DeleteStoredFile(file, db, conf))
+
+		var files, clients int
+		require.NoError(t, db.Unscoped().Model(&database.StoredFile{}).Count(&files).Error)
+		require.NoError(t, db.Unscoped().Model(&database.Client{}).Count(&clients).Error)
+		assert.Equal(t, 1, files, "the share row must survive a failed erasure")
+		assert.Equal(t, 1, clients, "the sender deleted before the failure must be restored")
+	})
+}
+
 // The sweep clears what a database written before this held on to: rows that
 // were marked deleted, and records left pointing at a share that is gone.
 func TestCleanupClearsTheOldBacklog(t *testing.T) {

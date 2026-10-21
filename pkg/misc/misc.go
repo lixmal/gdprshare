@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/jinzhu/gorm"
+
 	"github.com/lixmal/gdprshare/pkg/config"
 	"github.com/lixmal/gdprshare/pkg/database"
 )
@@ -57,35 +59,56 @@ func DeleteStoredFile(f *database.StoredFile, db *database.Database, config *con
 		errors = append(errors, fmt.Errorf("delete file with id %s from storage: %w", f.FileId, err))
 	}
 
-	if errs := deleteClients(f.ID, db); len(errs) > 0 {
-		errors = append(errors, errs...)
-	}
-
-	if err := db.Unscoped().Delete(f).Error; err != nil {
-		errors = append(errors, fmt.Errorf("delete file with id %s from database: %w", f.FileId, err))
+	if err := deleteRecords(f, db); err != nil {
+		errors = append(errors, err)
 	}
 
 	return errors
 }
 
+// deleteRecords removes the share row along with the sender and download records
+// that point at it. It runs in one transaction: a failure part way through
+// leaves every row in place, so a retry still finds all of them, rather than a
+// row that is gone while the addresses it accounts for stay behind.
+func deleteRecords(f *database.StoredFile, db *database.Database) error {
+	tx := db.Begin()
+	if tx.Error != nil {
+		return fmt.Errorf("begin erasure of file with id %s: %w", f.FileId, tx.Error)
+	}
+
+	if err := deleteClients(tx, f.ID); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if err := tx.Unscoped().Delete(f).Error; err != nil {
+		tx.Rollback()
+		return fmt.Errorf("delete file with id %s from database: %w", f.FileId, err)
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return fmt.Errorf("commit erasure of file with id %s: %w", f.FileId, err)
+	}
+
+	return nil
+}
+
 // deleteClients removes what was recorded about the sender of a share and about
 // everyone who asked for it.
-func deleteClients(storedFileId uint, db *database.Database) []error {
-	var errors []error
-
-	if err := db.Unscoped().
+func deleteClients(tx *gorm.DB, storedFileId uint) error {
+	if err := tx.Unscoped().
 		Where("stored_file_id = ?", storedFileId).
 		Delete(&database.Client{}).Error; err != nil {
-		errors = append(errors, fmt.Errorf("delete the sender of file %d: %w", storedFileId, err))
+		return fmt.Errorf("delete the sender of file %d: %w", storedFileId, err)
 	}
 
-	if err := db.Unscoped().
+	if err := tx.Unscoped().
 		Where("stored_file_id = ?", storedFileId).
 		Delete(&database.DstClient{}).Error; err != nil {
-		errors = append(errors, fmt.Errorf("delete the download records of file %d: %w", storedFileId, err))
+		return fmt.Errorf("delete the download records of file %d: %w", storedFileId, err)
 	}
 
-	return errors
+	return nil
 }
 
 // Cleanup removes expired files from the database and filesystem, and drops
