@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/jinzhu/configor"
+
+	"github.com/lixmal/gdprshare/pkg/trustedproxy"
 )
 
 // What the OIDC block falls back to for anything an operator leaves out. The
@@ -17,10 +19,18 @@ const (
 	DefaultProtect         = "uploads"
 	DefaultGroupsClaim     = "groups"
 	DefaultSessionLifetime = "12h"
+
+	// DefaultHSTSMaxAge is a year, which is what a browser preload list asks
+	// for and long enough to be worth sending at all.
+	DefaultHSTSMaxAge = 31536000
 )
 
 // DefaultScopes is what is asked of the provider when the config names nothing.
 var DefaultScopes = []string{"openid", "email", "profile"}
+
+// DefaultTrustedProxies keeps a configuration written before this setting
+// existed working the way it did: every client is believed.
+var DefaultTrustedProxies = []string{trustedproxy.All}
 
 type Config struct {
 	MaxUploadSize int64  `default:"25"` // MiB
@@ -58,8 +68,13 @@ type Config struct {
 		Enabled  bool   `default:"true"`
 		Interval string `default:"1h"`
 	}
-	SaveClientInfo bool `default:"false"`
-	ShowCountdown  bool `default:"false"`
+	// Who may set X-Forwarded-For and the TLS headers above. "all" believes
+	// any client, which is what this server has always done; "none" believes
+	// nobody and reads the address the connection came from. Otherwise a list
+	// of proxy addresses or CIDR prefixes.
+	TrustedProxies []string `default:"[all]"`
+	SaveClientInfo bool     `default:"false"`
+	ShowCountdown  bool     `default:"false"`
 	// Operator pages the footer links to, left out of the footer when empty.
 	PrivacyURL           string
 	ImprintURL           string
@@ -71,9 +86,33 @@ type Config struct {
 		Burst   int     `default:"20"`
 	}
 	TLSValidation struct {
-		Enabled        bool   `default:"true"`
-		MinVersion     string `default:"1.2"`
+		Enabled    bool   `default:"true"`
+		MinVersion string `default:"1.2"`
+		// When set, a request that says nothing about its encryption is
+		// refused rather than let through. Off by default, since a server that
+		// is not behind a proxy setting the headers would otherwise refuse
+		// every request.
+		Required       bool
 		BlockedCiphers []string
+	}
+	// What the server states about how its pages may be used. A `default` tag
+	// is not honoured this deep in the configuration, so these are pointers:
+	// left out is not the same as turned off, and ApplySecurityHeaderDefaults
+	// fills them in.
+	SecurityHeaders struct {
+		// Everything below, off in one go for a deployment whose proxy sets
+		// its own.
+		Enabled *bool
+		// The content security policy. Two policies on one response are both
+		// applied, so an operator whose proxy sends one turns this off rather
+		// than fighting it.
+		CSP *bool
+		// Strict-Transport-Security. Left out, it follows whether this server
+		// terminates TLS itself; a proxy that terminates it should send the
+		// header, but an operator can turn it on here instead.
+		HSTS *bool
+		// How long a browser is asked to remember that, in seconds.
+		HSTSMaxAge int
 	}
 	// Who may use this server, established against an OpenID Connect provider.
 	// Recipients of a share are not asked to sign in unless Protect says so:
@@ -102,7 +141,10 @@ type Config struct {
 
 // Default returns a Config instance with default values.
 func Default() *Config {
-	return &Config{}
+	conf := &Config{}
+	conf.ApplyDefaults()
+
+	return conf
 }
 
 // New loads and validates a configuration from the specified file path.
@@ -135,6 +177,12 @@ func (c *Config) validate() error {
 		if err := c.validateOIDC(); err != nil {
 			return err
 		}
+	}
+
+	c.ApplyDefaults()
+
+	if _, err := c.TrustedProxyList(); err != nil {
+		return err
 	}
 
 	if c.Cleanup.Enabled {
@@ -226,6 +274,66 @@ func (c *Config) SessionLifetime() (time.Duration, error) {
 	}
 
 	return lifetime, nil
+}
+
+// ApplyDefaults fills in the settings whose default a `default` tag cannot
+// carry, either because the setting is nested or because leaving it out has to
+// mean something other than the zero value. Doing nothing on a second call, so
+// it can be reached from more than one direction.
+func (c *Config) ApplyDefaults() {
+	if len(c.TrustedProxies) == 0 {
+		c.TrustedProxies = append([]string(nil), DefaultTrustedProxies...)
+	}
+
+	c.applySecurityHeaderDefaults()
+}
+
+// applySecurityHeaderDefaults fills in what an operator left out. A
+// configuration written before these settings existed gets the headers, which
+// only adds to what a response says; the policy that could conflict with a
+// proxy's own is the one an operator turns off.
+func (c *Config) applySecurityHeaderDefaults() {
+	if c.SecurityHeaders.Enabled == nil {
+		c.SecurityHeaders.Enabled = boolPtr(true)
+	}
+
+	if c.SecurityHeaders.CSP == nil {
+		c.SecurityHeaders.CSP = boolPtr(true)
+	}
+
+	// HSTS is deliberately left as it is: nil means it follows the TLS setting,
+	// which is read when the header is sent rather than fixed here.
+
+	if c.SecurityHeaders.HSTSMaxAge <= 0 {
+		c.SecurityHeaders.HSTSMaxAge = DefaultHSTSMaxAge
+	}
+}
+
+func boolPtr(value bool) *bool {
+	return &value
+}
+
+// SendHSTS reports whether to promise https for the next year. A browser
+// ignores the header over plain http, but a server that does not terminate TLS
+// itself cannot tell what the proxy in front did, so it is not guessed at:
+// left out, the header goes only where this server holds the certificate.
+func (c *Config) SendHSTS() bool {
+	if c.SecurityHeaders.HSTS == nil {
+		return c.TLS.Use
+	}
+
+	return *c.SecurityHeaders.HSTS
+}
+
+// TrustedProxyList is who may set the forwarding and TLS headers, parsed from
+// the config.
+func (c *Config) TrustedProxyList() (*trustedproxy.List, error) {
+	list, err := trustedproxy.Parse(c.TrustedProxies)
+	if err != nil {
+		return nil, fmt.Errorf("parse trustedproxies: %w", err)
+	}
+
+	return list, nil
 }
 
 // CleanupInterval is how often expired files are swept, parsed from the config.

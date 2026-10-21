@@ -417,9 +417,10 @@ func (s *Server) confirmReceipt(c *gin.Context) {
 	}
 
 	if storedFile.Count < 1 {
-		// File already deleted from storage by download handler, so we're taking care of the db now
-		if err := s.db.Delete(storedFile).Error; err != nil {
-			log.Printf("Failed to delete file with id %s from database: %s\n", fileId, err)
+		// The ciphertext went with the last download, so what is left is the
+		// row and everything recorded against it.
+		for _, err := range misc.DeleteStoredFile(storedFile, s.db, s.config) {
+			log.Printf("%s\n", err)
 		}
 	}
 
@@ -570,11 +571,16 @@ func (s *Server) setStats(c *gin.Context) {
 		return
 	}
 
+	stats.URL = sanitizeReportURL(stats.URL)
+
 	if s.config.SaveClientInfo {
 		stats.Client = s.getClientInfo(c)
 		if stats.Client == nil {
 			return
 		}
+	} else if !s.requestMeetsTLS(c) {
+		apiError(c, http.StatusForbidden, ErrCodeTLSRequirements, "TLS requirements not met")
+		return
 	}
 
 	// Anyone can post here, so the table is bounded. A dropped report is not an
@@ -617,8 +623,34 @@ func (s *Server) statsFull() bool {
 	return stored >= MaxStatsRecords
 }
 
+// requestTLS returns the TLS version and cipher of a request. What the connection
+// actually was, when this server terminated it. Failing that, what the proxy in
+// front says it was, which is worth reading only from a proxy this server was
+// told about: a client that sets the headers itself would otherwise state its own
+// encryption.
+func (s *Server) requestTLS(c *gin.Context) (version, cipher string) {
+	if c.Request.TLS != nil {
+		return strconv.Itoa(int(c.Request.TLS.Version)), strconv.Itoa(int(c.Request.TLS.CipherSuite))
+	}
+
+	if s.trustsPeer(c) {
+		return c.Request.Header.Get(s.config.Header.TLSVersion), c.Request.Header.Get(s.config.Header.TLSCipherSuite)
+	}
+
+	return "", ""
+}
+
+// requestMeetsTLS reports whether a request passes the TLS validation the config
+// asks for. It is checked on its own where no client info is stored, so that a
+// request that would be refused is refused there too.
+func (s *Server) requestMeetsTLS(c *gin.Context) bool {
+	version, cipher := s.requestTLS(c)
+
+	return s.validateTLS(version, cipher) == nil
+}
+
 func (s *Server) getClientInfo(c *gin.Context) *database.Client {
-	var addr, ua, tlsversion, tlscipher string
+	var addr, ua string
 	var location *geoip.Location
 	var err error
 
@@ -636,13 +668,7 @@ func (s *Server) getClientInfo(c *gin.Context) *database.Client {
 		ua = "none"
 	}
 
-	if c.Request.TLS != nil {
-		tlscipher = strconv.Itoa(int(c.Request.TLS.CipherSuite))
-		tlsversion = strconv.Itoa(int(c.Request.TLS.Version))
-	} else {
-		tlsversion = c.Request.Header.Get(s.config.Header.TLSVersion)
-		tlscipher = c.Request.Header.Get(s.config.Header.TLSCipherSuite)
-	}
+	tlsversion, tlscipher := s.requestTLS(c)
 
 	if err := s.validateTLS(tlsversion, tlscipher); err != nil {
 		apiError(c, http.StatusForbidden, ErrCodeTLSRequirements, "TLS requirements not met")

@@ -1558,6 +1558,11 @@ class Upload extends React.Component {
                            autoComplete="new-password"
                            value={this.state.password} onChange={this.handlePasswordChange} />
                     <span className="hint">{t('upload.passwordHint')}</span>
+                    {/* Nothing can check the password before the file is asked
+                        for: what would check it is the file itself. So a wrong
+                        one costs a download, and it is the sender who sets how
+                        many there are. */}
+                    {this.state.password && <span className="hint">{t('upload.passwordCost')}</span>}
                 </div>
 
                 <div className="field">

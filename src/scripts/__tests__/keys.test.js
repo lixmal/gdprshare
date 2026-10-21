@@ -9,6 +9,7 @@ import {
     keyToB64,
     passwordPrefix,
     readFragment,
+    withoutSecret,
 } from '../keys'
 
 const KEY_LENGTH = 32
@@ -84,5 +85,37 @@ describe('deriveKey', () => {
 
         // the link alone must not be the key when a password is in play
         expect(Buffer.from(key)).not.toEqual(Buffer.from(secret))
+    })
+})
+
+describe('withoutSecret', () => {
+    // The error report the download page sends carries the address of the page.
+    // The fragment of that address is the key to the file, so it must never be
+    // part of what is sent.
+    it('drops the fragment', () => {
+        expect(withoutSecret('https://share.example.org/d/abc123#Zm9vYmFy'))
+            .toBe('https://share.example.org/d/abc123')
+    })
+
+    it('drops a fragment that marks a password', () => {
+        expect(withoutSecret('https://share.example.org/d/abc123#p.Zm9vYmFy'))
+            .toBe('https://share.example.org/d/abc123')
+    })
+
+    it('drops the query as well', () => {
+        expect(withoutSecret('https://share.example.org/d/abc123?lang=de#Zm9vYmFy'))
+            .toBe('https://share.example.org/d/abc123')
+    })
+
+    it('keeps an address that carries no secret', () => {
+        expect(withoutSecret('https://share.example.org/d/abc123'))
+            .toBe('https://share.example.org/d/abc123')
+    })
+
+    // an address that cannot be read may still hold the fragment, so nothing of
+    // it is reported
+    it('reports nothing for an address it cannot read', () => {
+        expect(withoutSecret('not an address#secret')).toBe('')
+        expect(withoutSecret('')).toBe('')
     })
 })
