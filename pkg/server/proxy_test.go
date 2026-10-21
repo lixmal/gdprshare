@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/lixmal/gdprshare/pkg/config"
+	"github.com/lixmal/gdprshare/pkg/database"
 )
 
 // requestFrom builds a request that arrived from peer and claims, in the
@@ -147,4 +148,24 @@ func TestTLSValidationLetsSilenceThroughByDefault(t *testing.T) {
 	defer cleanup()
 
 	assert.NoError(t, srv.validateTLS("", ""))
+}
+
+// With client info switched off, the TLS requirement still applies to what is
+// stored: a report from a connection that says nothing about its encryption is
+// refused, and nothing is written.
+func TestStatsRequireTLSWhenClientInfoIsNotKept(t *testing.T) {
+	srv, cleanup := setupTestServerWith(t, func(conf *config.Config) {
+		conf.SaveClientInfo = false
+		conf.TLSValidation.Enabled = true
+		conf.TLSValidation.MinVersion = "1.2"
+		conf.TLSValidation.Required = true
+	})
+	defer cleanup()
+
+	w := postStats(t, srv, "https://example.org/d/broken")
+	assert.Equal(t, http.StatusForbidden, w.Code)
+
+	var count int64
+	require.NoError(t, srv.db.Model(&database.Stats{}).Count(&count).Error)
+	assert.Zero(t, count, "a refused report must not be stored")
 }
