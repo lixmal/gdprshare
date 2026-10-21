@@ -55,6 +55,18 @@ func TestMappedAndZonedAddresses(t *testing.T) {
 	assert.True(t, list.Contains(netip.MustParseAddr("fe80::1%eth0")))
 }
 
+// A mapped prefix is stored as the IPv4 prefix it covers, since peers are
+// compared in their unmapped form.
+func TestMappedPrefixesMatchUnmappedPeers(t *testing.T) {
+	list, err := Parse([]string{"::ffff:192.0.2.4/128", "::ffff:198.51.100.0/120"})
+	require.NoError(t, err)
+
+	assert.True(t, list.Contains(netip.MustParseAddr("192.0.2.4")), "the single mapped host")
+	assert.True(t, list.Contains(netip.MustParseAddr("198.51.100.77")), "inside the mapped /120")
+	assert.True(t, list.Contains(netip.MustParseAddr("::ffff:198.51.100.77")), "the mapped form of the same peer")
+	assert.False(t, list.Contains(netip.MustParseAddr("192.0.2.5")), "a neighbour is not trusted")
+}
+
 func TestParseRejectsNonsense(t *testing.T) {
 	for _, entry := range []string{"not-an-address", "10.0.0.0/64", "10.0.0.0/-1", "example.org"} {
 		_, err := Parse([]string{entry})

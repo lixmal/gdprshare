@@ -82,7 +82,7 @@ func parsePrefixes(entries []string) (*List, error) {
 				return nil, fmt.Errorf("trusted proxy %q has bits set below its prefix length", entry)
 			}
 
-			prefixes = append(prefixes, prefix.Masked())
+			prefixes = append(prefixes, unmapPrefix(prefix.Masked()))
 
 			continue
 		}
@@ -97,6 +97,17 @@ func parsePrefixes(entries []string) (*List, error) {
 	}
 
 	return &List{prefixes: prefixes}, nil
+}
+
+// unmapPrefix rewrites an IPv4-mapped prefix such as ::ffff:192.0.2.0/120 as the
+// IPv4 prefix it covers, since Contains compares unmapped addresses. A prefix
+// shorter than /96 spans more than the mapped range and is returned unchanged.
+func unmapPrefix(prefix netip.Prefix) netip.Prefix {
+	if !prefix.Addr().Is4In6() || prefix.Bits() < 96 {
+		return prefix
+	}
+
+	return netip.PrefixFrom(prefix.Addr().Unmap(), prefix.Bits()-96)
 }
 
 // Empty reports whether nobody is trusted.
